@@ -1,7 +1,7 @@
 <!-- Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT -->
 <p align="center"><img src="docs/img/capa.png" alt="Bancada Livre: simulador livre e offline de lógica digital" width="820"></p>
 
-# <img src="src/assets/icone.svg" alt="" width="44" align="top"> Bancada Livre <img src="docs/img/bandeira-brasil.svg" alt="Brasil" title="Feito no Brasil" width="20" align="top">
+# <img src="src/assets/icone.svg" alt="" width="44" align="top"> Bancada Livre <img src="docs/img/bandeira-brasil.svg" alt="Brasil" title="Feito no Brasil" width="20" height="14">
 
 [![Testes](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml/badge.svg)](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/HeraldoAntunes/bancada-livre/badge)](https://scorecard.dev/viewer/?uri=github.com/HeraldoAntunes/bancada-livre)
