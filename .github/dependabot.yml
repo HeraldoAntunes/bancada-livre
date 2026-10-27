@@ -17,6 +17,13 @@ updates:
     schedule:
       interval: monthly
     open-pull-requests-limit: 3
+    # versão grande (React, Vite, TypeScript, Vitest, ESLint...) muda a forma de usar a biblioteca: é migração
+    # planejada, com trabalho e testes próprios, e não pedido automático
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
+      producao:
+        dependency-type: production
       desenvolvimento:
         dependency-type: development

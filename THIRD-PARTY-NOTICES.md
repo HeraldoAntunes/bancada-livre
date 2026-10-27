@@ -9,7 +9,7 @@ do próprio HTML distribuído, num comentário no fim do arquivo.
 | react | 18.3.1 | MIT | Facebook, Inc. and its affiliates | https://github.com/facebook/react |
 | react-dom | 18.3.1 | MIT | Facebook, Inc. and its affiliates | https://github.com/facebook/react |
 | scheduler | 0.23.2 | MIT | Facebook, Inc. and its affiliates | https://github.com/facebook/react |
-| zustand | 5.0.14 | MIT | Paul Henschel | https://github.com/pmndrs/zustand |
+| zustand | 5.0.16 | MIT | Paul Henschel | https://github.com/pmndrs/zustand |
 
 ## Versão para Windows (executável e instalador)
 

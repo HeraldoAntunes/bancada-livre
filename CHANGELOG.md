@@ -9,6 +9,10 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+### Alterado
+- Bibliotecas atualizadas: zustand 5.0.16 (vai no arquivo do aluno) e, nas ferramentas de montagem,
+  vite-plugin-singlefile 2.3.4 e dependências indiretas com correções de segurança. Nada muda no uso.
+
 ## [1.0.0] - 2026-10-27 · "Bancada Livre"
 
 Primeira versão pública. Reúne as versões de desenvolvimento 0.1 a 0.7 e o que foi preparado como 0.8.0,
