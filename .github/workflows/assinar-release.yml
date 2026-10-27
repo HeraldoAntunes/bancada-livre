@@ -1,7 +1,9 @@
 # Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Assina os anexos de cada release (o HTML do simulador e o SHA256SUMS) com o Sigstore, sem chave guardada: a
 # assinatura diz "estes bytes foram publicados na release <tag> deste repositório por este workflow".
-# Cada anexo ganha um <nome>.sigstore.json ao lado. Roda sozinho ao publicar uma release; pelo botão "Run workflow"
+# Cada anexo ganha um <nome>.sigstore.json ao lado, e a release ganha um atestado de origem (SLSA) de todos os
+# anexos, no formato in-toto (<repositório>-<tag>.intoto.jsonl), que também fica registrado no GitHub
+# (gh attestation verify). Roda sozinho ao publicar uma release; pelo botão "Run workflow"
 # assina uma release já publicada (informar a tag). Não refaz o build: assina os arquivos como estão na release.
 name: Assinar release
 
@@ -27,6 +29,7 @@ jobs:
     permissions:
       contents: write   # anexar as assinaturas à release
       id-token: write   # identidade do workflow para o certificado do Sigstore
+      attestations: write   # registrar o atestado de origem no GitHub
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
@@ -39,8 +42,22 @@ jobs:
           case "$TAG" in v[0-9]*) ;; *) echo "tag inválida: $TAG"; exit 1 ;; esac
           mkdir anexos
           gh release download "$TAG" --dir anexos
-          rm -f anexos/*.sigstore.json   # assinatura antiga é refeita junto com as outras
+          rm -f anexos/*.sigstore.json anexos/*.intoto.jsonl   # assinatura e atestado antigos são refeitos
           ls -l anexos
+
+      - name: Atestado de origem (SLSA) dos anexos
+        id: atestado
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: anexos/*
+
+      - name: Guardar o atestado como .intoto.jsonl
+        env:
+          BUNDLE: ${{ steps.atestado.outputs.bundle-path }}
+        run: |
+          mkdir proveniencia
+          jq -c . "$BUNDLE" > "proveniencia/${GH_REPO#*/}-${TAG}.intoto.jsonl"
+          ls -l proveniencia
 
       - name: Assinar cada anexo
         working-directory: anexos
@@ -60,4 +77,4 @@ jobs:
           done
 
       - name: Anexar à release
-        run: gh release upload "$TAG" anexos/*.sigstore.json --clobber
+        run: gh release upload "$TAG" anexos/*.sigstore.json proveniencia/*.intoto.jsonl --clobber

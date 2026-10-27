@@ -9,6 +9,12 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+### Alterado
+- Ferramenta de testes atualizada (Vitest 4.1.12), o que resolve os alertas de segurança das ferramentas de
+  montagem. Nada muda no programa: o arquivo HTML gerado é o mesmo da 1.0.2.
+- Instalador montado com setuptools 84.2.1 (correção de segurança da ferramenta de empacotamento).
+- Cada release ganha um atestado de origem (SLSA), conferível com `gh attestation verify`.
+
 ## [1.0.2] - 2026-10-27 · "Arquivos mais seguros"
 
 Correções: o uso do simulador continua o mesmo.

@@ -18,6 +18,9 @@
     `assinar-release.yml` deste repositório. Ela confirma que o arquivo é o mesmo publicado na release. Para conferir
     (com o [cosign](https://docs.sigstore.dev/cosign/system_config/installation/)):
     `cosign verify-blob --bundle <arquivo>.sigstore.json --certificate-identity-regexp "^https://github.com/HeraldoAntunes/bancada-livre/.github/workflows/assinar-release.yml@" --certificate-oidc-issuer https://token.actions.githubusercontent.com <arquivo>`
+  - A release também traz um atestado de origem (SLSA), `bancada-livre-<versão>.intoto.jsonl`, que liga cada
+    anexo ao workflow que o publicou. Com o [GitHub CLI](https://cli.github.com/), basta:
+    `gh attestation verify <arquivo> --repo HeraldoAntunes/bancada-livre`
 
 ## Versões com suporte
 
