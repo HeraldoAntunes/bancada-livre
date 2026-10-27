@@ -22,13 +22,13 @@ booleana do circuito inteiro.
   &nbsp;·&nbsp; <a href="#perguntas-frequentes">Perguntas frequentes</a>
 </p>
 
-### ⬇ Qual arquivo baixar? (versão 1.0.0)
+### ⬇ Qual arquivo baixar? (versão 1.0.1)
 
 | Para quê | Baixar |
 |---|---|
-| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-1.0.0.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.0/Instalar-BancadaLivre-1.0.0.exe) |
-| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-1.0.0-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.0/BancadaLivre-1.0.0-portatil.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-1.0.0.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.0/BancadaLivre-1.0.0.html) |
+| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-1.0.1.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.1/Instalar-BancadaLivre-1.0.1.exe) |
+| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-1.0.1-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.1/BancadaLivre-1.0.1-portatil.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-1.0.1.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.1/BancadaLivre-1.0.1.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na

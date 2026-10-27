@@ -9,7 +9,7 @@ abstract: >-
   Bancada web didática de lógica digital, livre e offline: o aluno monta circuitos com chaves, portas lógicas,
   LEDs, displays de 7 segmentos e CIs da série 74xx com pinagem real, vê o sinal propagar e confere todos os
   estados na tabela-verdade automática. Roda no navegador, num único arquivo HTML, sem instalação.
-version: "1.0.0"
+version: "1.0.1"
 date-released: "2026-10-27"
 authors:
   - given-names: "Heraldo"

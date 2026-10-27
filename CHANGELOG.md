@@ -9,9 +9,18 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+## [1.0.1] - 2026-10-27 · "Bibliotecas e página do projeto"
+
+Manutenção: nada muda no uso do simulador.
+
 ### Alterado
 - Bibliotecas atualizadas: zustand 5.0.16 (vai no arquivo do aluno) e, nas ferramentas de montagem,
-  vite 6.4.5, vite-plugin-singlefile 2.3.4 e dependências indiretas com correções de segurança. Nada muda no uso.
+  vite 6.4.5, vite-plugin-singlefile 2.3.4 e dependências indiretas com correções de segurança.
+- O build confere que o programa ficou embutido no arquivo HTML antes de aplicar a política de segurança; se não
+  ficou, a montagem para com erro, em vez de gerar um arquivo que abre em branco.
+
+### Adicionado
+- Guia de uso (docs/GUIA-DE-USO.md) e página do projeto com capa, imagens do programa e tabela de downloads.
 
 ## [1.0.0] - 2026-10-27 · "Bancada Livre"
 
