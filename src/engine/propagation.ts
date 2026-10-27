@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Modo passo a passo (RF-05.5): a "onda" de propagação avança nível a nível.
 // Nível 0 = fontes; cada componente seguinte fica em 1 + máx(nível dos que o
 // alimentam). CIs usam o grafo de unidades (uma por porta interna) e o nível

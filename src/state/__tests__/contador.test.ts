@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Contador automático (COUNTER, desde a 1.0): conta 00, 01, 10, 11... no ritmo da própria frequência,
 // com o mesmo Rodar, Pausar e Avançar do CLOCK. Saídas q0 (bit menos significativo) a q3.
 import { createElement } from 'react'

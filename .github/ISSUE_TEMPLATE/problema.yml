@@ -1,4 +1,4 @@
-# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 name: Relatar um problema
 description: Algo não funcionou como deveria no simulador
 labels: ["problema"]

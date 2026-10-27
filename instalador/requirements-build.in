@@ -1,4 +1,4 @@
-# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Ferramentas só de empacotamento (não vão para o programa). Gerar o .txt com hashes:
 #   uv pip compile --generate-hashes --python-version 3.13 instalador/requirements-build.in -o instalador/requirements-build.txt
 pyinstaller==6.22.3

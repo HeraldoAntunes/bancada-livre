@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Motor de simulação combinacional (spec §4.5, §6.1, §4.10).
 // A ordenação topológica trabalha sobre UNIDADES: componentes comuns são uma
 // unidade; cada porta interna de um CI é uma unidade própria — encadear portas

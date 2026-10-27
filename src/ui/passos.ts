@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Frase do passo a passo: diz, em linguagem de aula, o que acontece em cada nível da onda de propagação.
 import { chipOf } from '../engine/ics'
 import { isGate, type CircuitComponent } from '../engine/types'

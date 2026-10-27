@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // CIs de função novos (desde a 1.0): 74138 (decodificador 3 → 8), 74151 (multiplexador 8 → 1) e
 // 74283 (somador de 4 bits). Pinagem conferida nos datasheets da Texas Instruments (SDLS014, SDLS054,
 // SDLS095A, vista superior do encapsulamento N).

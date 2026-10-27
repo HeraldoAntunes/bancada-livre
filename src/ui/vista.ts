@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Zoom e movimento da bancada: a vista é um deslocamento (x, y, em pixels da tela) mais uma escala.
 // Ponto na tela = ponto na bancada × escala + deslocamento. O circuito salvo não muda.
 import type { CircuitComponent } from '../engine/types'

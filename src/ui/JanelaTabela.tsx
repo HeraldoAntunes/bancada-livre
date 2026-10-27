@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Tabela-verdade destacada: janela dentro do programa que se arrasta pela barra de título e se
 // redimensiona pelo canto; a letra cresce com a largura (bom para projetar). Posição e tamanho ficam
 // lembrados neste navegador.

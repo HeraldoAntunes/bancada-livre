@@ -1,4 +1,4 @@
-﻿# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+﻿# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Monta o HTML único, o executável (PyInstaller) e o instalador (Inno Setup) do Bancada Livre, verifica no
 # Microsoft Defender e escreve pacote\SHA256SUMS.txt.  Uso:  powershell -ExecutionPolicy Bypass -File instalador\build.ps1
 # A versão vem só do package.json: daqui ela vai para o .exe (versao.txt gerado) e para o instalador (/DAppVer).
@@ -40,11 +40,11 @@ VSVersionInfo(
   ffi=FixedFileInfo(filevers=($partes), prodvers=($partes), mask=0x3f, flags=0x0, OS=0x40004, fileType=0x1, subtype=0x0, date=(0, 0)),
   kids=[
     StringFileInfo([StringTable('041604B0', [
-      StringStruct('CompanyName', 'Heraldo Antunes Silva Filho (projeto livre)'),
+      StringStruct('CompanyName', 'Heraldo Antunes (projeto livre)'),
       StringStruct('FileDescription', 'Bancada Livre - simulador didatico de logica digital'),
       StringStruct('FileVersion', '$versao'),
       StringStruct('InternalName', 'BancadaLivre'),
-      StringStruct('LegalCopyright', 'Copyright (c) 2026 Heraldo Antunes Silva Filho - Licenca MIT'),
+      StringStruct('LegalCopyright', 'Copyright (c) 2026 Heraldo Antunes - Licenca MIT'),
       StringStruct('OriginalFilename', 'BancadaLivre.exe'),
       StringStruct('ProductName', 'Bancada Livre'),
       StringStruct('ProductVersion', '$versao')])]),

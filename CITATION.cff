@@ -1,4 +1,4 @@
-# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Como citar o Bancada Livre (Citation File Format 1.2.0). O GitHub mostra "Cite this repository" a partir deste arquivo.
 # A cada versão publicada, atualizar version e date-released (o teste de versão confere os dois).
 cff-version: 1.2.0
@@ -13,8 +13,7 @@ version: "1.0.1"
 date-released: "2026-10-27"
 authors:
   - given-names: "Heraldo"
-    family-names: "Antunes Silva"
-    name-suffix: "Filho"
+    family-names: "Antunes"
     orcid: "https://orcid.org/0000-0002-5495-0381"
 license: MIT
 keywords:

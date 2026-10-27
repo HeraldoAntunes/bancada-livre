@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Circuito que o Guia de CIs carrega para cada chip (botão "Carregar exemplo" e comando guia.carregar_exemplo).
 import { EXAMPLES } from '../examples'
 import { CHIPS, type ChipId } from '../engine/ics'

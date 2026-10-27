@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Estado da aplicação (zustand) — spec §6 camada 2.
 // Histórico de undo/redo por snapshots (RF-07); clock com tempo virtual (RF-02).
 

@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Barreira de erro (RNF-08): um erro inesperado na UI não pode perder o
 // trabalho do aluno — o circuito segue no autosave e pode ser baixado daqui.
 

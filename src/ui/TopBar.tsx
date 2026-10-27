@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Barra superior: marca, abas da paleta e botões agrupados por função (Arquivo, Editar, Aula),
 // com título em cada grupo, e a versão (abre o Sobre). Spec §8.
 

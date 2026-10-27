@@ -1,4 +1,4 @@
-# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Nota de segurança do OpenSSF Scorecard: roda toda semana e a cada envio ao main, publica o resultado
 # (é o que alimenta o selo do README) e manda o relatório para a aba Security do GitHub.
 # As actions ficam fixadas pelo hash do commit, com a versão no comentário, como o Scorecard recomenda.

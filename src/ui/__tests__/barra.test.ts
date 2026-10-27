@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // A barra superior não pode esconder botões em tela estreita: quebra em duas linhas e a primeira linha
 // da grade da página cresce junto. (A largura real em 1366 px é conferida no navegador.)
 import { describe, expect, it } from 'vitest'

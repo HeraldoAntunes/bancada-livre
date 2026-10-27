@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // CIs didáticos da série 74xx (spec §4.10) — definições com pinagem REAL.
 // A pinagem é a fonte da verdade: vem dos datasheets (vista superior, pino 1
 // à esquerda do chanfro, numeração anti-horária).

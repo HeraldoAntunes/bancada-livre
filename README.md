@@ -1,4 +1,4 @@
-<!-- Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT -->
+<!-- Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT -->
 <p align="center"><img src="docs/img/capa.png" alt="Bancada Livre: simulador livre e offline de lógica digital" width="820"></p>
 
 # <img src="src/assets/icone.svg" alt="" width="44" align="top"> Bancada Livre
@@ -184,7 +184,7 @@ Se usar o Bancada Livre num trabalho, artigo ou material didático, cite a vers�
 
 ## Como foi feito
 
-O Bancada Livre foi criado e dirigido por **Heraldo Antunes Silva Filho**, para as suas aulas. Foi feito com apoio de
+O Bancada Livre foi criado e dirigido por **Heraldo Antunes**, para as suas aulas. Foi feito com apoio de
 **inteligência artificial** (Claude, da Anthropic, pelo Claude Code), usada como ferramenta: a ideia, os requisitos,
 as decisões de didática, a revisão e a aprovação de cada versão são do autor. A mesma declaração aparece na janela
 **Sobre** do programa, aberta pelo número da versão.

@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Política de segurança (CSP) que o build injeta no HTML único.
 import { describe, expect, it } from 'vitest'
 import { comCsp } from '../csp'

@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Ouve o fim de um toque ou clique (pointerup ou pointercancel) a partir do próprio pointerdown.
 // Registrar depois, num useEffect, deixava escapar o toque instantâneo de telas de toque e lousas:
 // o pointerup chegava antes de o React redesenhar.

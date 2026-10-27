@@ -1,4 +1,4 @@
-<!-- Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT -->
+<!-- Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT -->
 # Segurança e privacidade
 
 ## Como o Bancada Livre protege o computador e os dados

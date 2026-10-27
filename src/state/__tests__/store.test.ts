@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Testes do store: round-trip JSON, undo/redo, regras de conexão e clock.
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'

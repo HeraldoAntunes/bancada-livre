@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Painel direito: propriedades do item selecionado + tabelas-verdade (spec §4.6, §8).
 
 import { gateExpression } from '../engine/gates'

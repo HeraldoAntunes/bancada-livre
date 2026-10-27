@@ -1,4 +1,4 @@
-﻿; Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+﻿; Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 ; Instalador do Bancada Livre (Inno Setup 6). Compilado por instalador\build.ps1, que passa a versão lida do
 ; package.json em /DAppVer (a versão não fica escrita aqui, para não ficar para trás).
 #ifndef AppVer
@@ -11,8 +11,8 @@ AppId={{B3D1A6E0-5C2F-4A87-9E14-7F0C2B8D4E61}
 AppName=Bancada Livre
 AppVersion={#AppVer}
 AppVerName=Bancada Livre {#AppVer}
-AppPublisher=Heraldo Antunes Silva Filho (projeto livre)
-AppCopyright=Copyright (c) 2026 Heraldo Antunes Silva Filho - Licença MIT
+AppPublisher=Heraldo Antunes (projeto livre)
+AppCopyright=Copyright (c) 2026 Heraldo Antunes - Licença MIT
 VersionInfoVersion={#AppVer}.0
 VersionInfoDescription=Instalador do Bancada Livre
 ; instalação só para o usuário: não pede administrador

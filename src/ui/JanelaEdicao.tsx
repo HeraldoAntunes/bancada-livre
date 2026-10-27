@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Janela de edição aberta com duplo clique no componente: os mesmos campos do painel, em destaque.
 import { useEffect } from 'react'
 import { useCircuit } from '../state/store'

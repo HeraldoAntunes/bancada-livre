@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Pinos de entrada/saída incluindo CIs — camada acima de types.ts, que não
 // pode conhecer os chips (evita import circular types ⇄ ics).
 

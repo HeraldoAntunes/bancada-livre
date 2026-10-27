@@ -1,4 +1,4 @@
-# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Testes automáticos a cada envio ao GitHub: linter, checagem de tipos, testes do Vitest e o build do HTML único
 # (só para conferir que monta; nada é publicado por aqui).
 name: Testes

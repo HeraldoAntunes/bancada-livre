@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Barra do passo a passo, no topo da bancada: nível atual, bolinhas de progresso, botões grandes e a frase
 // do que acontece no nível. Teclas: seta para a direita ou espaço avança, seta para a esquerda volta,
 // Home reinicia, Esc sai.

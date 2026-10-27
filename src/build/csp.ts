@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Usado só no build (vite.config.ts): injeta no HTML único uma política de segurança (CSP) que libera
 // apenas o script embutido, pelo hash dele, e bloqueia qualquer acesso à rede. Como o arquivo abre por
 // file://, a política vai numa <meta>, logo depois do charset.

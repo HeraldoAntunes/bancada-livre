@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // O fim do toque é ouvido desde o pointerdown: um toque instantâneo (tela de toque, lousa interativa) não se perde.
 import { describe, expect, it, vi } from 'vitest'
 import { ouvirFimDoPonteiro } from '../ponteiro'

@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Valida os circuitos de exemplo: estrutura (fiação bem-formada) e
 // comportamento (tabela-verdade bate com a função lógica esperada).
 

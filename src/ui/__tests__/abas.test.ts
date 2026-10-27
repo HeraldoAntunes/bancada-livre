@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Abas da paleta com ícone e nome (a escolhida em azul), "Limpar tudo" com nome e cor de alerta e,
 // no CI sem alimentação, a faixa escura no meio do corpo, longe dos números dos pinos.
 import { createElement } from 'react'

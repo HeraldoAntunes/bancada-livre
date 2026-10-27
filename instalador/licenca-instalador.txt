@@ -2,7 +2,7 @@
 Simulador didático de lógica digital: portas lógicas, CIs da série 74xx, LEDs e displays.
 
 SOFTWARE LIVRE E GRATUITO - LICENÇA MIT
-Copyright (c) 2026 Heraldo Antunes Silva Filho
+Copyright (c) 2026 Heraldo Antunes
 
 Você pode usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou
 vender cópias deste programa, gratuitamente e sem pedir autorização, desde que o aviso

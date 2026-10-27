@@ -1,4 +1,4 @@
-﻿# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+﻿# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Gera instalador\bancada-livre.ico (16 a 256 px) desenhando o chip BL, o mesmo desenho de src\assets\icone.svg
 # (grade de 64 × 64). Uso:  powershell -ExecutionPolicy Bypass -File instalador\gerar-icone.ps1
 $ErrorActionPreference = 'Stop'

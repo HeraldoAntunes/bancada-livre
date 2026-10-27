@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Tabela-verdade do circuito (spec §4.6): a mesma no painel lateral e na janela flutuante.
 
 import { useEffect, useMemo, useState } from 'react'

@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Espelhar e girar componentes. Primeiro espelha (troca esquerda e direita em torno do centro do corpo),
 // depois gira de 90 em 90 graus no sentido horário, também em torno do centro. O circuito salvo guarda
 // os campos opcionais espelhado e giro; sem eles, nada muda.

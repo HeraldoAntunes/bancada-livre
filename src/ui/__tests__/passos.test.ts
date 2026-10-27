@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Frases do passo a passo: o que acontece em cada nível da onda de propagação.
 import { describe, expect, it } from 'vitest'
 import { propagationLevels } from '../../engine/propagation'

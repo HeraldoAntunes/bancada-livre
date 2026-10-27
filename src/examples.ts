@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Biblioteca de circuitos de exemplo graduada por nível (spec §4.8, v0.5).
 // Ids numéricos ('e1', 'f1') para o store realinhar o contador ao carregar.
 

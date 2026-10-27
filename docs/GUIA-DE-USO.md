@@ -1,4 +1,4 @@
-<!-- Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT -->
+<!-- Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT -->
 # Guia de uso do Bancada Livre
 
 Um passeio pelo programa, do primeiro circuito ao uso em sala. Para baixar, veja o [README](../README.md).

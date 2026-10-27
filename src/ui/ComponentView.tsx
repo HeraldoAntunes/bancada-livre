@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Um componente na bancada: corpo + terminais (leads) + pinos + rótulo.
 
 import { decodeDisplay } from '../engine/display'

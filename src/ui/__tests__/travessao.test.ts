@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Textos da tela sem travessão (regra do projeto). Comentários ficam de fora; o '—' sozinho entre aspas é
 // símbolo de célula vazia (display apagado, pino sem nome), não pontuação.
 import { describe, expect, it } from 'vitest'

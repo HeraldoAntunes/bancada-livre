@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Testes do projeto (não do motor): metadados que precisam andar juntos a cada versão.
 import { describe, expect, it } from 'vitest'
 import pkg from '../../package.json'
@@ -57,7 +57,7 @@ describe('dependências', () => {
 })
 
 describe('cabeçalho de autoria e licença', () => {
-  const CABECALHO = 'Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT'
+  const CABECALHO = 'Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT'
   const proprios = {
     ...import.meta.glob(['../**/*.{ts,tsx,css}'], { query: '?raw', import: 'default', eager: true }),
     ...import.meta.glob(['../../index.html', '../../vite.config.ts', '../../eslint.config.js'], {

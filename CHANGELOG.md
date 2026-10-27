@@ -1,4 +1,4 @@
-<!-- Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT -->
+<!-- Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT -->
 # Mudanças
 
 O que mudou em cada versão do Bancada Livre, da mais nova para a mais antiga.

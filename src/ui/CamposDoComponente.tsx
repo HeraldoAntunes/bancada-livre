@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Campos editáveis de um componente (rótulo, entradas, modo, frequência...): os mesmos no painel de
 // propriedades e na janela de edição aberta com duplo clique.
 import { chipOf } from '../engine/ics'

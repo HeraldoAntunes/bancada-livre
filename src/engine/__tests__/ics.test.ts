@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 import { describe, expect, it } from 'vitest'
 import { DIGIT_SEGMENTS } from '../display'
 import { CHIP_IDS, CHIPS, icPowered } from '../ics'

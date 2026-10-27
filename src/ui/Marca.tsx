@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Marca do programa (chip BL) na barra e no Sobre: o mesmo desenho-mestre de src/assets/icone.svg,
 // embutido como imagem data: (permitida pela CSP), para haver uma fonte só do desenho.
 import icone from '../assets/icone.svg?raw'

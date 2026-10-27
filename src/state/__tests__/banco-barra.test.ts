@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Banco de chaves (DIP_SWITCH, 4 ou 8 posições) e barra de LEDs (LED_BAR, 4 ou 8), desde a 1.0.
 // Cada posição do banco vira uma coluna de entrada da tabela-verdade; cada LED da barra, uma de saída.
 import { beforeEach, describe, expect, it } from 'vitest'

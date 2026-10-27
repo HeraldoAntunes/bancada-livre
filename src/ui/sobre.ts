@@ -1,10 +1,10 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Textos da janela Sobre, separados do desenho para o teste conferir o que o usuário lê.
 // O aviso de marcas é o mesmo do README (o teste compara os dois).
 
 export const SOBRE = {
   nome: 'Bancada Livre',
-  autor: 'Heraldo Antunes Silva Filho',
+  autor: 'Heraldo Antunes',
   licenca:
     'MIT. É software livre: pode usar, copiar, modificar e distribuir, inclusive em outras ' +
     'instituições de ensino, desde que mantenha o aviso de autoria e a licença.',

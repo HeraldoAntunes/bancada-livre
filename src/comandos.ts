@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Cada ação é um comando: toda ação da tela existe aqui com nome, descrição e parâmetros validados, e a tela
 // chama o mesmo caminho. Um agente de IA usa o programa aberto sem clicar, pela página:
 //   window.bancadaLivre.listar()                       → comandos, descrições e parâmetros

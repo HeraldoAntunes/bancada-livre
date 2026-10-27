@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Cada ação é um comando: toda ação da tela existe também como comando com nome, descrição e parâmetros
 // validados, para um agente de IA usar o programa sem clicar (window.bancadaLivre.executar).
 import { beforeEach, describe, expect, it } from 'vitest'

@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Janela flutuante (tabela-verdade destacada): posição e tamanho sempre alcançáveis na tela.
 import { describe, expect, it } from 'vitest'
 import { JANELA_MIN, janelaInicial, manterNaTela } from '../janela'

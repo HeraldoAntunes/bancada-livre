@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Janela "Sobre": versão, autoria, licença, privacidade, uso de IA e terceiros.
 // Visível dentro do próprio programa: quem recebe só o HTML também vê os créditos.
 

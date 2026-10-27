@@ -1,4 +1,4 @@
-# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 """Lançador do Bancada Livre para Windows (vira o BancadaLivre.exe pelo PyInstaller).
 
 Abre o simulador, que é o arquivo bancada-livre.html guardado junto com o programa, numa janela própria do

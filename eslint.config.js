@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Linter: regras recomendadas do JavaScript e do TypeScript, mais as regras dos hooks do React.
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'

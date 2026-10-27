@@ -1,4 +1,4 @@
-# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 # Assina os anexos de cada release (o HTML do simulador e o SHA256SUMS) com o Sigstore, sem chave guardada: a
 # assinatura diz "estes bytes foram publicados na release <tag> deste repositório por este workflow".
 # Cada anexo ganha um <nome>.sigstore.json ao lado. Roda sozinho ao publicar uma release; pelo botão "Run workflow"

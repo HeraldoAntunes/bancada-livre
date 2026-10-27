@@ -1,4 +1,4 @@
-// Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Corpos SVG dos componentes — estilo skeuomórfico + portas ANSI (spec §8.1).
 
 import type { ChipDef } from '../engine/ics'
