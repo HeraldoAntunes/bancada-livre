@@ -9,7 +9,13 @@ async function sha256Base64(texto: string): Promise<string> {
 }
 
 export async function comCsp(html: string): Promise<string> {
-  const encontrados = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)]
+  const tagScript = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi
+  const encontrados = [...html.matchAll(tagScript)]
+  // todo <script> precisa entrar no hash; um que escapasse da busca ficaria bloqueado (o texto "<script"
+  // dentro do próprio código do programa não conta, por isso a conferência é feita fora dos blocos achados)
+  if (/<script\b/i.test(html.replace(tagScript, ''))) {
+    throw new Error('CSP: há um <script> que a busca não reconheceu; a política não liberaria todos')
+  }
   // script externo ou vazio daria um hash que não libera o programa: o HTML abriria em branco
   for (const [, atributos, corpo] of encontrados) {
     if (/\bsrc\s*=/.test(atributos) || corpo.trim() === '') {

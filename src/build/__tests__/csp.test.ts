@@ -32,6 +32,16 @@ describe('CSP do HTML único', async () => {
     await expect(comCsp(vazio)).rejects.toThrow(/não embutido/)
   })
 
+  it('reconhece a tag em maiúsculas e com espaço antes do ">"', async () => {
+    const variante = html.replace('<script type="module">console.log(1)</script>', '<SCRIPT type="module">console.log(1)</SCRIPT >')
+    const politica = (await comCsp(variante)).match(/content="([^"]+)"/)?.[1] ?? ''
+    expect(politica).toContain(`'sha256-${await sha256('console.log(1)')}'`)
+  })
+
+  it('para o build se algum <script> escapar da busca', async () => {
+    await expect(comCsp(html.replace('</head>', '<script>sem fechamento</head>'))).rejects.toThrow(/não reconheceu/)
+  })
+
   it('não deixa nada sair nem entrar pela rede', () => {
     for (const regra of ["default-src 'none'", "connect-src 'none'", "object-src 'none'", "base-uri 'none'", "form-action 'none'"]) {
       expect(csp).toContain(regra)
