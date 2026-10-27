@@ -1,87 +1,141 @@
 <!-- Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT -->
-# Bancada Livre
+<p align="center"><img src="docs/img/capa.png" alt="Bancada Livre: simulador livre e offline de lógica digital" width="820"></p>
 
-Simulador **didático** de lógica digital, numa bancada que roda no navegador. O aluno arrasta componentes para a bancada (chaves e botões nas
-entradas, portas lógicas e CIs no meio, LEDs e displays de 7 segmentos na saída), liga tudo com fios e **vê o sinal
-propagar na hora**. A tabela-verdade automática mostra **todos os estados** de cada porta e do circuito inteiro.
+# <img src="src/assets/icone.svg" alt="" width="44" align="top"> Bancada Livre
 
-É livre, gratuito, funciona sem internet e cabe num único arquivo HTML.
+[![Testes](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml/badge.svg)](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/HeraldoAntunes/bancada-livre/badge)](https://scorecard.dev/viewer/?uri=github.com/HeraldoAntunes/bancada-livre)
+[![Versão](https://img.shields.io/github/v/release/HeraldoAntunes/bancada-livre?label=vers%C3%A3o)](https://github.com/HeraldoAntunes/bancada-livre/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/HeraldoAntunes/bancada-livre/total?label=downloads)](https://github.com/HeraldoAntunes/bancada-livre/releases)
+[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
+[![Testado no Windows 11](https://img.shields.io/badge/testado%20no-Windows%2011-0078D6)](#sistemas)
+
+**Simulador livre e offline de lógica digital, para montar e testar circuitos em sala de aula.**
+Feito por um professor para as próprias aulas e distribuído livremente: o aluno arrasta chaves, portas lógicas, CIs
+74xx, LEDs e displays para a bancada, liga os fios e vê o sinal propagar na hora, com a tabela-verdade e a expressão
+booleana do circuito inteiro.
+
+<p align="center">
+  <a href="https://github.com/HeraldoAntunes/bancada-livre/releases/latest"><b>⬇ Baixar o Bancada Livre</b></a>
+  &nbsp;·&nbsp; <a href="docs/GUIA-DE-USO.md">Guia de uso</a>
+  &nbsp;·&nbsp; <a href="#sistemas">Outros sistemas</a>
+  &nbsp;·&nbsp; <a href="#perguntas-frequentes">Perguntas frequentes</a>
+</p>
+
+### ⬇ Qual arquivo baixar? (versão 1.0.0)
+
+| Para quê | Baixar |
+|---|---|
+| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-1.0.0.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.0/Instalar-BancadaLivre-1.0.0.exe) |
+| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-1.0.0-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.0/BancadaLivre-1.0.0-portatil.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-1.0.0.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.0/BancadaLivre-1.0.0.html) |
+
+Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
+programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na
+[página de versões](https://github.com/HeraldoAntunes/bancada-livre/releases).
+
+- **Grátis e livre:** licença [MIT](LICENSE). Use, copie e distribua à vontade, inclusive em escolas e redes de ensino.
+- **Sem internet, sem conta, sem anúncios:** os circuitos ficam só no seu computador.
+- **Versão atual:** a da página de [Releases](https://github.com/HeraldoAntunes/bancada-livre/releases/latest); o que
+  mudou em cada versão está nas [novidades](CHANGELOG.md).
+
+> **Aviso:** projeto independente e voluntário, fornecido "no estado em que se encontra", **sem garantia de qualquer
+> tipo**. As marcas citadas pertencem aos seus donos; o Bancada Livre é um projeto independente, sem vínculo com elas.
 
 ## Como abrir
 
-Na página de versões (Releases), escolha um dos arquivos:
+1. Abra a página de **[downloads (Releases)](https://github.com/HeraldoAntunes/bancada-livre/releases/latest)**.
+2. Baixe o arquivo que serve para você:
 
-| Qual arquivo baixar? | Para quê |
-|-|-|
-| `Instalar-BancadaLivre-<versão>.exe` | **Instalar no computador (Windows).** Cria atalho no menu Iniciar e abre o simulador numa janela própria. Não pede administrador. |
-| `BancadaLivre-<versão>-portatil.zip` | **Usar sem instalar (Windows), em pendrive.** Descompacte e abra `BancadaLivre.exe`. |
-| `BancadaLivre-<versão>.html` | **Qualquer sistema, sem instalar nada.** Abra com dois cliques no navegador. É um arquivo só: dá para pôr no Moodle ou mandar por e-mail. |
+   | Arquivo | Para quem |
+   |---|---|
+   | **`Instalar-BancadaLivre-x.y.z.exe`** ⭐ | **quase todo mundo no Windows.** Dois cliques e "Avançar": cria o atalho no menu Iniciar, abre numa janela própria e não pede senha de administrador |
+   | `BancadaLivre-x.y.z-portatil.zip` | quem quer levar num pendrive sem instalar: descompacte e abra `BancadaLivre.exe` |
+   | `BancadaLivre-x.y.z.html` | qualquer sistema: abra com dois cliques no navegador. É um arquivo só, que dá para pôr no Moodle ou mandar por e-mail |
+   | Código-fonte | só para quem vai estudar ou modificar o programa |
 
-Para mexer no código, veja a seção "Para quem desenvolve", mais abaixo.
+3. Abra pelo atalho **Bancada Livre** no Menu Iniciar (ou pelo arquivo HTML, no navegador).
 
-Testado no Windows 11 com o Microsoft Edge. Em outros navegadores atuais (Chrome, Firefox, Safari) deve
-funcionar, mas não foi verificado.
+Para conferir se o arquivo é legítimo, compare o SHA-256 com o `SHA256SUMS.txt` da mesma página (troque `x.y.z` pela
+versão que baixou):
+```bash
+certutil -hashfile Instalar-BancadaLivre-x.y.z.exe SHA256
+```
 
-## O que dá para fazer
+## Como é
+| Somador completo com portas lógicas | Semáforo com contador e tabela-verdade |
+|---|---|
+| ![Somador completo montado com portas XOR, AND e OR, com a tabela-verdade ao lado](docs/img/somador-completo.png) | ![Semáforo com contador de 2 bits, três LEDs coloridos e a tabela-verdade de cada contagem](docs/img/semaforo-contador.png) |
+| **Decodificador 7448 no display de 7 segmentos** | **Decodificador 74138 acendendo 8 LEDs** |
+| ![Chaves BCD ligadas ao 7448 e ao display, mostrando o dígito 5](docs/img/display-7448.png) | ![Três chaves no 74138, com oito LEDs vermelhos e as expressões de cada saída](docs/img/decodificador-74138.png) |
 
+## Recursos
 - **8 portas** no símbolo ANSI: AND, OR, NOT, NAND, NOR, XOR e XNOR, de 2 a 8 entradas, e o BUFFER.
-- **Entradas**: chave (SWITCH), CLOCK de 0,5 a 10 Hz (com rodar, pausar e avançar meio período no próprio
+- **Entradas:** chave (SWITCH), CLOCK de 0,5 a 10 Hz (com rodar, pausar e avançar meio período no próprio
   componente), NÍVEL ALTO (1), NÍVEL BAIXO (0), PUSH BUTTON, **banco de chaves** de 4 ou 8 posições e
   **contador automático** de 2 a 4 bits, que gera as combinações no ritmo escolhido.
-- **Saídas**: LED (azul, vermelho, verde ou amarelo), **barra de LEDs** de 4 ou 8, display de 7 segmentos (BCD
+- **Saídas:** LED (azul, vermelho, verde ou amarelo), **barra de LEDs** de 4 ou 8, display de 7 segmentos (BCD
   de 0 a 9, hexadecimal de 0 a F, ou segmento a segmento) e SONDA.
-- Fios que mostram o estado pela cor e pela espessura: em 1, azul e grosso; em 0, cinza e fino.
-- Estados 0, 1, X (indefinido, como uma entrada solta) e E (erro: duas saídas no mesmo ponto ou laço).
-- **Tabela-verdade** automática de cada porta e do circuito. Clicar numa linha aplica aquela combinação às
-  chaves. Abaixo dela aparece a **expressão booleana**.
-- **CIs da série 74xx** (7400, 7402, 7404, 7408, 7432, 7486, o decodificador 7448, o decodificador 74138, o
-  multiplexador 74151 e o somador de 4 bits 74283) com a pinagem real e
-  alimentação VCC e GND obrigatória, como na protoboard. O **Guia de CIs** mostra a pinagem e dicas de bancada
-  de cada chip.
-- **Modo passo a passo**: o sinal avança uma porta de cada vez.
-- **Texto livre** para anotar o circuito, nome das portas na bancada (botão `Aa`) e rótulo próprio em cada porta.
-- Desfazer e refazer (Ctrl+Z e Ctrl+Y) e **30 circuitos de exemplo** em quatro grupos: Básico, Intermediário,
-  Avançado e CIs, da porta AND sozinha até o semáforo com contador e o somador de 4 bits com o 74283.
-- **Salvamento automático**: fechar a aba não perde o circuito.
+- **Fios que mostram o estado** pela cor e pela espessura: em 1, azul e grosso; em 0, cinza e fino. Estados 0, 1,
+  X (indefinido, como uma entrada solta) e E (erro: duas saídas no mesmo ponto ou laço).
+- **Tabela-verdade** automática de cada porta e do circuito, com os bits do contador como entradas. Clicar numa
+  linha aplica aquela combinação ao circuito. Abaixo dela aparece a **expressão booleana**, e o botão **Destacar**
+  abre a tabela numa janela grande, boa para projetar.
+- **CIs da série 74xx** com a pinagem real e alimentação VCC e GND obrigatória, como na protoboard: 7400, 7402,
+  7404, 7408, 7432, 7486, o decodificador 7448, o decodificador 74138, o multiplexador 74151 e o somador de 4 bits
+  74283. O **Guia de CIs** mostra a pinagem e dicas de bancada de cada chip.
+- **Modo passo a passo:** o sinal avança uma porta de cada vez.
+- **30 circuitos de exemplo** em quatro grupos (Básico, Intermediário, Avançado e CIs), da porta AND sozinha até o
+  semáforo com contador e o somador de 4 bits com o 74283.
+- **Bancada confortável:** zoom no ponto do cursor, **Ajustar** para ver o circuito inteiro, espelhar e girar
+  componentes, texto livre para anotar, nome das portas (`Aa`), desfazer e refazer.
+- **Salvar e exportar:** salvamento automático, circuito em `.json`, imagem PNG da bancada e tabela em CSV.
+- **Agentes de IA:** cada ação do programa existe também como comando, para um agente de IA que controla o
+  navegador usar o simulador sem clicar (ver [Para quem desenvolve](#para-quem-desenvolve)).
 
-## Primeiros passos
+## Sistemas
+| | Windows 11 | Linux | macOS |
+|---|---|---|---|
+| Instalador, atalho e janela própria | ✅ | não (use o HTML) | não (use o HTML) |
+| Arquivo HTML no navegador | ✅ testado no Microsoft Edge | ⚠️ deve funcionar, não testado | ⚠️ deve funcionar, não testado |
 
-1. Escolha uma aba na barra superior: **ENTRADAS**, **PORTAS**, **SAÍDAS** ou **CIs**. À direita ficam os
-   botões, em três grupos: **Arquivo** (Abrir, Salvar, PNG), **Editar** (desfazer, refazer, limpar) e **Aula**
-   (Exemplos, Passo a passo, Tabela, Guia de CIs e nomes das portas).
-2. Arraste um componente da paleta (à esquerda) para a bancada, ou clique nele.
-3. Ligue os pinos: arraste de um círculo de saída até um de entrada. Uma saída pode alimentar várias entradas;
-   cada entrada aceita um fio só.
-4. Clique nas chaves para alternar entre 0 e 1 e veja o sinal propagar.
-5. No painel da direita, acompanhe a tabela-verdade. O botão **Destacar** abre a tabela numa janela que dá
-   para mover e aumentar.
+O instalador e a versão portátil abrem o simulador numa janela própria do **Microsoft Edge** ou do **Google
+Chrome**, um dos dois precisa estar instalado. O arquivo HTML funciona em navegadores atuais (Chrome, Edge, Firefox,
+Safari); foi testado no Windows 11 com o Microsoft Edge. Em telas com menos de 1366 px de largura, a barra superior
+passa a ocupar duas linhas.
 
-Para ver melhor, use a roda do mouse (amplia no ponto do cursor), arraste o fundo para mover a bancada e use
-os botões do canto: menos, porcentagem (volta a 100%), mais e **Ajustar**, que mostra todo o circuito o maior
-possível. Ctrl e +, Ctrl e − e Ctrl e 0 fazem o mesmo.
+## Atalhos de teclado
+| Tecla | Ação | Tecla | Ação |
+|---|---|---|---|
+| `Ctrl+Z` / `Ctrl+Y` | desfazer / refazer | `Delete` | apagar o item selecionado |
+| `E` | espelhar o componente selecionado | `R` | girar 90 graus |
+| `Ctrl` e `+` / `Ctrl` e `−` | ampliar / reduzir | `Ctrl+0` | voltar a 100% |
+| `→` ou `Espaço` / `←` (passo a passo) | próximo nível / nível anterior | `Home` / `Esc` (passo a passo) | reiniciar / sair |
 
-Para começar rápido, abra o menu **Exemplos**. Um **duplo clique** no componente abre a janela de edição dele. Com um componente selecionado, a tecla **E**
-espelha e a tecla **R** gira 90 graus. A tecla **Delete** apaga o item selecionado.
+Duplo clique num componente abre a janela de edição dele.
 
-## Salvar e exportar
+## Perguntas frequentes
+**É de graça mesmo?** Sim. É software livre (licença MIT): pode usar, copiar, instalar em quantos computadores quiser e
+distribuir.
 
-- **Salvar** baixa o circuito como `circuito.json`, para guardar ou entregar trabalhos; **Abrir** carrega de volta.
-- **PNG** baixa uma imagem da bancada.
-- **Exportar CSV**, abaixo da tabela-verdade, baixa a tabela com ponto e vírgula e acentuação UTF-8, o formato que
-  planilhas em português esperam.
+**Precisa de internet?** Não. Tudo funciona offline, e o programa não acessa a internet em momento nenhum.
 
-## Privacidade
+**Onde ficam os meus circuitos?** O circuito aberto fica guardado no próprio navegador (salvamento automático: fechar
+a janela não perde o trabalho). Para guardar ou entregar, use **Salvar**, que baixa um arquivo `.json`; **Abrir**
+carrega de volta.
 
-Tudo roda no seu computador. O circuito fica guardado só no navegador (salvamento automático) e nos arquivos que
-você mesmo baixar. O simulador não envia nada pela internet, não usa contas nem login e não tem propaganda ou
-rastreamento.
+**Posso pôr no Moodle ou mandar para os alunos?** Pode. O `BancadaLivre-x.y.z.html` é o simulador inteiro num arquivo
+só: o aluno abre com dois cliques, sem instalar nada.
 
-## Limitações conhecidas
+**O antivírus reclamou. É seguro?** Os arquivos passam pelo Microsoft Defender antes de cada publicação, e você pode
+conferir o SHA-256 e a assinatura do Sigstore. Alertas de "editor desconhecido" acontecem porque não há assinatura
+digital paga. Veja [SECURITY.md](.github/SECURITY.md).
 
-- Em telas com menos de 1366 px de largura, a barra superior passa a ocupar duas linhas.
-- Interface só em português.
-- O display não tem ponto decimal.
-- Só lógica combinacional: flip-flops e memória ficam para uma versão futura.
+**Tem flip-flop e memória?** Ainda não: esta versão é de lógica combinacional. Lógica sequencial está nos planos.
+
+**Posso usar na minha escola ou rede de ensino?** Pode, à vontade, mantendo o aviso de licença.
+
+**Encontrei um erro ou tenho uma ideia.** Abra uma [issue](https://github.com/HeraldoAntunes/bancada-livre/issues/new/choose).
 
 ## Para quem desenvolve
 
@@ -94,6 +148,8 @@ npm test         # testes automáticos
 npm run lint     # linter
 npm run build    # gera dist/index.html, o arquivo único
 ```
+
+Para entender o código, veja [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
 ### Comandos (para agentes de IA)
 
@@ -109,12 +165,29 @@ bancadaLivre.executar('tabela.ler')
 
 Cada comando é um passo do Desfazer. O registro fica em `src/comandos.ts`.
 
+## Privacidade
+
+Tudo roda no seu computador. O circuito fica guardado só no navegador (salvamento automático) e nos arquivos que
+você mesmo baixar. O simulador não envia nada pela internet, não usa contas nem login e não tem propaganda ou
+rastreamento. O arquivo HTML traz uma política de segurança que bloqueia qualquer acesso à rede.
+
+*This program will not transfer any information to other networked systems unless specifically requested by the user or
+the person installing or operating it.*
+
+## Contribuir
+Sugestões e correções são bem-vindas. Veja [CONTRIBUTING.md](.github/CONTRIBUTING.md) e a política de segurança em
+[SECURITY.md](.github/SECURITY.md).
+
+## Como citar
+Se usar o Bancada Livre num trabalho, artigo ou material didático, cite a versão usada. Os dados estão em
+[CITATION.cff](CITATION.cff); no GitHub, o botão **Cite this repository** gera a referência pronta (APA ou BibTeX).
+
 ## Como foi feito
 
-O Bancada Livre foi criado e dirigido por **Heraldo Antunes Silva Filho**, para as suas aulas. Foi feito com apoio de **inteligência artificial** (Claude, da Anthropic, pelo Claude Code),
-usada como ferramenta: a ideia, os requisitos, as decisões de didática, a revisão e a aprovação de cada versão são
-do autor. A mesma declaração aparece na janela **Sobre** do programa, aberta pelo número da versão. As mudanças de
-cada versão estão no [CHANGELOG.md](CHANGELOG.md).
+O Bancada Livre foi criado e dirigido por **Heraldo Antunes Silva Filho**, para as suas aulas. Foi feito com apoio de
+**inteligência artificial** (Claude, da Anthropic, pelo Claude Code), usada como ferramenta: a ideia, os requisitos,
+as decisões de didática, a revisão e a aprovação de cada versão são do autor. A mesma declaração aparece na janela
+**Sobre** do programa, aberta pelo número da versão.
 
 ## Licença
 
@@ -122,4 +195,8 @@ Licença **MIT** (ver [LICENSE](LICENSE)): uso, cópia, modificação e distribu
 instituições de ensino, mantendo o aviso de autoria. As bibliotecas de terceiros e suas licenças estão em
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
-As marcas citadas pertencem aos seus donos; o Bancada Livre é um projeto independente, sem vínculo com elas.
+### Autoria dos desenhos
+Os símbolos das portas, os corpos dos componentes, os CIs, os ícones e a capa foram **desenhados para o Bancada
+Livre**, como código SVG escrito no próprio projeto, e estão sob a mesma licença MIT. Nenhum desenho foi copiado de
+outros programas ou pacotes de ícones. As portas seguem apenas a **convenção** dos símbolos distintivos (ANSI/IEEE
+91), e a pinagem dos CIs segue as folhas de dados dos fabricantes; o desenho de cada componente é original.

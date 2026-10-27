@@ -14,19 +14,24 @@ const iconeDaAba = {
 }
 
 // Política de segurança no HTML único (ver src/build/csp.ts). Roda depois do
-// viteSingleFile, quando o script já está embutido e o hash é o definitivo.
+// viteSingleFile, quando o script já está embutido e o hash é o definitivo: desde a
+// versão 2.3.4 ele embute na etapa "post" do generateBundle, então esta também é "post"
+// e vem depois dele na lista de plugins.
 const politicaDeSeguranca = {
   name: 'politica-de-seguranca',
   apply: 'build' as const,
   enforce: 'post' as const,
-  generateBundle(_: unknown, bundle: Record<string, { type: string; fileName: string; source?: string | Uint8Array }>) {
-    return Promise.all(
-      Object.values(bundle)
-        .filter((f) => f.type === 'asset' && f.fileName.endsWith('.html') && typeof f.source === 'string')
-        .map(async (f) => {
-          f.source = await comCsp(f.source as string)
-        }),
-    ).then(() => undefined)
+  generateBundle: {
+    order: 'post' as const,
+    handler(_: unknown, bundle: Record<string, { type: string; fileName: string; source?: string | Uint8Array }>) {
+      return Promise.all(
+        Object.values(bundle)
+          .filter((f) => f.type === 'asset' && f.fileName.endsWith('.html') && typeof f.source === 'string')
+          .map(async (f) => {
+            f.source = await comCsp(f.source as string)
+          }),
+      ).then(() => undefined)
+    },
   },
 }
 

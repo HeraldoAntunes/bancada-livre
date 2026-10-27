@@ -25,6 +25,13 @@ describe('CSP do HTML único', async () => {
     expect(csp).not.toMatch(/script-src[^;]*unsafe-inline/)
   })
 
+  it('recusa script ainda não embutido (o HTML abriria em branco)', async () => {
+    const externo = html.replace('<script type="module">console.log(1)</script>', '<script type="module" src="/assets/index.js"></script>')
+    const vazio = html.replace('console.log(1)', '')
+    await expect(comCsp(externo)).rejects.toThrow(/não embutido/)
+    await expect(comCsp(vazio)).rejects.toThrow(/não embutido/)
+  })
+
   it('não deixa nada sair nem entrar pela rede', () => {
     for (const regra of ["default-src 'none'", "connect-src 'none'", "object-src 'none'", "base-uri 'none'", "form-action 'none'"]) {
       expect(csp).toContain(regra)

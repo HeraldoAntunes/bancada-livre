@@ -9,7 +9,14 @@ async function sha256Base64(texto: string): Promise<string> {
 }
 
 export async function comCsp(html: string): Promise<string> {
-  const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1])
+  const encontrados = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)]
+  // script externo ou vazio daria um hash que não libera o programa: o HTML abriria em branco
+  for (const [, atributos, corpo] of encontrados) {
+    if (/\bsrc\s*=/.test(atributos) || corpo.trim() === '') {
+      throw new Error('CSP: script ainda não embutido no HTML; a política seria calculada sobre um script vazio')
+    }
+  }
+  const scripts = encontrados.map((m) => m[2])
   const hashes = await Promise.all(scripts.map(async (s) => `'sha256-${await sha256Base64(s)}'`))
   const politica = [
     "default-src 'none'",
