@@ -1,0 +1,49 @@
+﻿BANCADA LIVRE
+Simulador didático de lógica digital: portas lógicas, CIs da série 74xx, LEDs e displays.
+
+SOFTWARE LIVRE E GRATUITO - LICENÇA MIT
+Copyright (c) 2026 Heraldo Antunes Silva Filho
+
+Você pode usar, copiar, modificar, mesclar, publicar, distribuir, sublicenciar e/ou
+vender cópias deste programa, gratuitamente e sem pedir autorização, desde que o aviso
+de direitos autorais e esta permissão sejam mantidos em todas as cópias.
+
+AVISO DE ISENÇÃO DE RESPONSABILIDADE
+Este programa é fornecido "no estado em que se encontra", SEM GARANTIA DE QUALQUER TIPO,
+expressa ou implícita, incluindo garantias de comercialização, adequação a um fim
+específico ou não violação. Em nenhum caso os autores ou titulares dos direitos serão
+responsáveis por qualquer reclamação, dano (incluindo perda de dados) ou outra
+responsabilidade decorrente do uso, do mau uso ou da impossibilidade de uso do programa.
+Guarde os circuitos importantes com o botão Salvar.
+
+PRIVACIDADE
+O Bancada Livre funciona sem internet: não coleta, não envia e não compartilha dados.
+Os circuitos ficam apenas no seu computador.
+
+COMPONENTES DE TERCEIROS
+React, React DOM, scheduler e zustand (MIT), Python (PSF License) e PyInstaller (GPL 2.0
+com exceção para o executável gerado; runtime hooks Apache 2.0). O instalador é feito com
+o Inno Setup. Os textos completos ficam na pasta licencas, instalada junto com o programa.
+Detalhes no arquivo THIRD-PARTY-NOTICES.md instalado junto com o programa.
+
+As marcas citadas pertencem aos seus donos; o Bancada Livre é um projeto independente, sem vínculo com elas.
+
+==================================================================================
+Texto original da licença (MIT License):
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify,
+merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be included in all copies
+or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

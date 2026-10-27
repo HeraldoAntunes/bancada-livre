@@ -1,0 +1,22 @@
+# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Dependabot: uma vez por mês, abre um pedido de mudança (pull request) quando sai versão nova das actions ou das
+# bibliotecas do simulador. Nada é aplicado sozinho: cada pedido só entra se o mantenedor aceitar.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      desenvolvimento:
+        dependency-type: development

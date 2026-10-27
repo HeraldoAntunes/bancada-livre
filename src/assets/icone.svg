@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT -->
+  <!-- Ícone do programa: chip DIP com chanfro, ponto à direita do chanfro e as iniciais BL (desenho-mestre). -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="#14365c"/>
+  <g stroke="#cfe0f4" stroke-width="3" stroke-linecap="round">
+    <path d="M14 18h6M14 28h6M14 38h6M14 48h6M44 18h6M44 28h6M44 38h6M44 48h6"/>
+  </g>
+  <rect x="20" y="11" width="24" height="44" rx="3" fill="#1a1a1a" stroke="#4dabf7" stroke-width="2"/>
+  <path d="M28 11a4 4 0 0 0 8 0" fill="#14365c"/>
+  <circle cx="39" cy="17" r="2" fill="#fff"/>
+  <text x="32" y="38" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Segoe UI, Arial, sans-serif">BL</text>
+</svg>

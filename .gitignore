@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.local
+.DS_Store
+# cópia distribuível do build de arquivo único (gerada por npm run build)
+Bancada Livre.html
+Simulador de Portas Lógicas.html
+
+# saídas do build do executável (instalador\build.ps1)
+pacote/
+.venv-build/
+__pycache__/
+
+# marcador da cópia pública (scripts de exportação)
+.bancada-livre-publico

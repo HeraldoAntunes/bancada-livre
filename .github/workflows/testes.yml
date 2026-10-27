@@ -1,0 +1,49 @@
+# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+# Testes automáticos a cada envio ao GitHub: linter, checagem de tipos, testes do Vitest e o build do HTML único
+# (só para conferir que monta; nada é publicado por aqui).
+name: Testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: testes-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar as dependências exatamente como no package-lock.json
+        run: npm ci
+
+      - name: Linter
+        run: npm run lint
+
+      - name: Checagem de tipos
+        run: npx tsc --noEmit
+
+      - name: Testes
+        run: npm test
+
+      - name: Testes do lançador do Windows
+        run: python3 -m unittest discover -s instalador -p "test_*.py"
+
+      - name: Montar o HTML único (conferência)
+        run: npm run build

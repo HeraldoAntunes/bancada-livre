@@ -1,0 +1,1001 @@
+/* Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT */
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  color: #223;
+}
+
+.app {
+  display: grid;
+  height: 100%;
+  grid-template-rows: minmax(52px, auto) 1fr 28px;
+  grid-template-columns: 104px 1fr 300px;
+  grid-template-areas:
+    'top top top'
+    'palette bench side'
+    'status status status';
+}
+
+/* ---- barra superior ---- */
+.topbar {
+  grid-area: top;
+  background: #14365c;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  padding: 0 12px 4px;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 16px;
+  margin-right: 10px;
+  white-space: nowrap;
+}
+
+.tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 66px;
+  margin-top: 4px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #cfe0f4;
+  padding: 4px 8px 3px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tab.active {
+  color: #fff;
+  background: #1c7ed6;
+  border-color: #74c0fc;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.topbar .lang,
+.topbar .action {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-radius: 4px;
+  padding: 5px 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.topbar .action:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* largura fixa: sem ela a caixa cresce até o nome do exemplo mais longo e empurra a barra para fora da tela */
+.topbar .exemplos {
+  width: 124px;
+}
+
+.topbar .lang option {
+  color: #223;
+}
+
+.version {
+  font-size: 13px;
+  color: #cfe0f4;
+  margin-left: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.version:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  text-decoration: underline;
+}
+
+/* ---- janela Sobre ---- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 45, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 26px 30px;
+  max-width: 480px;
+  width: calc(100% - 48px);
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.modal h2 {
+  font-size: 19px;
+  color: #14365c;
+  margin-bottom: 2px;
+}
+
+.about-version {
+  color: #678;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.about-list dt {
+  font-weight: 700;
+  color: #1b4f8a;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 10px;
+}
+
+.about-list dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #334;
+}
+
+.about-hint {
+  font-size: 12px;
+  color: #678;
+  border-top: 1px solid #e3ecf5;
+  margin-top: 14px;
+  padding-top: 10px;
+}
+
+.about-close {
+  margin-top: 14px;
+  border: none;
+  background: #14365c;
+  color: #fff;
+  border-radius: 5px;
+  padding: 8px 18px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.about-close:hover {
+  background: #1b4f8a;
+}
+
+/* ---- paleta ---- */
+.palette {
+  grid-area: palette;
+  background: #f4f7fa;
+  border-right: 1px solid #ccd6e0;
+  overflow-y: auto;
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.palette-item {
+  width: 92px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 2px 4px;
+  text-align: center;
+  cursor: grab;
+  user-select: none;
+}
+
+.palette-item:hover {
+  border-color: #9cb8d4;
+  background: #e8f1fa;
+}
+
+.palette-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1b4f8a;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+
+/* ---- bancada ---- */
+.bench {
+  grid-area: bench;
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+}
+
+.bench svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  touch-action: none;
+}
+
+.pin {
+  fill: #fff;
+  stroke: #1a1a1a;
+  stroke-width: 2.5;
+  cursor: crosshair;
+}
+
+.pin:hover {
+  fill: #74c0fc;
+}
+
+.pin-target {
+  stroke: #2f9e44;
+  stroke-width: 3.5;
+}
+
+@keyframes dashmove {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+
+.wire-error path {
+  animation: dashmove 0.7s linear infinite;
+}
+
+/* ---- painel lateral ---- */
+.side {
+  grid-area: side;
+  border-left: 1px solid #ccd6e0;
+  background: #fafbfc;
+  overflow-y: auto;
+  padding: 14px;
+  font-size: 13px;
+}
+
+.side section {
+  margin-bottom: 22px;
+}
+
+.side h2 {
+  font-size: 14px;
+  color: #14365c;
+  border-bottom: 2px solid #dbe6f0;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.side h3 {
+  font-size: 13px;
+  margin: 12px 0 4px;
+  color: #1b4f8a;
+}
+
+.side h3 small {
+  font-weight: 400;
+  color: #567;
+  margin-left: 6px;
+}
+
+.hint {
+  color: #678;
+  font-size: 12px;
+  margin: 6px 0;
+}
+
+.comp-name {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.field input,
+.field select {
+  border: 1px solid #b8c6d4;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+  width: 90px;
+}
+
+.side button {
+  border: 1px solid #b8c6d4;
+  background: #fff;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin: 6px 0;
+}
+
+.side button:hover {
+  background: #eef4fa;
+}
+
+.side button.danger {
+  color: #c92a2a;
+  border-color: #e5b3b3;
+}
+
+.side button.danger:hover {
+  background: #fdf0f0;
+}
+
+/* ---- tabela-verdade ---- */
+.tt-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+table.tt {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.tt th,
+.tt td {
+  border: 1px solid #ccd6e0;
+  padding: 3px 8px;
+  text-align: center;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.tt thead th {
+  background: #e3ecf5;
+  position: sticky;
+  top: 0;
+}
+
+.tt thead th.out-col {
+  background: #d8e8d8;
+}
+
+.tt tbody tr {
+  cursor: pointer;
+}
+
+.tt tbody tr:hover {
+  background: #eaf3fc;
+}
+
+.tt tr.current {
+  background: #d3e7fb;
+  font-weight: 700;
+}
+
+.sig-e {
+  color: #e8590c;
+  font-weight: 700;
+}
+
+.expr {
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px;
+  color: #14365c;
+  background: #eef4fa;
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin: 6px 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.sig-x {
+  color: #889;
+}
+
+/* ---- barreira de erro ---- */
+.crash {
+  max-width: 560px;
+  margin: 80px auto;
+  padding: 24px 28px;
+  border: 1px solid #e5b3b3;
+  border-radius: 8px;
+  background: #fff8f8;
+}
+
+.crash h1 {
+  font-size: 20px;
+  color: #c92a2a;
+  margin-bottom: 10px;
+}
+
+.crash p {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.crash-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.crash-actions button {
+  border: 1px solid #b8c6d4;
+  background: #fff;
+  border-radius: 5px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.crash-actions button:first-child {
+  background: #14365c;
+  border-color: #14365c;
+  color: #fff;
+}
+
+.crash pre {
+  font-size: 11px;
+  color: #a66;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
+/* ---- Guia de CIs ---- */
+.modal.guide {
+  max-width: 720px;
+}
+
+.guide-body {
+  display: flex;
+  gap: 18px;
+}
+
+.guide-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 86px;
+}
+
+.guide-nav button {
+  border: 1px solid #ccd6e0;
+  background: #f4f7fa;
+  border-radius: 5px;
+  padding: 7px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: Consolas, monospace;
+  cursor: pointer;
+  text-align: left;
+}
+
+.guide-nav button small {
+  display: block;
+  font-weight: 400;
+  font-size: 10px;
+  color: #678;
+}
+
+.guide-nav button.active {
+  background: #14365c;
+  border-color: #14365c;
+  color: #fff;
+}
+
+.guide-nav button.active small {
+  color: #cfe0f4;
+}
+
+.guide-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.guide-content h3 {
+  font-size: 17px;
+  color: #14365c;
+  margin: 0 0 6px;
+}
+
+.guide-content h3 small {
+  font-weight: 400;
+  color: #567;
+  margin-left: 8px;
+  font-size: 13px;
+}
+
+.guide-content h4 {
+  font-size: 13px;
+  color: #1b4f8a;
+  margin: 12px 0 4px;
+}
+
+.guide-content ul {
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.guide-content .tt {
+  width: auto;
+}
+
+.pinout {
+  width: 100%;
+  max-width: 280px;
+  display: block;
+  margin: 4px auto;
+}
+
+/* ---- rodapé ---- */
+.status {
+  grid-area: status;
+  background: #eef2f6;
+  border-top: 1px solid #ccd6e0;
+  font-size: 12px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 0 12px;
+  color: #456;
+}
+
+.status .warn {
+  color: #c92a2a;
+  font-weight: 600;
+}
+
+.step-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #1c7ed6;
+  font-weight: 600;
+}
+
+.step-controls button {
+  border: 1px solid #a5c9e8;
+  background: #fff;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.step-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.topbar .action.active {
+  background: #4dabf7;
+  border-color: #74c0fc;
+}
+
+.topbar .action:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.legend {
+  color: #789;
+}
+
+/* Ícones próprios (src/ui/icons.tsx): herdam a cor do texto e alinham com ele. */
+.icon {
+  display: inline-block;
+  vertical-align: -0.2em;
+  flex-shrink: 0;
+}
+
+.marca {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar .action .icon {
+  vertical-align: middle;
+}
+
+/* Zoom da bancada: controles no canto, sempre visíveis */
+.bancada-svg {
+  cursor: grab;
+}
+
+.zoom {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid #b8c6d4;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 6px rgba(20, 54, 92, 0.15);
+}
+
+.zoom button {
+  min-width: 32px;
+  height: 30px;
+  border: 1px solid #b8c6d4;
+  background: #f4f7fa;
+  color: #14365c;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.zoom button:hover {
+  background: #e8f1fa;
+}
+
+.zoom .zoom-pct {
+  min-width: 56px;
+  font-size: 13px;
+}
+
+.zoom .zoom-ajustar {
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+/* Tabela-verdade: botão Destacar e janela flutuante */
+.secao-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.secao-titulo h2 {
+  flex: 1;
+}
+
+.destacar {
+  font-size: 12px;
+  padding: 3px 10px;
+  border: 1px solid #1b4f8a;
+  background: #e8f1fa;
+  color: #14365c;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.janela {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #1b4f8a;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(20, 54, 92, 0.3);
+  resize: both;
+  overflow: hidden;
+  min-width: 260px;
+  min-height: 160px;
+}
+
+.janela-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 6px 12px;
+  background: #14365c;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: move;
+  user-select: none;
+}
+
+.janela-titulo button {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  border: 1px solid #6d9ccc;
+  background: #24507f;
+  color: #fff;
+  cursor: pointer;
+}
+
+.janela-corpo {
+  flex: 1;
+  overflow: auto;
+  padding: 10px 14px 18px;
+  container-type: inline-size;
+}
+
+/* a letra acompanha a largura da janela: maior para projetar */
+.janela-corpo .tt-scroll {
+  max-height: none;
+}
+
+.janela-corpo .tt th,
+.janela-corpo .tt td {
+  font-size: clamp(14px, 3.4cqw, 34px);
+  padding: 0.25em 0.7em;
+}
+
+.janela-corpo .expr,
+.janela-corpo .hint {
+  font-size: clamp(13px, 2.6cqw, 26px);
+}
+
+/* Passo a passo: barra grande no topo da bancada */
+.barra-passo {
+  grid-area: bench;
+  align-self: start;
+  justify-self: center;
+  z-index: 20;
+  margin-top: 10px;
+  max-width: calc(100% - 24px);
+  background: #fff8e1;
+  border: 2px solid #f0b429;
+  border-radius: 10px;
+  padding: 8px 12px 6px;
+  box-shadow: 0 4px 14px rgba(20, 54, 92, 0.18);
+}
+
+.barra-passo-linha {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.barra-passo-nivel {
+  font-size: 17px;
+  color: #14365c;
+  margin-right: 4px;
+}
+
+.barra-passo-pontos {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 6px;
+}
+
+.barra-passo-pontos button {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #c58b00;
+  background: #fff;
+  padding: 0;
+  cursor: pointer;
+}
+
+.barra-passo-pontos button.feito {
+  background: #f0b429;
+}
+
+.barra-passo-linha > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: 1px solid #1b4f8a;
+  background: #e8f1fa;
+  color: #14365c;
+  cursor: pointer;
+}
+
+.barra-passo-linha > button.principal {
+  background: #1b4f8a;
+  color: #fff;
+}
+
+.barra-passo-linha > button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.barra-passo-linha > button.sair {
+  border-color: #b8c6d4;
+  background: #fff;
+  color: #556;
+}
+
+.barra-passo-frase {
+  margin: 6px 2px 2px;
+  font-size: 15px;
+  color: #3a3000;
+}
+
+/* Controles do CLOCK, desenhados acima dele na bancada */
+.clock-botao {
+  cursor: pointer;
+}
+
+.clock-botao rect {
+  fill: #1b4f8a;
+  stroke: #0f2f52;
+  stroke-width: 1;
+}
+
+.clock-botao .icon {
+  color: #fff;
+}
+
+.clock-botao:hover rect {
+  fill: #2d6bb0;
+}
+
+.clock-acoes {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+
+.clock-acoes button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Janela de edição (duplo clique no componente) */
+.modal.edicao {
+  min-width: 320px;
+  max-width: 420px;
+}
+
+.modal.edicao .field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-size: 15px;
+}
+
+.modal.edicao .field input,
+.modal.edicao .field select {
+  font-size: 15px;
+  padding: 4px 6px;
+}
+
+.edicao-rodape {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.edicao-rodape .principal {
+  background: #1b4f8a;
+  color: #fff;
+  border: 1px solid #14365c;
+  border-radius: 6px;
+  padding: 6px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Componente espelhado ou girado: cada texto desfaz a orientação em torno do próprio centro */
+.orientado text {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: var(--desfaz);
+}
+
+.orientacao-acoes {
+  display: flex;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+/* Barra agrupada por função (opção B): título pequeno em cima, botões com cara de botão embaixo */
+.brand {
+  cursor: default;
+  padding-right: 12px;
+  margin-right: 6px;
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 2px 4px 3px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.grupo-titulo {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9fc3e6;
+  padding-left: 2px;
+}
+
+.grupo-botoes {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.topbar .grupo .action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #24507f;
+  border: 1px solid #6d9ccc;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+  padding: 3px 6px;
+}
+
+.topbar .grupo .action:hover:not(:disabled) {
+  background: #2d6bb0;
+}
+
+.topbar .grupo .action:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.topbar .grupo .action.alerta {
+  background: #c92a2a;
+  border-color: #ffa8a8;
+  font-weight: 600;
+}
+
+.topbar .grupo .action.alerta:hover:not(:disabled) {
+  background: #e03131;
+}
+
+.topbar .grupo .action.active {
+  background: #4dabf7;
+  border-color: #a5d8ff;
+}
+
+.topbar .grupo .exemplos {
+  padding: 3px 6px;
+}

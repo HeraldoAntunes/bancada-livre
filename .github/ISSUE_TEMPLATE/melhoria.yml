@@ -1,0 +1,23 @@
+# Bancada Livre · © 2026 Heraldo Antunes Silva Filho · SPDX-License-Identifier: MIT
+name: Sugerir uma melhoria
+description: Uma ideia de recurso, componente ou exemplo para o simulador
+labels: ["melhoria"]
+body:
+  - type: textarea
+    id: situacao
+    attributes:
+      label: Que situação de aula isso resolve?
+      description: Conte como você dá a aula hoje e onde o simulador poderia ajudar mais.
+    validations:
+      required: true
+  - type: textarea
+    id: ideia
+    attributes:
+      label: Como você imagina que funcione?
+    validations:
+      required: true
+  - type: input
+    id: disciplina
+    attributes:
+      label: Disciplina ou nível de ensino (opcional)
+      placeholder: "Eletrônica digital, ensino técnico"
