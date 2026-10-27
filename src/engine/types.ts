@@ -1,8 +1,8 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Núcleo do simulador — modelo de dados e tipos de sinal (spec §3, §7).
+// Núcleo do simulador — modelo de dados e tipos de sinal.
 // Esta camada não conhece a UI.
 
-/** Valor de sinal em um fio/pino. Ternário + condição de erro (spec §3.1). */
+/** Valor de sinal em um fio/pino. Ternário + condição de erro. */
 export type Signal = 0 | 1 | 'X' | 'E'
 
 export const GATE_TYPES = ['NOT', 'AND', 'OR', 'NAND', 'NOR', 'XOR', 'XNOR', 'BUFFER'] as const
@@ -15,7 +15,7 @@ export const SINK_TYPES = ['LED', 'DISPLAY', 'PROBE', 'LED_BAR'] as const
 export type SinkType = (typeof SINK_TYPES)[number]
 
 /**
- * 'IC' = circuito integrado 74xx (spec §4.10); o campo `chip` identifica o modelo.
+ * 'IC' = circuito integrado 74xx; o campo `chip` identifica o modelo.
  * 'LABEL' = rótulo de texto livre para anotar o circuito (sem pinos, fora da simulação).
  */
 export type ComponentType = GateType | SourceType | SinkType | 'IC' | 'LABEL'
@@ -24,7 +24,7 @@ export type ComponentType = GateType | SourceType | SinkType | 'IC' | 'LABEL'
 export const CORES_LED = ['azul', 'vermelho', 'verde', 'amarelo'] as const
 export type CorLed = (typeof CORES_LED)[number]
 
-/** Modo do display de 7 segmentos (RF-03). */
+/** Modo do display de 7 segmentos. */
 export type DisplayMode = 'bcd' | 'hex' | 'raw'
 
 export interface CircuitComponent {
@@ -35,7 +35,7 @@ export interface CircuitComponent {
   label?: string
   /** Estado atual de fontes interativas (SWITCH, PUSH_BUTTON). */
   state?: 0 | 1
-  /** Fan-in de portas multi-entrada (2 a 8, RF-01.1). */
+  /** Fan-in de portas multi-entrada (2 a 8). */
   inputs?: number
   /** Modo do DISPLAY: bcd (0–9), hex (0–F) ou raw (a–g). */
   mode?: DisplayMode

@@ -9,6 +9,28 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+## [1.0.2] - 2026-10-27 · "Arquivos mais seguros"
+
+Correções: o uso do simulador continua o mesmo.
+
+### Corrigido
+- Um arquivo de circuito estragado ou feito de propósito com valores estranhos não consegue mais travar o
+  programa: o simulador confere o nome de cada CI, os rótulos, o número de entradas das portas, a frequência do
+  clock, o modo do display, a posição dos componentes e se cada fio liga pinos que existem, e recusa o arquivo
+  com uma mensagem clara.
+- Se o circuito salvo automaticamente não puder ser aberto, ele fica guardado à parte no navegador, em vez de
+  ser apagado na primeira mudança.
+- O aviso de CI sem alimentação diz os pinos certos de cada chip: VCC no 14 e GND no 7 nos CIs de 14 pinos, VCC
+  no 16 e GND no 8 no 7448, 74138, 74151 e 74283.
+- Na tabela de atalhos, `Ctrl+0` aparece como o que ele faz: mostrar o circuito inteiro (Ajustar).
+
+### Adicionado
+- A bandeira do Brasil, pequena, ao lado do nome do programa na janela Sobre e na página do projeto.
+
+### Alterado
+- A montagem do arquivo HTML confere a política de segurança de um jeito mais rigoroso e para com erro se
+  alguma coisa ficar de fora.
+
 ## [1.0.1] - 2026-10-27 · "Bibliotecas e página do projeto"
 
 Manutenção: nada muda no uso do simulador.

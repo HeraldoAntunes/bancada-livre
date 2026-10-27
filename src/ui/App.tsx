@@ -1,6 +1,6 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 import { useEffect, useMemo } from 'react'
-import { icPowered } from '../engine/ics'
+import { chipOf, icPowered } from '../engine/ics'
 import { propagationLevels, stepFilteredSim } from '../engine/propagation'
 import { simulate } from '../engine/simulate'
 import { useCircuit } from '../state/store'
@@ -24,12 +24,14 @@ export default function App() {
   const hasClock = components.some((c) => c.type === 'CLOCK' || c.type === 'COUNTER')
   const tab = useCircuit((s) => s.abaPaleta)
 
-  // Modo passo a passo (RF-05.5): a onda de propagação avança nível a nível.
+  // Modo passo a passo: a onda de propagação avança nível a nível.
   const passo = useCircuit((s) => s.passo)
   const stepMode = passo.ativo
   const stepIndex = passo.nivel
 
   const sim = useMemo(() => simulate(components, wires), [components, wires])
+  // primeiro CI sem VCC/GND: o aviso diz os pinos certos dele (14 e 7 ou 16 e 8)
+  const semEnergia = components.find((c) => c.type === 'IC' && !icPowered(c, sim.pins))
   const prop = useMemo(() => propagationLevels(components, wires), [components, wires])
   const shownSim = useMemo(
     () => (stepMode ? stepFilteredSim(sim, components, wires, prop.levels, stepIndex) : sim),
@@ -108,9 +110,10 @@ export default function App() {
           {components.length} componente{components.length === 1 ? '' : 's'} · {wires.length} fio
           {wires.length === 1 ? '' : 's'}
         </span>
-        {components.some((c) => c.type === 'IC' && !icPowered(c, sim.pins)) && (
+        {semEnergia && (
           <span className="warn">
-            <Icon name="raio" size={14} /> CI sem alimentação: ligue VCC (pino 14) ao nível 1 e GND (pino 7) ao nível 0
+            <Icon name="raio" size={14} /> {chipOf(semEnergia).id} sem alimentação: ligue VCC (pino{' '}
+            {chipOf(semEnergia).vcc}) ao nível 1 e GND (pino {chipOf(semEnergia).gnd}) ao nível 0
           </span>
         )}
         {sim.cycleComps.size > 0 && (

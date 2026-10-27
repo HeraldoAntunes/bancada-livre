@@ -165,7 +165,7 @@ export function Workbench({ sim, stepHighlight, levels }: WorkbenchProps) {
       if (drag.kind === 'move') {
         const isMoved = dragMeta.current.moved || Math.hypot(p.x - drag.sx, p.y - drag.sy) > 4
         if (isMoved) {
-          // um checkpoint por arrasto, antes do primeiro deslocamento (RF-07)
+          // um checkpoint por arrasto, antes do primeiro deslocamento
           if (!dragMeta.current.checkpointed) {
             checkpoint()
             dragMeta.current.checkpointed = true
@@ -191,7 +191,7 @@ export function Workbench({ sim, stepHighlight, levels }: WorkbenchProps) {
         const comp = el.getAttribute('data-comp')!
         const pin = el.getAttribute('data-pin')!
         const dir = el.getAttribute('data-dir') as 'in' | 'out'
-        // Só conecta saída→entrada (RF-04.2), em qualquer ordem de arrasto.
+        // Só conecta saída→entrada, em qualquer ordem de arrasto.
         if (dir !== drag.from.dir) {
           const out = drag.from.dir === 'out' ? drag.from : { comp, pin }
           const inn = drag.from.dir === 'in' ? drag.from : { comp, pin }

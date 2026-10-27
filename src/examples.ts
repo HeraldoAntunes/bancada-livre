@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Biblioteca de circuitos de exemplo graduada por nível (spec §4.8, v0.5).
+// Biblioteca de circuitos de exemplo graduada por nível.
 // Ids numéricos ('e1', 'f1') para o store realinhar o contador ao carregar.
 
 import type { CircuitComponent, ComponentType, GateType, Wire } from './engine/types'
@@ -380,7 +380,7 @@ export const EXAMPLES: Example[] = [
       W('f7', 'e7', 'out', 'e8', 'in'),
     ],
   },
-  // ---------- CIs (spec §4.10) ----------
+  // ---------- CIs ----------
   {
     // O ritual completo da primeira montagem: alimentar, ligar, testar.
     name: '7408: primeira ligação',

@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Tabela-verdade do circuito (spec §4.6): a mesma no painel lateral e na janela flutuante.
+// Tabela-verdade do circuito: a mesma no painel lateral e na janela flutuante.
 
 import { useEffect, useMemo, useState } from 'react'
 import { mintermExpression } from '../engine/expression'
@@ -111,7 +111,7 @@ export function TabelaDoCircuito() {
                 </tbody>
               </table>
             </div>
-            {/* expressão booleana por soma de mintermos (RF-06.4) */}
+            {/* expressão booleana por soma de mintermos */}
             {table.outputs.map((o, i) => {
               const expr = mintermExpression(table, i)
               return expr ? (

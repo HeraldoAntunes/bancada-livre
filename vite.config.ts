@@ -49,7 +49,7 @@ const avisoDeTerceiros = {
 
 // viteSingleFile embute JS e CSS no index.html: o build vira UM arquivo
 // autocontido que abre com dois cliques (file://), sem servidor — ideal
-// para distribuir aos alunos (RNF-01/RNF-02).
+// para distribuir aos alunos.
 export default defineConfig({
   plugins: [react(), iconeDaAba, viteSingleFile(), avisoDeTerceiros, politicaDeSeguranca],
   server: { port: 5173 },

@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Corpos SVG dos componentes — estilo skeuomórfico + portas ANSI (spec §8.1).
+// Corpos SVG dos componentes — estilo skeuomórfico + portas ANSI.
 
 import type { ChipDef } from '../engine/ics'
 import type { CorLed, GateType, Signal } from '../engine/types'
@@ -115,7 +115,7 @@ export function PushButtonBody({ pressed }: { pressed: boolean }) {
   )
 }
 
-/** CI DIP (14 ou 16 pinos): corpo preto, chanfro, ponto do pino 1 e numeração real (RF-10.2). */
+/** CI DIP (14 ou 16 pinos): corpo preto, chanfro, ponto do pino 1 e numeração real. */
 export function ChipBody({ def, powered }: { def: ChipDef; powered: boolean }) {
   const h = icHeight(def.pins)
   let faixaY = icPinY(1, def.pins) + IC_ROW_H / 2

@@ -1,8 +1,8 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Motor de simulação combinacional (spec §4.5, §6.1, §4.10).
+// Motor de simulação combinacional.
 // A ordenação topológica trabalha sobre UNIDADES: componentes comuns são uma
 // unidade; cada porta interna de um CI é uma unidade própria — encadear portas
-// do mesmo chip não dispara falso laço (RF-10.4).
+// do mesmo chip não dispara falso laço.
 
 import { evalGate } from './gates'
 import { chipOf, type ChipFunc, type ChipGate } from './ics'
@@ -181,7 +181,7 @@ export function simulate(
       const outs = powered ? func.evaluate(ins) : func.outputs.map(() => 'X' as Signal)
       func.outputs.forEach((n, i) => pins.set(pinKey(c.id, `p${n}`), outs[i]))
     } else if (gate) {
-      // porta interna de CI: só funciona com o chip alimentado (RF-10.3)
+      // porta interna de CI: só funciona com o chip alimentado
       const def = chipOf(c)
       const vcc = readInput(c.id, `p${def.vcc}`)
       const gnd = readInput(c.id, `p${def.gnd}`)

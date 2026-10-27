@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Avaliação ternária das portas lógicas (spec §3.2).
+// Avaliação ternária das portas lógicas.
 // Regra: valor já conhecido que determina a saída vence o X
 // (ex.: AND com uma entrada 0 → 0 mesmo com a outra X). Erro (E) sempre propaga.
 

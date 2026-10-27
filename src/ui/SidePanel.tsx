@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Painel direito: propriedades do item selecionado + tabelas-verdade (spec §4.6, §8).
+// Painel direito: propriedades do item selecionado + tabelas-verdade.
 
 import { gateExpression } from '../engine/gates'
 import type { SimResult } from '../engine/simulate'
@@ -21,7 +21,7 @@ function letters(n: number): string[] {
   return Array.from({ length: n }, (_, i) => String.fromCharCode(65 + i))
 }
 
-/** Tabela-verdade da porta selecionada (RF-06.1), com a linha atual destacada. */
+/** Tabela-verdade da porta selecionada, com a linha atual destacada. */
 function GateTable({ comp, sim }: { comp: CircuitComponent; sim: SimResult }) {
   if (!isGate(comp.type)) return null
   const n = inputCount(comp)

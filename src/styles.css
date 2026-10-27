@@ -145,6 +145,12 @@ body,
   margin-bottom: 2px;
 }
 
+/* bandeira ao lado do nome no Sobre: tamanho e cores originais, sem filtro */
+.bandeira-br {
+  vertical-align: 2px;
+  margin-left: 4px;
+}
+
 .about-version {
   color: #678;
   font-size: 13px;
@@ -929,7 +935,7 @@ table.tt {
   margin: 6px 0;
 }
 
-/* Barra agrupada por função (opção B): título pequeno em cima, botões com cara de botão embaixo */
+/* Barra agrupada por função: título pequeno em cima, botões com cara de botão embaixo */
 .brand {
   cursor: default;
   padding-right: 12px;

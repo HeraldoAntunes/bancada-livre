@@ -69,8 +69,8 @@ reinicia e `Esc` sai.
 ## 8. Zoom e vista
 
 A roda do mouse amplia no ponto do cursor, e arrastar o fundo move a bancada. Os botões do canto reduzem, voltam a
-100%, ampliam e **Ajustar** mostra todo o circuito o maior possível. `Ctrl` e `+`, `Ctrl` e `−` e `Ctrl+0` fazem o
-mesmo.
+100%, ampliam e **Ajustar** mostra todo o circuito o maior possível. No teclado, `Ctrl` e `+` amplia, `Ctrl` e `−`
+reduz e `Ctrl+0` faz o mesmo que **Ajustar**.
 
 ## 9. Salvar, abrir e exportar
 

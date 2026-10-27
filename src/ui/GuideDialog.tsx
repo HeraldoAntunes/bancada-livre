@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Guia de CIs (RF-10.5): datasheet didático — figura da pinagem (a "marcação"),
+// Guia de CIs: datasheet didático — figura da pinagem (a "marcação"),
 // função, portas internas, tabela-verdade, dicas de bancada e exemplo pronto.
 
 import { useEffect, useState } from 'react'

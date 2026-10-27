@@ -27,7 +27,7 @@ describe('simulate — propagação combinacional', () => {
     expect(simulate(comps, ws).pins.get(pinKey('l', 'in'))).toBe(1)
   })
 
-  it('fan-out: uma saída alimenta duas entradas (RF-04.3)', () => {
+  it('fan-out: uma saída alimenta duas entradas', () => {
     const comps = [
       comp('s', 'SWITCH', { state: 1 }),
       comp('l1', 'LED'),
@@ -58,7 +58,7 @@ describe('simulate — propagação combinacional', () => {
     expect(simulate(comps, ws).pins.get(pinKey('l', 'in'))).toBe(1)
   })
 
-  it('conflito: dois drivers na mesma entrada → E (RF-05.3)', () => {
+  it('conflito: dois drivers na mesma entrada → E', () => {
     const comps = [
       comp('a', 'SWITCH', { state: 1 }),
       comp('b', 'SWITCH', { state: 0 }),
@@ -72,7 +72,7 @@ describe('simulate — propagação combinacional', () => {
     expect(r.wires.get('w2')).toBe('E')
   })
 
-  it('conflito é detectado mesmo quando o pino alvo está em laço (auditoria #2)', () => {
+  it('conflito é detectado mesmo quando o pino alvo está em laço', () => {
     // a e b dirigem n.in0, que também é realimentado pelo próprio NOT
     const comps = [
       comp('a', 'SWITCH', { state: 1 }),
@@ -91,7 +91,7 @@ describe('simulate — propagação combinacional', () => {
     expect(r.wires.get('w3')).toBe('E')
   })
 
-  it('laço combinacional → E sem travar (RF-05.2)', () => {
+  it('laço combinacional → E sem travar', () => {
     // NOT realimentado nele mesmo
     const comps = [comp('n', 'NOT'), comp('l', 'LED')]
     const ws = [wire('w1', 'n', 'out', 'n', 'in0'), wire('w2', 'n', 'out', 'l', 'in')]

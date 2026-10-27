@@ -27,8 +27,10 @@ Os textos completos dessas licenças vão na pasta licencas, instalada junto com
 As ferramentas usadas só para montar e testar o programa (Vite, TypeScript, Vitest, ESLint e seus complementos)
 não vão para o arquivo do aluno. Elas estão listadas, com as licenças, no package-lock.json.
 
-Nenhum ícone, fonte ou imagem de terceiros é distribuído: os desenhos são próprios e as fontes de texto são as
-que já vêm no sistema de quem abre o programa.
+A única imagem de terceiros é a bandeira do Brasil (`src/assets/bandeira-brasil.svg`, na janela Sobre e no README):
+o arquivo `File:Flag_of_Brazil.svg` do Wikimedia Commons, sem alteração, de domínio público (símbolo nacional,
+usado conforme a Lei 5.700/1971). Os demais desenhos são próprios, e as fontes de texto são as que já vêm no
+sistema de quem abre o programa.
 
 ## Licença MIT: react, react-dom e scheduler
 

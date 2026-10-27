@@ -4,8 +4,12 @@
 
 import { useEffect } from 'react'
 import { version } from '../../package.json'
+import bandeira from '../assets/bandeira-brasil.svg?raw'
 import { Marca } from './Marca'
 import { SOBRE } from './sobre'
+
+// embutida como data URL, no padrão do Marca: o Sobre funciona sem rede
+const BANDEIRA = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(bandeira)}`
 
 export function AboutDialog({ onClose }: { onClose: () => void }) {
   useEffect(() => {
@@ -20,7 +24,8 @@ export function AboutDialog({ onClose }: { onClose: () => void }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Sobre o Bancada Livre">
         <h2>
-          <Marca size={32} /> Bancada Livre
+          <Marca size={32} /> Bancada Livre{' '}
+          <img className="bandeira-br" src={BANDEIRA} width={20} height={14} alt="Brasil" title="Feito no Brasil" />
         </h2>
         <p className="about-version">Versão {version} · 2026</p>
 

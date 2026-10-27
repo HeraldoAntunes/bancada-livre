@@ -1,6 +1,6 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Barra superior: marca, abas da paleta e botões agrupados por função (Arquivo, Editar, Aula),
-// com título em cada grupo, e a versão (abre o Sobre). Spec §8.
+// com título em cada grupo, e a versão (abre o Sobre).
 
 import { useRef, useState } from 'react'
 import { version } from '../../package.json'

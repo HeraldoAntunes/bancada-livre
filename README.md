@@ -1,7 +1,7 @@
 <!-- Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT -->
 <p align="center"><img src="docs/img/capa.png" alt="Bancada Livre: simulador livre e offline de lógica digital" width="820"></p>
 
-# <img src="src/assets/icone.svg" alt="" width="44" align="top"> Bancada Livre
+# <img src="src/assets/icone.svg" alt="" width="44" align="top"> Bancada Livre <img src="docs/img/bandeira-brasil.svg" alt="Brasil" title="Feito no Brasil" width="20" align="top">
 
 [![Testes](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml/badge.svg)](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/HeraldoAntunes/bancada-livre/badge)](https://scorecard.dev/viewer/?uri=github.com/HeraldoAntunes/bancada-livre)
@@ -23,13 +23,13 @@ booleana do circuito inteiro.
   &nbsp;·&nbsp; <a href="#perguntas-frequentes">Perguntas frequentes</a>
 </p>
 
-### ⬇ Qual arquivo baixar? (versão 1.0.1)
+### ⬇ Qual arquivo baixar? (versão 1.0.2)
 
 | Para quê | Baixar |
 |---|---|
-| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-1.0.1.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.1/Instalar-BancadaLivre-1.0.1.exe) |
-| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-1.0.1-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.1/BancadaLivre-1.0.1-portatil.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-1.0.1.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.1/BancadaLivre-1.0.1.html) |
+| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-1.0.2.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.2/Instalar-BancadaLivre-1.0.2.exe) |
+| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-1.0.2-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.2/BancadaLivre-1.0.2-portatil.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-1.0.2.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.2/BancadaLivre-1.0.2.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na
@@ -110,7 +110,7 @@ passa a ocupar duas linhas.
 |---|---|---|---|
 | `Ctrl+Z` / `Ctrl+Y` | desfazer / refazer | `Delete` | apagar o item selecionado |
 | `E` | espelhar o componente selecionado | `R` | girar 90 graus |
-| `Ctrl` e `+` / `Ctrl` e `−` | ampliar / reduzir | `Ctrl+0` | voltar a 100% |
+| `Ctrl` e `+` / `Ctrl` e `−` | ampliar / reduzir | `Ctrl+0` | mostrar todo o circuito (Ajustar) |
 | `→` ou `Espaço` / `←` (passo a passo) | próximo nível / nível anterior | `Home` / `Esc` (passo a passo) | reiniciar / sair |
 
 Duplo clique num componente abre a janela de edição dele.

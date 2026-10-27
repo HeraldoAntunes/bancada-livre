@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Decodificação do display de 7 segmentos (RF-03).
+// Decodificação do display de 7 segmentos.
 // Segmentos na ordem a, b, c, d, e, f, g:
 //
 //    ─a─

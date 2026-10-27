@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Paleta lateral: itens da aba ativa (ENTRADAS / PORTAS / SAÍDAS / CIs) — spec §8, §4.10.
+// Paleta lateral: itens da aba ativa (ENTRADAS / PORTAS / SAÍDAS / CIs).
 
 import { CHIPS, type ChipId } from '../engine/ics'
 import { entradaUnica, isGate, type ComponentType } from '../engine/types'

@@ -35,7 +35,7 @@ import {
   SwitchBody,
 } from './symbols'
 
-/** Tooltip da porta: nome, expressão e mini tabela-verdade (RF-01.3). */
+/** Tooltip da porta: nome, expressão e mini tabela-verdade. */
 function gateTooltip(c: CircuitComponent): string {
   if (!isGate(c.type)) return ''
   const head = `${c.type}: ${gateExpression(c.type)}`
@@ -49,7 +49,7 @@ interface Props {
   comp: CircuitComponent
   sim: SimResult
   selected: boolean
-  /** Mostrar o nome do tipo sob as portas (RF-01.4). */
+  /** Mostrar o nome do tipo sob as portas. */
   showNames: boolean
   /** true quando o componente está no nível atual da onda (modo passo a passo). */
   waveHighlight: boolean
@@ -74,7 +74,7 @@ export function ComponentView({
   const editar = useCircuit((s) => s.editar)
   const g = geometryOf(comp)
 
-  // Texto sob o componente: portas mostram o TIPO (muleta didática, RF-01.4)
+  // Texto sob o componente: portas mostram o TIPO (muleta didática)
   // combinado com o rótulo próprio, quando houver; demais mostram só o rótulo.
   // LABEL desenha o texto no próprio corpo — sem legenda embaixo.
   const caption =
@@ -206,7 +206,7 @@ export function ComponentView({
           style={{ cursor: 'pointer' }}
           onPointerDown={(e) => {
             e.stopPropagation()
-            // captura: soltar fora da janela ainda libera o botão (RF-02)
+            // captura: soltar fora da janela ainda libera o botão
             try {
               ;(e.currentTarget as Element).setPointerCapture(e.pointerId)
             } catch {
@@ -225,7 +225,7 @@ export function ComponentView({
           </text>
         ))}
 
-      {/* pinos (conectores em nós — RF-04.1) */}
+      {/* pinos (conectores em nós) */}
       {g.pins.map((p) => (
         <circle
           key={p.name}

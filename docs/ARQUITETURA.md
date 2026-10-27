@@ -3,17 +3,23 @@
 
 Visão rápida do código, para quem vai ler ou contribuir.
 
-## Três camadas
+## Pastas do código
 
 ```text
 src/
 ├── engine/   núcleo da simulação, sem interface: tipos, portas, simulação, tabela-verdade, display, CIs
 ├── state/    estado do programa (zustand): circuito, desfazer e refazer, clock, salvamento automático
 ├── ui/       interface em React e SVG: barra, paleta, bancada, fios, painéis, Sobre, Guia de CIs, ícones
-├── build/    usado só no build: a política de segurança (CSP) injetada no HTML
+├── build/    usado na montagem: a política de segurança (CSP) injetada no HTML e o ícone da página
+├── assets/   o ícone do programa em SVG
+├── main.tsx  ponto de entrada: monta a tela e expõe os comandos em window.bancadaLivre
+├── styles.css  estilos da interface
 ├── comandos.ts  cada ação do programa como comando com nome (a tela e os agentes de IA usam o mesmo caminho)
 └── examples.ts  os circuitos de exemplo
 ```
+
+Fora de `src/`, a pasta `instalador/` monta a versão para Windows: um lançador em Python (empacotado pelo
+PyInstaller) abre o HTML numa janela própria, e o Inno Setup gera o instalador.
 
 A única fronteira obrigatória é a do **núcleo**: `src/engine/` não importa nada da interface e é testado sozinho.
 A interface lê o estado, chama o núcleo e desenha o resultado.
@@ -46,7 +52,9 @@ Um CI só funciona com VCC em 1 e GND em 0; sem isso, todas as saídas ficam em 
 }
 ```
 
-Desde a 1.0, cada componente pode trazer `espelhado` (true) e `giro` (90, 180 ou 270). São opcionais: arquivo
+Desde a 1.0, cada componente pode trazer `espelhado` (true) e `giro` (90, 180 ou 270), e os componentes novos
+trazem os seus campos: `cor` (LED), `bits` (banco de chaves, barra de LEDs e contador), `estados` (posições do banco de chaves) e
+`contagem` (contador). São opcionais: arquivo
 sem eles abre como antes, e valores fora disso são recusados.
 
 O campo `version` é o compromisso com quem já tem arquivos salvos: mudança que impeça abrir circuitos antigos só
@@ -57,6 +65,7 @@ estrutura é validada antes de carregar.
 
 - `npm run build` gera `dist/index.html`, um único arquivo com o JavaScript, o CSS, a política de segurança e o
   aviso das licenças de terceiros embutidos.
-- `npm test` roda os testes do núcleo, do estado e do projeto (versão igual em todos os lugares, cabeçalhos,
-  componentes de terceiros, ausência de emoji na interface, workflows fixados por hash).
+- `npm test` roda os testes do núcleo, do estado, da interface, dos comandos, da política de segurança e do
+  projeto (versão igual em todos os lugares, cabeçalhos, componentes de terceiros, ausência de emoji na interface,
+  workflows fixados por hash). O lançador do Windows tem testes próprios em Python (`instalador/test_lancador.py`).
 - `npm run lint` roda o ESLint sem tolerar avisos.

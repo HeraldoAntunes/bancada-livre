@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Barreira de erro (RNF-08): um erro inesperado na UI não pode perder o
+// Barreira de erro: um erro inesperado na UI não pode perder o
 // trabalho do aluno — o circuito segue no autosave e pode ser baixado daqui.
 
 import { Component, type ReactNode } from 'react'
@@ -17,10 +17,12 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   }
 
   private download = () => {
+    // se nem isso for possível, o salvamento automático ainda cobre a recarga
     try {
-      executar('arquivo.salvar', { arquivo: 'circuito-recuperado.json' })
-    } catch {
-      /* se nem isso for possível, o autosave ainda cobre o reload */
+      const r = executar('arquivo.salvar', { arquivo: 'circuito-recuperado.json' })
+      if (!r.ok) console.warn('Bancada Livre: não foi possível baixar o circuito.', r.erro)
+    } catch (e) {
+      console.warn('Bancada Livre: não foi possível baixar o circuito.', e)
     }
   }
 

@@ -34,7 +34,7 @@ const ws = [
   wire('w6', 'g', 'out', 'c', 'in'),
 ]
 
-describe('propagationLevels (RF-05.5)', () => {
+describe('propagationLevels', () => {
   it('fontes = 0, portas = 1, saídas = 2', () => {
     const { levels, maxLevel } = propagationLevels(comps, ws)
     expect(levels.get('a')).toBe(0)

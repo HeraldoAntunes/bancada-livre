@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Fio na bancada: estado comunicado por cor + espessura (spec §3.1, RNF-04).
+// Fio na bancada: estado comunicado por cor + espessura.
 
 import type { Signal } from '../engine/types'
 

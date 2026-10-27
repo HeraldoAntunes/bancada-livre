@@ -1,10 +1,10 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Estado da aplicação (zustand) — spec §6 camada 2.
-// Histórico de undo/redo por snapshots (RF-07); clock com tempo virtual (RF-02).
+// Estado da aplicação (zustand).
+// Histórico de undo/redo por snapshots; clock com tempo virtual.
 
 import { create } from 'zustand'
 import { CHIPS, type ChipId } from '../engine/ics'
-import { allOutputPins } from '../engine/pins'
+import { allInputPins, allOutputPins } from '../engine/pins'
 import {
   bitsDe,
   bitsPermitidos,
@@ -48,18 +48,36 @@ const VALID_TYPES = new Set<string>([...SOURCE_TYPES, ...GATE_TYPES, ...SINK_TYP
  */
 function validateCircuit(data: Circuit): string | null {
   const compIds = new Set<string>()
+  const porId = new Map<string, CircuitComponent>()
   for (const c of data.components) {
     if (
       !c ||
       typeof c !== 'object' ||
       typeof c.id !== 'string' ||
       !VALID_TYPES.has(c.type) ||
-      typeof c.x !== 'number' ||
-      typeof c.y !== 'number'
+      !Number.isFinite(c.x) ||
+      !Number.isFinite(c.y)
     ) {
       return 'Arquivo inválido: componente malformado.'
     }
     if (compIds.has(c.id)) return `Arquivo inválido: id de componente duplicado (${c.id}).`
+    // rótulo é desenhado como texto: outro tipo quebraria a tela; o limite é o mesmo do comando
+    if (c.label !== undefined && !(typeof c.label === 'string' && c.label.length <= (c.type === 'LABEL' ? 60 : 8))) {
+      return `Arquivo inválido: rótulo malformado (${c.id}).`
+    }
+    if (c.state !== undefined && c.state !== 0 && c.state !== 1) {
+      return `Arquivo inválido: estado malformado (${c.id}).`
+    }
+    if (c.inputs !== undefined && !(Number.isInteger(c.inputs) && c.inputs >= 2 && c.inputs <= 8)) {
+      return `Arquivo inválido: número de entradas fora da faixa (${c.id}).`
+    }
+    // frequência zero ou absurda pararia o clock com contas infinitas
+    if (c.freq !== undefined && !(Number.isFinite(c.freq) && c.freq >= 0.5 && c.freq <= 10)) {
+      return `Arquivo inválido: frequência fora da faixa (${c.id}).`
+    }
+    if (c.mode !== undefined && !['bcd', 'hex', 'raw'].includes(c.mode)) {
+      return `Arquivo inválido: modo do display desconhecido (${c.id}).`
+    }
     // orientação (1.0): opcional; quando vem, só valores conhecidos
     if (c.espelhado !== undefined && typeof c.espelhado !== 'boolean') {
       return `Arquivo inválido: espelhamento malformado (${c.id}).`
@@ -89,10 +107,12 @@ function validateCircuit(data: Circuit): string | null {
     ) {
       return `Arquivo inválido: contagem fora da faixa (${c.id}).`
     }
-    if (c.type === 'IC' && !(typeof c.chip === 'string' && c.chip in CHIPS)) {
+    // hasOwnProperty: o operador `in` aceitaria nomes herdados como "constructor"
+    if (c.type === 'IC' && !(typeof c.chip === 'string' && Object.prototype.hasOwnProperty.call(CHIPS, c.chip))) {
       return `Arquivo inválido: CI com chip desconhecido (${c.id}).`
     }
     compIds.add(c.id)
+    porId.set(c.id, c)
   }
   const wireIds = new Set<string>()
   for (const w of data.wires) {
@@ -108,6 +128,13 @@ function validateCircuit(data: Circuit): string | null {
       if (!compIds.has(end.comp)) {
         return `Arquivo inválido: fio ${w.id} aponta para componente inexistente.`
       }
+    }
+    // o fio sai de um pino de saída e chega num pino de entrada que existem no componente
+    if (
+      !allOutputPins(porId.get(w.from.comp)!).includes(w.from.pin) ||
+      !allInputPins(porId.get(w.to.comp)!).includes(w.to.pin)
+    ) {
+      return `Arquivo inválido: fio ${w.id} ligado a um pino que não existe.`
     }
   }
   return null
@@ -153,22 +180,41 @@ const HISTORY_MAX = 50
 // qualquer circuito de aula e barram arquivo errado ou malicioso antes do JSON.parse.
 export const MAX_JSON_CHARS = 2_000_000
 const AUTOSAVE_KEY = 'simulador-portas:autosave'
+/** Onde fica guardado um salvamento que não pôde ser aberto, para não ser sobrescrito na primeira edição. */
+export const AUTOSAVE_RECUSADO_KEY = 'simulador-portas:autosave-recusado'
 const SHOW_NAMES_KEY = 'simulador-portas:nomes'
 
-/** Restaura o circuito salvo automaticamente (RF-08, v0.5). */
+/** Restaura o circuito salvo automaticamente. */
 function loadAutosave(): Snapshot {
   const empty: Snapshot = { components: [], wires: [] }
+  let raw: string | null = null
   try {
     if (typeof localStorage === 'undefined') return empty
-    const raw = localStorage.getItem(AUTOSAVE_KEY)
+    raw = localStorage.getItem(AUTOSAVE_KEY)
     if (!raw) return empty
     const data = JSON.parse(raw) as Circuit
-    if (!Array.isArray(data.components) || !Array.isArray(data.wires)) return empty
-    if (validateCircuit(data) !== null) return empty
-    bumpCounter([...data.components.map((c) => c.id), ...data.wires.map((w) => w.id)])
-    return { components: data.components, wires: data.wires }
-  } catch {
-    return empty
+    const err =
+      !Array.isArray(data.components) || !Array.isArray(data.wires)
+        ? 'faltam "components" e "wires"'
+        : validateCircuit(data)
+    if (err === null) {
+      bumpCounter([...data.components.map((c) => c.id), ...data.wires.map((w) => w.id)])
+      return { components: data.components, wires: data.wires }
+    }
+    guardarRecusado(raw, err)
+  } catch (e) {
+    if (raw) guardarRecusado(raw, String(e))
+  }
+  return empty
+}
+
+/** Salvamento automático que não abriu: guarda à parte e avisa no console, em vez de perder em silêncio. */
+function guardarRecusado(raw: string, motivo: string) {
+  console.warn(`Bancada Livre: o circuito salvo não pôde ser aberto (${motivo}); cópia guardada em ${AUTOSAVE_RECUSADO_KEY}.`)
+  try {
+    localStorage.setItem(AUTOSAVE_RECUSADO_KEY, raw)
+  } catch (e) {
+    console.warn('Bancada Livre: não foi possível guardar a cópia do circuito salvo.', e)
   }
 }
 
@@ -190,7 +236,7 @@ export interface CircuitStore {
   future: Snapshot[]
   clockRunning: boolean
   clockMs: number
-  /** Mostrar o nome do tipo sob cada porta na bancada (RF-01.4). */
+  /** Mostrar o nome do tipo sob cada porta na bancada. */
   showNames: boolean
   /** Conta os circuitos carregados (exemplo ou arquivo): a bancada se enquadra a cada um. */
   carregamentos: number
@@ -476,7 +522,7 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
     }))
   },
 
-  // Uma entrada aceita apenas um fio (RF-04.5): fio novo substitui o existente.
+  // Uma entrada aceita apenas um fio: fio novo substitui o existente.
   connect: (from, to) => {
     get().checkpoint()
     set((s) => {
@@ -511,7 +557,7 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   },
 
   // Aplica apenas em SWITCH e no banco de chaves (chave `id:outN`): PUSH_BUTTON é
-  // momentâneo (RF-02) e não pode ficar travado em 1 por um clique na tabela-verdade.
+  // momentâneo e não pode ficar travado em 1 por um clique na tabela-verdade.
   applyInputs: (states) =>
     set((s) => ({
       components: s.components.map((c) => {
@@ -556,7 +602,7 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
       return changed ? { clockMs, components } : { clockMs }
     }),
 
-  // Avança meio período do clock mais rápido (modo passo, RF-02).
+  // Avança meio período do clock mais rápido (modo passo).
   stepClock: () => {
     // meio período do CLOCK mais rápido, ou um período inteiro do contador mais rápido (um passo da contagem)
     const passos = get().components.flatMap((c) =>
@@ -604,10 +650,11 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   },
 }))
 
-// Salvamento automático (RF-08, v0.5): grava o circuito no localStorage com
+// Salvamento automático: grava o circuito no localStorage com
 // debounce a cada mudança estrutural — fechar a aba não perde o trabalho.
 if (typeof window !== 'undefined') {
   let timer: number | undefined
+  let avisou = false
   let prev: Snapshot = { components: initial.components, wires: initial.wires }
   useCircuit.subscribe((s) => {
     if (s.components === prev.components && s.wires === prev.wires) return
@@ -619,8 +666,10 @@ if (typeof window !== 'undefined') {
           AUTOSAVE_KEY,
           JSON.stringify({ version: 1, components: prev.components, wires: prev.wires }),
         )
-      } catch {
-        /* modo privado/quota cheia: segue sem autosave */
+      } catch (e) {
+        // modo privado ou cota cheia: segue sem salvamento automático, com um aviso só
+        if (!avisou) console.warn('Bancada Livre: o salvamento automático falhou; use Salvar para guardar o circuito.', e)
+        avisou = true
       }
     }, 400)
   })

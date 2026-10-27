@@ -77,7 +77,7 @@ const cases: Record<GateType, Case[]> = {
   ],
 }
 
-describe('evalGate — semântica ternária (spec §3.2)', () => {
+describe('evalGate — semântica ternária', () => {
   for (const [gate, list] of Object.entries(cases) as [GateType, Case[]][]) {
     describe(gate, () => {
       for (const [ins, expected] of list) {

@@ -27,7 +27,7 @@ function powerWires(ic: string, chipId: keyof typeof CHIPS): Wire[] {
   ]
 }
 
-describe('definições dos chips (RF-10.1/10.2)', () => {
+describe('definições dos chips', () => {
   it('10 chips; pinos sem sobreposição e todos com papel definido', () => {
     expect(CHIP_IDS).toHaveLength(10)
     for (const id of CHIP_IDS) {
@@ -63,7 +63,7 @@ describe('definições dos chips (RF-10.1/10.2)', () => {
   })
 })
 
-describe('simulação de CIs (RF-10.3/10.4)', () => {
+describe('simulação de CIs', () => {
   const base = [
     comp('hi', 'LEVEL_HIGH'),
     comp('lo', 'LEVEL_LOW'),
@@ -121,7 +121,7 @@ describe('simulação de CIs (RF-10.3/10.4)', () => {
     expect(simulate(comps, ws).pins.get(pinKey('ic', 'p1'))).toBe(1) // NOR(0,0)=1
   })
 
-  it('encadear portas do MESMO chip não gera falso laço (RF-10.4)', () => {
+  it('encadear portas do MESMO chip não gera falso laço', () => {
     // ¬A na porta 1 → entrada da porta 3 (NAND(¬A,¬A) = A)
     const comps = [
       comp('hi', 'LEVEL_HIGH'),

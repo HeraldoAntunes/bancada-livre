@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Exporta a bancada (SVG) como imagem PNG (RF-08): o circuito inteiro em tamanho real, seja qual for o
+// Exporta a bancada (SVG) como imagem PNG: o circuito inteiro em tamanho real, seja qual for o
 // zoom da tela (ver vistaDeExportacao).
 import { useCircuit } from '../state/store'
 import { limitesDosComponentes, vistaDeExportacao } from './vista'

@@ -232,7 +232,7 @@ describe('exemplos — nível Avançado', () => {
   })
 })
 
-describe('exemplos — nível CIs (spec §4.10)', () => {
+describe('exemplos — nível CIs', () => {
   it('7408: primeira ligação faz AND', () => {
     const t = tableOf('7408: primeira ligação')
     for (const r of t.rows) expect(r.outputs[0]).toBe(r.inputs[0] & r.inputs[1])

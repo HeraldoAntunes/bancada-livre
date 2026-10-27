@@ -2,7 +2,7 @@
 # Monta o HTML único, o executável (PyInstaller) e o instalador (Inno Setup) do Bancada Livre, verifica no
 # Microsoft Defender e escreve pacote\SHA256SUMS.txt.  Uso:  powershell -ExecutionPolicy Bypass -File instalador\build.ps1
 # A versão vem só do package.json: daqui ela vai para o .exe (versao.txt gerado) e para o instalador (/DAppVer).
-# Tudo sai na pasta pacote\ (ignorada pelo Git). Build de distribuição só com ordem do professor.
+# Tudo sai na pasta pacote\ (ignorada pelo Git).
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path $PSScriptRoot -Parent
 Set-Location $raiz

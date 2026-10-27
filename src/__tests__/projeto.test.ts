@@ -151,7 +151,7 @@ describe('GitHub Actions', () => {
     eager: true,
   }) as Record<string, string>
 
-  it('existem os workflows combinados', () => {
+  it('existem os workflows de testes, CodeQL, Scorecard e release', () => {
     const nomes = Object.keys(workflows).map((c) => c.split('/').pop())
     expect(nomes.sort()).toEqual(['assinar-release.yml', 'codeql.yml', 'scorecard.yml', 'testes.yml'])
   })
@@ -177,8 +177,14 @@ describe('nome do programa igual em todos os lugares', () => {
     expect(pkg.name).toBe('bancada-livre')
     expect(citation).toMatch(/^title: "Bancada Livre/m)
     expect(indexHtml).toMatch(/<title>Bancada Livre<\/title>/)
-    expect(readme).toMatch(/^# (<img [^>]*> )?Bancada Livre$/m)
+    expect(readme).toMatch(/^# (<img [^>]*> )?Bancada Livre( <img [^>]*bandeira-brasil[^>]*>)?$/m)
     expect(SOBRE.nome).toBe('Bancada Livre')
+  })
+
+  it('a bandeira do Sobre vai embutida, sem pedir nada à rede', () => {
+    expect(sobreFonte).toContain("from '../assets/bandeira-brasil.svg?raw'")
+    expect(sobreFonte).toMatch(/alt="Brasil"/)
+    expect(sobreFonte).not.toMatch(/https?:\/\//)
   })
 
   it('o nome antigo não sobrou nos textos públicos', () => {
@@ -264,7 +270,7 @@ describe('controles do CLOCK no próprio CLOCK', () => {
   })
 })
 
-describe('barra superior agrupada por função (opção B)', () => {
+describe('barra superior agrupada por função', () => {
   const barra = Object.values(
     import.meta.glob('../ui/TopBar.tsx', { query: '?raw', import: 'default', eager: true }),
   )[0] as string

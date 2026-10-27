@@ -1,7 +1,7 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Política de segurança (CSP) que o build injeta no HTML único.
 import { describe, expect, it } from 'vitest'
-import { comCsp } from '../csp'
+import { blocosScript, comCsp } from '../csp'
 
 const html = '<!doctype html>\n<html><head><meta charset="UTF-8" />\n<script type="module">console.log(1)</script></head><body></body></html>'
 
@@ -40,6 +40,22 @@ describe('CSP do HTML único', async () => {
 
   it('para o build se algum <script> escapar da busca', async () => {
     await expect(comCsp(html.replace('</head>', '<script>sem fechamento</head>'))).rejects.toThrow(/não reconheceu/)
+  })
+
+  it('reconhece fechamento com quebra de linha e texto antes do ">"', async () => {
+    const variante = html.replace('</script>', '</script\t\n bar>')
+    const politica = (await comCsp(variante)).match(/content="([^"]+)"/)?.[1] ?? ''
+    expect(politica).toContain(`'sha256-${await sha256('console.log(1)')}'`)
+  })
+
+  it('não confunde "<script" dentro do código com uma tag', () => {
+    const variante = html.replace('console.log(1)', 'const t = "<script"; const s = "<scripts>"')
+    expect(blocosScript(variante)).toHaveLength(1)
+    expect(blocosScript('<p><scripts>x</scripts></p>')).toHaveLength(0)
+  })
+
+  it('para o build se o HTML não tiver <meta charset>', async () => {
+    await expect(comCsp(html.replace('<meta charset="UTF-8" />', ''))).rejects.toThrow(/charset/)
   })
 
   it('não deixa nada sair nem entrar pela rede', () => {

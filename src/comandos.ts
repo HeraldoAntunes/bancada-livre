@@ -91,7 +91,7 @@ function validar(params: Record<string, Param>, p: Record<string, unknown>): str
   return null
 }
 
-/** Executa um comando pelo nome. Nunca lança: erro volta como { ok: false, erro }. */
+/** Executa um comando pelo nome. Erro de uso volta como { ok: false, erro }; defeito inesperado do programa é relançado. */
 export function executar(nome: string, params: Record<string, unknown> = {}): Resultado {
   const c = REGISTRO.get(nome)
   if (!c) return { ok: false, erro: `comando desconhecido: "${nome}" (veja listar())` }

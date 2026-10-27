@@ -148,7 +148,7 @@ export function pinDirection(c: CircuitComponent, pin: string): { x: number; y: 
 }
 
 /**
- * Curva Bézier suave entre dois pinos (spec §3.1). d1 e d2 dizem para onde o fio sai de cada pino (padrão:
+ * Curva Bézier suave entre dois pinos. d1 e d2 dizem para onde o fio sai de cada pino (padrão:
  * da saída para a direita e da entrada para a esquerda); componentes espelhados ou girados mudam isso.
  */
 export function wirePath(

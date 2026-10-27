@@ -15,8 +15,8 @@ export const SOBRE = {
     'Feito com apoio de inteligência artificial (Claude, da Anthropic), usada como ferramenta. ' +
     'A ideia, os requisitos, as decisões e a revisão de cada versão são do autor.',
   terceiros:
-    'Usa as bibliotecas React e zustand, ambas com licença MIT. O texto das licenças vai no fim ' +
-    'deste arquivo HTML.',
+    'Usa as bibliotecas React e zustand, ambas com licença MIT, e o desenho da bandeira do Brasil, de domínio ' +
+    'público (Wikimedia Commons). O texto das licenças vai no fim deste arquivo HTML.',
   tecnologias: 'TypeScript · React 18 · SVG · Vite · zustand · Vitest',
   marcas:
     'As marcas citadas pertencem aos seus donos; o Bancada Livre é um projeto ' +

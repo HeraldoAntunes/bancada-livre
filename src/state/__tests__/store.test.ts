@@ -2,6 +2,7 @@
 // Testes do store: round-trip JSON, undo/redo, regras de conexão e clock.
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { EXAMPLES } from '../../examples'
 import { MAX_JSON_CHARS, useCircuit } from '../store'
 
 const st = () => useCircuit.getState()
@@ -28,7 +29,7 @@ function buildInverter() {
   return { sw, not, led }
 }
 
-describe('round-trip JSON (RF-08)', () => {
+describe('round-trip JSON', () => {
   it('salvar → carregar reproduz componentes e fios idênticos', () => {
     buildInverter()
     const json = st().toJSON()
@@ -59,7 +60,7 @@ describe('round-trip JSON (RF-08)', () => {
     expect(st().components).toHaveLength(3)
   })
 
-  it('fio sem from/to ou apontando para componente inexistente é rejeitado (auditoria #1)', () => {
+  it('fio sem from/to ou apontando para componente inexistente é rejeitado', () => {
     buildInverter()
     const depth = st().past.length
     expect(st().loadJSON('{"components":[],"wires":[{"id":"w1"}]}')).toMatch(/malformado/)
@@ -86,7 +87,7 @@ describe('round-trip JSON (RF-08)', () => {
   })
 })
 
-describe('undo/redo (RF-07)', () => {
+describe('undo/redo', () => {
   it('desfaz e refaz inserção e ligação', () => {
     buildInverter()
     expect(st().wires).toHaveLength(2)
@@ -139,7 +140,7 @@ describe('undo/redo (RF-07)', () => {
     expect(st().components[0].label).not.toBe('ABC')
   })
 
-  it('coalescência expira após pausa — sessões distintas geram undos distintos (auditoria #3)', () => {
+  it('coalescência expira após pausa — sessões distintas geram undos distintos', () => {
     vi.useFakeTimers()
     try {
       st().addComponent('AND', 0, 0)
@@ -157,7 +158,7 @@ describe('undo/redo (RF-07)', () => {
     }
   })
 
-  it('deleção com seleção órfã não polui o histórico (auditoria #11)', () => {
+  it('deleção com seleção órfã não polui o histórico', () => {
     st().addComponent('SWITCH', 0, 0)
     st().addComponent('AND', 100, 0)
     const [sw, and] = st().components
@@ -175,7 +176,7 @@ describe('undo/redo (RF-07)', () => {
   })
 })
 
-describe('regras de conexão (RF-04.5)', () => {
+describe('regras de conexão', () => {
   it('entrada aceita um único fio: novo substitui o antigo', () => {
     st().addComponent('SWITCH', 0, 0)
     st().addComponent('SWITCH', 0, 50)
@@ -207,7 +208,7 @@ describe('regras de conexão (RF-04.5)', () => {
   })
 })
 
-describe('rótulos e aplicação de entradas (auditoria #7 e #10)', () => {
+describe('rótulos e aplicação de entradas', () => {
   it('rótulo automático não duplica após deleção', () => {
     st().addComponent('SWITCH', 0, 0) // A
     st().addComponent('SWITCH', 0, 50) // B
@@ -218,7 +219,7 @@ describe('rótulos e aplicação de entradas (auditoria #7 e #10)', () => {
     expect(new Set(labels).size).toBe(labels.length)
   })
 
-  it('applyInputs não trava PUSH_BUTTON em 1 (RF-02)', () => {
+  it('applyInputs não trava PUSH_BUTTON em 1', () => {
     st().addComponent('SWITCH', 0, 0)
     st().addComponent('PUSH_BUTTON', 0, 50)
     const [sw, pb] = st().components
@@ -228,7 +229,7 @@ describe('rótulos e aplicação de entradas (auditoria #7 e #10)', () => {
   })
 })
 
-describe('clock (RF-02)', () => {
+describe('clock', () => {
   it('tickClocks alterna o estado a cada meio período', () => {
     st().addComponent('CLOCK', 0, 0)
     const states: (0 | 1 | undefined)[] = []
@@ -350,5 +351,48 @@ describe('espelhar e girar', () => {
     expect(st().loadJSON(JSON.stringify(ruim))).toMatch(/inválido/)
     const ruim2 = { version: 1, components: [{ id: 'a', type: 'LED', x: 0, y: 0, espelhado: 'sim' }], wires: [] }
     expect(st().loadJSON(JSON.stringify(ruim2))).toMatch(/inválido/)
+  })
+})
+
+describe('validação do arquivo aberto', () => {
+  const sw = { id: 'a', type: 'SWITCH', x: 0, y: 0 }
+  const led = { id: 'b', type: 'LED', x: 100, y: 0 }
+  const abrir = (components: object[], wires: object[] = []) =>
+    st().loadJSON(JSON.stringify({ version: 1, components, wires }))
+
+  it('abre todos os exemplos sem recusa', () => {
+    for (const ex of EXAMPLES) {
+      expect(abrir(ex.components, ex.wires), ex.name).toBeNull()
+    }
+  })
+
+  it('recusa chip com nome herdado do objeto', () => {
+    for (const chip of ['constructor', 'toString', '__proto__']) {
+      expect(abrir([{ id: 'c', type: 'IC', chip, x: 0, y: 0 }])).toMatch(/chip desconhecido/)
+    }
+  })
+
+  it('recusa rótulo que não é texto ou é comprido demais', () => {
+    expect(abrir([{ ...sw, label: { a: 1 } }])).toMatch(/rótulo/)
+    expect(abrir([{ ...sw, label: 'x'.repeat(9) }])).toMatch(/rótulo/)
+    expect(abrir([{ id: 't', type: 'LABEL', x: 0, y: 0, label: 'x'.repeat(60) }])).toBeNull()
+  })
+
+  it('recusa números fora da faixa', () => {
+    expect(abrir([{ id: 'g', type: 'AND', x: 0, y: 0, inputs: 1e7 }])).toMatch(/entradas/)
+    expect(abrir([{ id: 'k', type: 'CLOCK', x: 0, y: 0, freq: 0 }])).toMatch(/frequência/)
+    expect(abrir([{ id: 'k', type: 'CLOCK', x: 0, y: 0, freq: '1' }])).toMatch(/frequência/)
+    expect(abrir([{ ...sw, state: 2 }])).toMatch(/estado/)
+    expect(abrir([{ id: 'd', type: 'DISPLAY', x: 0, y: 0, mode: 'oct' }])).toMatch(/modo/)
+    expect(st().loadJSON('{"version":1,"components":[{"id":"a","type":"SWITCH","x":1e999,"y":0}],"wires":[]}')).toMatch(
+      /malformado/,
+    )
+  })
+
+  it('recusa fio ligado a pino que não existe ou no sentido errado', () => {
+    const fio = (from: object, to: object) => [{ id: 'w', from, to }]
+    expect(abrir([sw, led], fio({ comp: 'a', pin: 'out' }, { comp: 'b', pin: 'in' }))).toBeNull()
+    expect(abrir([sw, led], fio({ comp: 'a', pin: 'out' }, { comp: 'b', pin: 'in7' }))).toMatch(/pino/)
+    expect(abrir([sw, led], fio({ comp: 'b', pin: 'in' }, { comp: 'a', pin: 'out' }))).toMatch(/pino/)
   })
 })

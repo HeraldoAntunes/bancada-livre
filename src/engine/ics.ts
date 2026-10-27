@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// CIs didáticos da série 74xx (spec §4.10) — definições com pinagem REAL.
+// CIs didáticos da série 74xx — definições com pinagem REAL.
 // A pinagem é a fonte da verdade: vem dos datasheets (vista superior, pino 1
 // à esquerda do chanfro, numeração anti-horária).
 // Dois tipos de chip: de PORTAS (coleção de portas independentes) e de FUNÇÃO
@@ -312,7 +312,7 @@ export function chipOf(c: CircuitComponent): ChipDef {
   return CHIPS[(c.chip ?? '7400') as ChipId] ?? CHIPS['7400']
 }
 
-/** Um CI está alimentado quando VCC = 1 e GND = 0 (RF-10.3). */
+/** Um CI está alimentado quando VCC = 1 e GND = 0. */
 export function icPowered(c: CircuitComponent, pins: Map<string, Signal>): boolean {
   const def = chipOf(c)
   return pins.get(pinKey(c.id, `p${def.vcc}`)) === 1 && pins.get(pinKey(c.id, `p${def.gnd}`)) === 0

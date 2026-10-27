@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Geração de tabelas-verdade (spec §4.6).
+// Geração de tabelas-verdade.
 
 import { decodeDisplay, DIGIT_SEGMENTS } from './display'
 import { evalGate } from './gates'
@@ -20,7 +20,7 @@ export interface GateTableRow {
   output: Signal
 }
 
-/** Tabela-verdade estática de uma porta isolada (RF-06.1). */
+/** Tabela-verdade estática de uma porta isolada. */
 export function gateTruthTable(type: GateType, n: number): GateTableRow[] {
   const rows: GateTableRow[] = []
   for (let m = 0; m < 1 << n; m++) {
@@ -117,7 +117,7 @@ function displayCell(c: CircuitComponent, sim: ReturnType<typeof simulate>): str
 }
 
 /**
- * Tabela-verdade do circuito completo (RF-06.2): varre as 2^n combinações
+ * Tabela-verdade do circuito completo: varre as 2^n combinações
  * das fontes interativas e registra o valor visto por cada LED/DISPLAY.
  */
 export function circuitTruthTable(

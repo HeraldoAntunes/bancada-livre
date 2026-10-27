@@ -1,5 +1,5 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Expressão booleana por soma de mintermos (RF-06.4), derivada da tabela-verdade.
+// Expressão booleana por soma de mintermos, derivada da tabela-verdade.
 // Notação didática: A' = negado, · = E, + = OU.
 
 import type { CircuitTable } from './truthTable'

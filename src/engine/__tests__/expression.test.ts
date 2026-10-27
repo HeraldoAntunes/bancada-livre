@@ -10,7 +10,7 @@ function tableOf(name: string) {
   return circuitTruthTable(ex.components, ex.wires)
 }
 
-describe('mintermExpression (RF-06.4)', () => {
+describe('mintermExpression', () => {
   it('meio-somador: S = soma de mintermos do XOR; Cout = A·B', () => {
     const t = tableOf('Meio-somador')
     expect(mintermExpression(t, 0)).toBe("A'·B + A·B'")
