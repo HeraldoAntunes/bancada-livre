@@ -11,6 +11,7 @@ abstract: >-
   estados na tabela-verdade automática. Roda no navegador, num único arquivo HTML, sem instalação.
 version: "1.0.1"
 date-released: "2026-10-27"
+doi: "10.5281/zenodo.23696269"
 authors:
   - given-names: "Heraldo"
     family-names: "Antunes"
@@ -24,3 +25,7 @@ keywords:
   - "ensino"
   - "software livre"
   - "offline"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23696269"
+    description: "DOI de todas as versões no Zenodo (aponta sempre para a mais recente)"

@@ -7,6 +7,7 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/HeraldoAntunes/bancada-livre/badge)](https://scorecard.dev/viewer/?uri=github.com/HeraldoAntunes/bancada-livre)
 [![Versão](https://img.shields.io/github/v/release/HeraldoAntunes/bancada-livre?label=vers%C3%A3o)](https://github.com/HeraldoAntunes/bancada-livre/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/HeraldoAntunes/bancada-livre/total?label=downloads)](https://github.com/HeraldoAntunes/bancada-livre/releases)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23696269.svg)](https://doi.org/10.5281/zenodo.23696269)
 [![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
 [![Testado no Windows 11](https://img.shields.io/badge/testado%20no-Windows%2011-0078D6)](#sistemas)
 
@@ -181,6 +182,8 @@ Sugestões e correções são bem-vindas. Veja [CONTRIBUTING.md](.github/CONTRIB
 ## Como citar
 Se usar o Bancada Livre num trabalho, artigo ou material didático, cite a versão usada. Os dados estão em
 [CITATION.cff](CITATION.cff); no GitHub, o botão **Cite this repository** gera a referência pronta (APA ou BibTeX).
+Cada versão fica arquivada no Zenodo com DOI. O DOI geral, que leva sempre à versão mais recente, é
+[10.5281/zenodo.23696269](https://doi.org/10.5281/zenodo.23696269).
 
 ## Como foi feito
 
