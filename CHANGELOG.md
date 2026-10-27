@@ -11,7 +11,7 @@ desenvolvimento, antes da primeira publicação.
 
 ### Alterado
 - Bibliotecas atualizadas: zustand 5.0.16 (vai no arquivo do aluno) e, nas ferramentas de montagem,
-  vite-plugin-singlefile 2.3.4 e dependências indiretas com correções de segurança. Nada muda no uso.
+  vite 6.4.5, vite-plugin-singlefile 2.3.4 e dependências indiretas com correções de segurança. Nada muda no uso.
 
 ## [1.0.0] - 2026-10-27 · "Bancada Livre"
 
