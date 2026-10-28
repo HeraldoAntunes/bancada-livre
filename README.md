@@ -189,14 +189,13 @@ fica em `src/comandos.ts`.
 
 ## Privacidade
 
-Tudo roda no seu computador. O circuito fica guardado só no navegador (salvamento automático) e nos arquivos que
-você mesmo baixar. O simulador não envia nada pela internet, não usa contas nem login e não tem propaganda ou
-rastreamento. O arquivo HTML traz uma política de segurança que bloqueia qualquer acesso à rede. O botão **Ver se
-há versão nova**, na janela Sobre, só abre a página de versões no seu navegador quando você clica nele: o programa
-não consulta a internet sozinho.
+O Bancada Livre nunca se conecta à internet. O arquivo HTML traz uma política de segurança que bloqueia qualquer
+acesso à rede. O botão **Ver se há versão nova**, na janela Sobre, só abre a página do programa no seu navegador.
 
-*This program will not transfer any information to other networked systems unless specifically requested by the user or
-the person installing or operating it.*
+O circuito em uso fica guardado no próprio navegador, neste computador (salvamento automático). Lá também ficam os
+ajustes: o botão **Aa** (nomes das portas) e a posição das janelas da tabela-verdade e da linha do tempo. Quando você
+clica em **Salvar**, **PNG** ou **SVG**, o arquivo vai para a pasta de downloads do navegador, ou para onde ele perguntar. Não há conta, login,
+propaganda nem rastreamento.
 
 ## Contribuir
 Sugestões e correções são bem-vindas. Veja [CONTRIBUTING.md](.github/CONTRIBUTING.md) e a política de segurança em

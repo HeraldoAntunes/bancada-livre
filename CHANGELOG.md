@@ -9,6 +9,13 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+### Corrigido
+- No Windows, o Bancada Livre fixado na barra de tarefas fica com o próprio ícone e reabre o programa, em vez de
+  virar um atalho do Edge.
+
+### Alterado
+- Texto de privacidade do README e da janela Sobre mais curto e só com o que o programa faz de fato.
+
 ## [2.0.1] - 2026-10-28
 
 ### Corrigido

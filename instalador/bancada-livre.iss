@@ -45,9 +45,10 @@ Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDesc
 Source: "{#Dist}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\Bancada Livre"; Filename: "{app}\BancadaLivre.exe"; Comment: "Simulador didático de lógica digital"
+; AppUserModelID igual ao que o lancador.py põe na janela: o pino da barra de tarefas fica com o Bancada Livre, não com o Edge
+Name: "{autoprograms}\Bancada Livre"; Filename: "{app}\BancadaLivre.exe"; Comment: "Simulador didático de lógica digital"; AppUserModelID: "BancadaLivre"
 Name: "{autoprograms}\Desinstalar o Bancada Livre"; Filename: "{uninstallexe}"; Comment: "Remove o programa; os circuitos salvos ficam guardados"
-Name: "{autodesktop}\Bancada Livre"; Filename: "{app}\BancadaLivre.exe"; Tasks: desktopicon
+Name: "{autodesktop}\Bancada Livre"; Filename: "{app}\BancadaLivre.exe"; Tasks: desktopicon; AppUserModelID: "BancadaLivre"
 
 [Run]
 Filename: "{app}\BancadaLivre.exe"; Description: "Abrir o Bancada Livre agora"; Flags: nowait postinstall skipifsilent
