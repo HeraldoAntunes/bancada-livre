@@ -34,6 +34,8 @@ export interface SimResult {
   cycleComps: Set<string>
   /** Pinos de entrada com mais de um driver (conflito). */
   conflictPins: Set<string>
+  /** Entradas assíncronas cujo laço com a própria saída foi cortado (ver `UnitGraph`). */
+  atrasadas: Set<string>
 }
 
 export interface UnitGraph {
@@ -47,6 +49,11 @@ export interface UnitGraph {
   icFunc: Map<string, ChipFunc>
   /** Unidades que produzem Q e Q̄ de um elemento de memória (`compId#q`). */
   seqSaida: Set<string>
+  /**
+   * Entradas assíncronas (`comp:pino`) que fecham um laço com a própria saída (ex.: contador que se limpa ao chegar
+   * em N). O fio delas sai do grafo: a saída vem do estado guardado e o reset age na rodada seguinte do assentamento.
+   */
+  assincronasAtrasadas: Set<string>
   adj: Map<string, string[]>
   indeg: Map<string, number>
   preds: Map<string, string[]>
@@ -123,6 +130,8 @@ export function buildUnitGraph(components: CircuitComponent[], wires: Wire[]): U
   const adj = new Map<string, string[]>(units.map((u) => [u, []]))
   const indeg = new Map<string, number>(units.map((u) => [u, 0]))
   const preds = new Map<string, string[]>(units.map((u) => [u, []]))
+  /** ligações que chegam a uma entrada assíncrona: candidatas a atraso se fecharem laço */
+  const assincronas: { src: string; dst: string; pino: string }[] = []
   for (const w of wires) {
     if (!byId.has(w.from.comp) || !byId.has(w.to.comp)) continue
     const src = outPinUnit.get(pinKey(w.from.comp, w.from.pin))
@@ -132,9 +141,72 @@ export function buildUnitGraph(components: CircuitComponent[], wires: Wire[]): U
       adj.get(src)!.push(dst)
       indeg.set(dst, (indeg.get(dst) ?? 0) + 1)
       preds.get(dst)!.push(src)
+      if (seqSaida.has(dst) && dsts.length === 1) assincronas.push({ src, dst, pino: pinKey(w.to.comp, w.to.pin) })
     }
   }
-  return { units, unitComp, icGate, icFunc, seqSaida, adj, indeg, preds }
+  const assincronasAtrasadas = new Set<string>()
+  if (assincronas.length > 0) {
+    const grupo = componentesFortes(units, adj)
+    for (const a of assincronas) {
+      if (grupo.get(a.src) !== grupo.get(a.dst)) continue
+      const saem = adj.get(a.src)!
+      saem.splice(saem.indexOf(a.dst), 1)
+      const chegam = preds.get(a.dst)!
+      chegam.splice(chegam.indexOf(a.src), 1)
+      indeg.set(a.dst, indeg.get(a.dst)! - 1)
+      assincronasAtrasadas.add(a.pino)
+    }
+  }
+  return { units, unitComp, icGate, icFunc, seqSaida, assincronasAtrasadas, adj, indeg, preds }
+}
+
+/** Componentes fortemente conexos (Tarjan, sem recursão): unidade → número do grupo. */
+function componentesFortes(units: string[], adj: Map<string, string[]>): Map<string, number> {
+  const indice = new Map<string, number>()
+  const menor = new Map<string, number>()
+  const grupo = new Map<string, number>()
+  const pilha: string[] = []
+  const naPilha = new Set<string>()
+  let proximo = 0
+  let grupos = 0
+  for (const raiz of units) {
+    if (indice.has(raiz)) continue
+    const quadros: { u: string; i: number }[] = [{ u: raiz, i: 0 }]
+    indice.set(raiz, proximo)
+    menor.set(raiz, proximo++)
+    pilha.push(raiz)
+    naPilha.add(raiz)
+    while (quadros.length > 0) {
+      const q = quadros[quadros.length - 1]
+      const viz = adj.get(q.u) ?? []
+      if (q.i < viz.length) {
+        const v = viz[q.i++]
+        if (!indice.has(v)) {
+          indice.set(v, proximo)
+          menor.set(v, proximo++)
+          pilha.push(v)
+          naPilha.add(v)
+          quadros.push({ u: v, i: 0 })
+        } else if (naPilha.has(v)) menor.set(q.u, Math.min(menor.get(q.u)!, indice.get(v)!))
+        continue
+      }
+      quadros.pop()
+      if (quadros.length > 0) {
+        const pai = quadros[quadros.length - 1].u
+        menor.set(pai, Math.min(menor.get(pai)!, menor.get(q.u)!))
+      }
+      if (menor.get(q.u) === indice.get(q.u)) {
+        let w: string
+        do {
+          w = pilha.pop()!
+          naPilha.delete(w)
+          grupo.set(w, grupos)
+        } while (w !== q.u)
+        grupos++
+      }
+    }
+  }
+  return grupo
 }
 
 /**
@@ -205,6 +277,8 @@ export function simulate(
       pins.set(pinKey(c.id, `p${def.gnd}`), gnd)
       if (graph.seqSaida.has(u)) {
         const asinc = seq.assincronas.map((n) => {
+          // entrada atrasada: a saída vem do estado guardado (1 é o nível de repouso das entradas ativas em 0)
+          if (graph.assincronasAtrasadas.has(pinKey(c.id, `p${n}`))) return 1
           const v = readInput(c.id, `p${n}`)
           pins.set(pinKey(c.id, `p${n}`), v)
           return v
@@ -247,6 +321,7 @@ export function simulate(
     } else if (isSeq(c.type)) {
       if (graph.seqSaida.has(u)) {
         const lidos = entradasAssincronas(c.type).map((p) => {
+          if (graph.assincronasAtrasadas.has(pinKey(c.id, p))) return undefined
           const v = readInput(c.id, p)
           pins.set(pinKey(c.id, p), v)
           return v
@@ -282,6 +357,12 @@ export function simulate(
     } else if (isSink(c.type)) {
       for (const p of inputPins(c)) pins.set(pinKey(c.id, p), readInput(c.id, p))
     }
+  }
+
+  // Entradas assíncronas atrasadas: o valor delas só existe depois que o laço todo foi avaliado
+  for (const k of graph.assincronasAtrasadas) {
+    const i = k.lastIndexOf(':')
+    pins.set(k, readInput(k.slice(0, i), k.slice(i + 1)))
   }
 
   // Unidades em laço: pinos viram 'E'; o componente dono entra no aviso.
@@ -333,5 +414,5 @@ export function simulate(
     for (const w of driversByTarget.get(k) ?? []) wireVals.set(w.id, 'E')
   }
 
-  return { pins, wires: wireVals, cycleComps, conflictPins }
+  return { pins, wires: wireVals, cycleComps, conflictPins, atrasadas: graph.assincronasAtrasadas }
 }

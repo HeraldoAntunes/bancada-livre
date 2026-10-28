@@ -106,3 +106,43 @@ describe('contador automático', () => {
     expect(svg).toContain('>101<')
   })
 })
+
+describe('clock atrasado', () => {
+  it('um atraso de um período inteiro não perde a borda: o flip-flop T troca a cada segundo', () => {
+    useCircuit.setState({
+      components: [
+        { id: 'ck', type: 'CLOCK', x: 0, y: 0, freq: 1, state: 0 },
+        { id: 'um', type: 'LEVEL_HIGH', x: 0, y: 0 },
+        { id: 'f', type: 'FF_T', x: 0, y: 0, q: 0, clkVisto: 0 },
+      ],
+      wires: [
+        { id: 'w1', from: { comp: 'ck', pin: 'out' }, to: { comp: 'f', pin: 'clk' } },
+        { id: 'w2', from: { comp: 'um', pin: 'out' }, to: { comp: 'f', pin: 't' } },
+      ],
+    })
+    const qs: unknown[] = []
+    for (let i = 0; i < 4; i++) {
+      st().tickClocks(1000)
+      qs.push(st().components.find((c) => c.id === 'f')!.q)
+    }
+    expect(qs).toEqual([1, 0, 1, 0])
+  })
+})
+
+describe('aviso de oscilação', () => {
+  it('acende com a trava ligada à própria saída invertida e apaga quando o fio sai', () => {
+    useCircuit.setState({
+      components: [
+        { id: 'um', type: 'LEVEL_HIGH', x: 0, y: 0 },
+        { id: 't', type: 'LATCH_D', x: 0, y: 0 },
+      ],
+      wires: [
+        { id: 'w1', from: { comp: 'um', pin: 'out' }, to: { comp: 't', pin: 'en' } },
+        { id: 'w2', from: { comp: 't', pin: 'qn' }, to: { comp: 't', pin: 'd' } },
+      ],
+    })
+    expect(st().oscilando).toBe(true)
+    useCircuit.setState({ wires: st().wires.filter((w) => w.id !== 'w2') })
+    expect(st().oscilando).toBe(false)
+  })
+})

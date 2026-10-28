@@ -177,7 +177,7 @@ describe('nome do programa igual em todos os lugares', () => {
     expect(pkg.name).toBe('bancada-livre')
     expect(citation).toMatch(/^title: "Bancada Livre/m)
     expect(indexHtml).toMatch(/<title>Bancada Livre<\/title>/)
-    expect(readme).toMatch(/^# (<img [^>]*> )?Bancada Livre( <img [^>]*bandeira-brasil[^>]*>)?$/m)
+    expect(readme).toMatch(/^<h1 align="center">Bancada Livre( <img [^>]*bandeira-brasil[^>]*>)?<\/h1>$/m)
     expect(SOBRE.nome).toBe('Bancada Livre')
   })
 

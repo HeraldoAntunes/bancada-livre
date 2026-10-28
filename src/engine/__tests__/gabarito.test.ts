@@ -2,7 +2,7 @@
 // Gabarito em CSV: leitura (separadores, BOM, recusas) e comparação com o circuito montado.
 import { describe, expect, it } from 'vitest'
 import { EXAMPLES } from '../../examples'
-import { conferir, lerGabarito, type Gabarito } from '../gabarito'
+import { conferir, lerGabarito, resumoConferencia, type Gabarito } from '../gabarito'
 import { circuitTruthTable } from '../truthTable'
 
 const tabelaDe = (nome: string) => {
@@ -63,5 +63,23 @@ describe('comparação com o circuito', () => {
     expect(c.faltam).toEqual(['B'])
     expect(c.sobram).toEqual(['Z'])
     expect(c.linhas).toHaveLength(0)
+  })
+})
+
+describe('resumo da conferência', () => {
+  const resumo = (csv: string) => resumoConferencia(conferir(lerGabarito(csv) as Gabarito, tabelaDe('Meio-somador')))
+
+  it('só fica com a cor de certo quando houve linhas comparadas e todas bateram', () => {
+    expect(resumo('A;B;S;Cout\n0;0;0;0\n0;1;1;0\n1;0;1;0\n1;1;0;1')).toMatchObject({ certo: true })
+  })
+
+  it('entrada faltando, nenhuma saída ou nenhuma linha comparada não aparecem como certo', () => {
+    const falta = resumo('A;S\n0;0')
+    expect(falta.certo).toBe(false)
+    expect(falta.texto).toMatch(/não tem a entrada B/)
+    expect(resumo('A;B;Z\n0;0;1')).toMatchObject({ certo: false, texto: expect.stringMatching(/Nenhuma coluna/) })
+    const vf = resumo('A;B;S\nF;F;F\nV;V;F')
+    expect(vf.certo).toBe(false)
+    expect(vf.texto).toMatch(/Nenhuma linha do gabarito/)
   })
 })

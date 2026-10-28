@@ -95,3 +95,21 @@ describe('stepFilteredSim', () => {
     expect(sim.wires.get('w5')).toBe(0)
   })
 })
+
+describe('passo a passo com flip-flop', () => {
+  it('Q vem do estado guardado: no passo 1 o Q e o fio dele já têm valor, mesmo com o D no fim da cadeia', () => {
+    const cs = [comp('f', 'FF_D', { q: 1, clkVisto: 0 }), comp('n1', 'NOT'), comp('n2', 'NOT'), comp('n3', 'NOT'), comp('l', 'LED')]
+    const w = [
+      wire('a', 'f', 'q', 'n1', 'in0'),
+      wire('b', 'n1', 'out', 'n2', 'in0'),
+      wire('c', 'n2', 'out', 'n3', 'in0'),
+      wire('d', 'n3', 'out', 'f', 'd'),
+      wire('e', 'f', 'q', 'l', 'in'),
+    ]
+    const { levels, saidas } = propagationLevels(cs, w)
+    const s1 = stepFilteredSim(simulate(cs, w), cs, w, levels, 1, saidas)
+    expect(s1.pins.get(pinKey('f', 'q'))).toBe(1)
+    expect(s1.wires.get('e')).toBe(1)
+    expect(s1.pins.get(pinKey('l', 'in'))).toBe(1)
+  })
+})

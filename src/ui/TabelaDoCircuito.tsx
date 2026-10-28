@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { mintermExpression } from '../engine/expression'
-import { conferir, MAX_CSV_CHARS } from '../engine/gabarito'
+import { conferir, MAX_CSV_CHARS, resumoConferencia } from '../engine/gabarito'
 import { temMemoria } from '../engine/sequencial'
 import { circuitTruthTable, estadoDaColuna, inputColumns, outputColumns } from '../engine/truthTable'
 import type { Signal } from '../engine/types'
@@ -60,6 +60,7 @@ export function TabelaDoCircuito() {
   const gabarito = useCircuit((s) => s.gabarito)
   const conferencia = useMemo(() => (gabarito && table ? conferir(gabarito, table) : null), [gabarito, table])
   /** Erros de cada linha da tabela (pela combinação), para marcar as células que não batem. */
+  const resumo = conferencia ? resumoConferencia(conferencia) : null
   const errosDaLinha = new Map(conferencia?.linhas.map((l) => [l.entradas.join(''), l.erros]) ?? [])
   const arquivo = useRef<HTMLInputElement>(null)
   const [avisoCsv, setAvisoCsv] = useState('')
@@ -161,17 +162,7 @@ export function TabelaDoCircuito() {
                 </p>
               ) : null
             })}
-            {conferencia && (
-              <p className={'hint gabarito-resumo' + (conferencia.acertos === conferencia.linhas.length ? ' certo' : '')}>
-                {conferencia.faltam.length > 0
-                  ? `O gabarito não tem a entrada ${conferencia.faltam.join(', ')}: confira os nomes das chaves.`
-                  : conferencia.saidas.length === 0
-                    ? 'Nenhuma coluna do gabarito tem o nome de uma saída deste circuito.'
-                    : `Gabarito: ${conferencia.acertos} de ${conferencia.linhas.length} linhas certas` +
-                      ` (saídas ${conferencia.saidas.join(', ')}).`}
-                {conferencia.sobram.length > 0 && ` Colunas sem par no circuito: ${conferencia.sobram.join(', ')}.`}
-              </p>
-            )}
+            {resumo && <p className={'hint gabarito-resumo' + (resumo.certo ? ' certo' : '')}>{resumo.texto}</p>}
             {avisoCsv && <p className="hint gabarito-resumo">{avisoCsv}</p>}
             <input ref={arquivo} type="file" accept=".csv,text/csv" hidden onChange={importar} />
             <span className="tt-botoes">

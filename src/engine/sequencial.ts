@@ -117,6 +117,21 @@ function passo(c: CircuitComponent, sim: SimResult): CircuitComponent {
   return { ...c, q: novoQ, ...(tipo === 'LATCH_D' ? {} : { clkVisto }) }
 }
 
+/**
+ * Entrada assíncrona atrasada (reset pela própria saída): ao soltar, ela continua valendo por mais uma rodada. É o
+ * que acontece no chip real, onde o CLR ainda está ativo enquanto as saídas que ele limpou descem; sem isso, a
+ * descida limpa pareceria uma borda de clock para o flip-flop seguinte.
+ */
+function comSoltura(sim: SimResult, anterior: SimResult | null, porId: Map<string, CircuitComponent>): SimResult {
+  if (!anterior || sim.atrasadas.size === 0) return sim
+  const pins = new Map(sim.pins)
+  for (const k of sim.atrasadas) {
+    const ativo = porId.get(k.slice(0, k.lastIndexOf(':')))?.type === 'IC' ? 0 : 1
+    if (anterior.pins.get(k) === ativo) pins.set(k, ativo)
+  }
+  return { ...sim, pins }
+}
+
 export interface Assentado {
   components: CircuitComponent[]
   /** Elementos que não pararam de mudar dentro do limite (oscilação): ficam com estado indefinido. */
@@ -131,8 +146,12 @@ export function assentar(components: CircuitComponent[], wires: Wire[]): Assenta
   const oscilando = new Set<string>()
   if (!components.some(temMemoria)) return { components, oscilando }
   let atual = components
+  let anterior: SimResult | null = null
+  const porId = new Map(components.map((c) => [c.id, c]))
   for (let i = 0; i < MAX_ASSENTAR; i++) {
-    const sim = simulate(atual, wires)
+    const simulado = simulate(atual, wires)
+    const sim = comSoltura(simulado, anterior, porId)
+    anterior = simulado
     let mudou = false
     const prox = atual.map((c) => {
       if (!temMemoria(c)) return c

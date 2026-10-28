@@ -159,3 +159,78 @@ describe('circuito sem memória', () => {
     expect(assentar(cs, []).components).toBe(cs)
   })
 })
+
+describe('reset assíncrono pela própria saída', () => {
+  const contar = (cs0: CircuitComponent[], ws: Wire[], clk: string, ler: (cs: CircuitComponent[]) => number, n: number) => {
+    let cs = assentar(cs0, ws).components
+    const vistos: number[] = []
+    for (let i = 0; i < n; i++) {
+      cs = mudar(cs, ws, clk, 1)
+      cs = mudar(cs, ws, clk, 0)
+      vistos.push(ler(cs))
+    }
+    return { vistos, laco: simulate(cs, ws).cycleComps }
+  }
+
+  it('contador mod 3 com flip-flops T e AND no CLR: 1, 2, 0, 1, 2, 0, sem laço', () => {
+    const cs0 = [comp('c', 'SWITCH'), comp('um', 'LEVEL_HIGH'), comp('a', 'FF_T'), comp('b', 'FF_T'), comp('g', 'AND')]
+    const ws = [
+      wire('w1', 'c', 'out', 'a', 'clk'),
+      wire('w2', 'um', 'out', 'a', 't'),
+      wire('w3', 'um', 'out', 'b', 't'),
+      wire('w4', 'a', 'qn', 'b', 'clk'),
+      wire('w5', 'a', 'q', 'g', 'in0'),
+      wire('w6', 'b', 'q', 'g', 'in1'),
+      wire('w7', 'g', 'out', 'a', 'clr'),
+      wire('w8', 'g', 'out', 'b', 'clr'),
+    ]
+    const r = contar(cs0, ws, 'c', (cs) => Number(q(cs, ws, 'b')) * 2 + Number(q(cs, ws, 'a')), 6)
+    expect(r.vistos).toEqual([1, 2, 0, 1, 2, 0])
+    expect(r.laco.size).toBe(0)
+  })
+
+  it('74161 com NAND(QD, QB) no CLR̄ conta de 0 a 9 e volta (década)', () => {
+    const cs0 = [
+      comp('c', 'SWITCH'),
+      comp('um', 'LEVEL_HIGH'),
+      comp('zero', 'LEVEL_LOW'),
+      comp('ic', 'IC', { chip: '74161' }),
+      comp('n', 'NAND'),
+    ]
+    const ws = [
+      wire('v', 'um', 'out', 'ic', 'p16'),
+      wire('g', 'zero', 'out', 'ic', 'p8'),
+      wire('k', 'c', 'out', 'ic', 'p2'),
+      wire('e1', 'um', 'out', 'ic', 'p7'),
+      wire('e2', 'um', 'out', 'ic', 'p10'),
+      wire('ld', 'um', 'out', 'ic', 'p9'),
+      wire('a', 'ic', 'p11', 'n', 'in0'),
+      wire('b', 'ic', 'p13', 'n', 'in1'),
+      wire('r', 'n', 'out', 'ic', 'p1'),
+    ]
+    const ler = (cs: CircuitComponent[]) => {
+      const sim = simulate(cs, ws)
+      return [11, 12, 13, 14].reduce((acc, p) => acc * 2 + Number(sim.pins.get(pinKey('ic', `p${p}`))), 0)
+    }
+    const r = contar(cs0, ws, 'c', ler, 11)
+    expect(r.vistos).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1])
+    expect(r.laco.size).toBe(0)
+  })
+
+  it('7474 com 2Q no 1CLR̄ não é laço combinacional', () => {
+    const cs0 = [comp('um', 'LEVEL_HIGH'), comp('zero', 'LEVEL_LOW'), comp('ic', 'IC', { chip: '7474' })]
+    const ws = [wire('v', 'um', 'out', 'ic', 'p14'), wire('g', 'zero', 'out', 'ic', 'p7'), wire('r', 'ic', 'p9', 'ic', 'p1')]
+    const cs = assentar(cs0, ws).components
+    const sim = simulate(cs, ws)
+    expect(sim.cycleComps.size).toBe(0)
+    // 2Q = 0 limpa o primeiro flip-flop: 1Q = 0
+    expect(sim.pins.get(pinKey('ic', 'p9'))).toBe(0)
+    expect(sim.pins.get(pinKey('ic', 'p5'))).toBe(0)
+  })
+
+  it('laço só de portas continua sendo laço combinacional', () => {
+    const cs0 = [comp('a', 'NOT'), comp('f', 'FF_D')]
+    const ws = [wire('w1', 'a', 'out', 'a', 'in0'), wire('w2', 'a', 'out', 'f', 'clr')]
+    expect(simulate(cs0, ws).cycleComps.has('a')).toBe(true)
+  })
+})

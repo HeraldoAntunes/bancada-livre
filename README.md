@@ -1,29 +1,42 @@
 <!-- Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT -->
-<p align="center"><img src="docs/img/capa.png" alt="Bancada Livre: simulador livre e offline de lógica digital" width="820"></p>
+<p align="center"><img src="src/assets/icone.svg" alt="" width="120"></p>
 
-# <img src="src/assets/icone.svg" alt="" width="44" align="top"> Bancada Livre <img src="docs/img/bandeira-brasil.svg" alt="Brasil" title="Feito no Brasil" width="20" height="14">
+<h1 align="center">Bancada Livre <img src="docs/img/bandeira-brasil.svg" alt="Brasil" title="Feito no Brasil" width="20" height="14"></h1>
 
-[![Testes](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml/badge.svg)](https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/HeraldoAntunes/bancada-livre/badge)](https://scorecard.dev/viewer/?uri=github.com/HeraldoAntunes/bancada-livre)
-[![Versão](https://img.shields.io/github/v/release/HeraldoAntunes/bancada-livre?label=vers%C3%A3o)](https://github.com/HeraldoAntunes/bancada-livre/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/HeraldoAntunes/bancada-livre/total?label=downloads)](https://github.com/HeraldoAntunes/bancada-livre/releases)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23696269.svg)](https://doi.org/10.5281/zenodo.23696269)
-[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
-[![Testado no Windows 11](https://img.shields.io/badge/testado%20no-Windows%2011-0078D6)](#sistemas)
+<p align="center"><b>Simulador livre e offline de lógica digital, para montar e testar circuitos em sala de aula.</b><br>
+O aluno liga chaves, portas, CIs 74xx, flip-flops, LEDs e displays e vê o sinal propagar na hora, com a
+tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e sem internet.</p>
 
-**Simulador livre e offline de lógica digital, para montar e testar circuitos em sala de aula.**
-Feito por um professor para as próprias aulas e distribuído livremente: o aluno arrasta chaves, portas lógicas, CIs
-74xx, LEDs e displays para a bancada, liga os fios e vê o sinal propagar na hora, com a tabela-verdade e a expressão
-booleana do circuito inteiro.
+<p align="center">
+  <img src="https://img.shields.io/badge/feito%20em-TypeScript-555" alt="Feito em TypeScript">
+  <a href="#sistemas"><img src="https://img.shields.io/badge/testado%20no-Edge%20%C2%B7%20Windows%2011-0078D6" alt="Testado no Edge · Windows 11"></a>
+  <img src="https://img.shields.io/badge/internet-n%C3%A3o%20precisa-2b8a3e" alt="Não precisa de internet">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue" alt="Licença MIT"></a>
+  <img src="https://img.shields.io/badge/situa%C3%A7%C3%A3o-em%20teste-e8590c" alt="Situação: em teste">
+  <br>
+  <a href="https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml"><img src="https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml/badge.svg" alt="Testes"></a>
+  <a href="https://scorecard.dev/viewer/?uri=github.com/HeraldoAntunes/bancada-livre"><img src="https://api.scorecard.dev/projects/github.com/HeraldoAntunes/bancada-livre/badge" alt="OpenSSF Scorecard"></a>
+  <a href="https://github.com/HeraldoAntunes/bancada-livre/releases/latest"><img src="https://img.shields.io/github/v/release/HeraldoAntunes/bancada-livre?label=vers%C3%A3o" alt="Versão"></a>
+  <a href="https://github.com/HeraldoAntunes/bancada-livre/releases"><img src="https://img.shields.io/github/downloads/HeraldoAntunes/bancada-livre/total?label=downloads" alt="Downloads"></a>
+  <a href="https://doi.org/10.5281/zenodo.23696269"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23696269.svg" alt="DOI"></a>
+</p>
 
 <p align="center">
   <a href="https://github.com/HeraldoAntunes/bancada-livre/releases/latest"><b>⬇ Baixar o Bancada Livre</b></a>
   &nbsp;·&nbsp; <a href="docs/GUIA-DE-USO.md">Guia de uso</a>
-  &nbsp;·&nbsp; <a href="#sistemas">Outros sistemas</a>
-  &nbsp;·&nbsp; <a href="#perguntas-frequentes">Perguntas frequentes</a>
+  &nbsp;·&nbsp; <a href="#programas-livres-">Programas Livres</a>
 </p>
 
-### ⬇ Qual arquivo baixar? (versão 2.0.0)
+<p align="center"><img src="docs/img/capa.png" alt="Bancada Livre: simulador livre e offline de lógica digital" width="820"></p>
+
+<p align="center">
+  <a href="#qual-arquivo-baixar">Baixar</a> · <a href="#como-abrir">Como abrir</a> · <a href="#recursos">Recursos</a> ·
+  <a href="#sistemas">Sistemas</a> · <a href="#perguntas-frequentes">Perguntas</a> · <a href="#programas-livres-">Programas Livres</a>
+</p>
+
+## Qual arquivo baixar?
+
+Versão 2.0.0:
 
 | Para quê | Baixar |
 |---|---|
@@ -213,3 +226,14 @@ Os símbolos das portas, os corpos dos componentes, os CIs, os ícones e a capa 
 Livre**, como código SVG escrito no próprio projeto, e estão sob a mesma licença MIT. Nenhum desenho foi copiado de
 outros programas ou pacotes de ícones. As portas seguem apenas a **convenção** dos símbolos distintivos (ANSI/IEEE
 91), e a pinagem dos CIs segue as folhas de dados dos fabricantes; o desenho de cada componente é original.
+
+## Programas Livres <img src="docs/img/bandeira-brasil.svg" alt="Brasil" title="Feito no Brasil" width="20" height="14">
+
+Programas gratuitos e de código aberto, feitos por um professor para as próprias aulas. Cada um funciona sozinho,
+sem internet e sem conta.
+
+| | Programa | Para que serve | Código | Baixar |
+|---|---|---|---|---|
+| <img src="https://raw.githubusercontent.com/HeraldoAntunes/giz-livre/main/docs/img/icone.png" alt="" width="36"> | **Giz Livre** | Lousa digital para dar aula com mesa digitalizadora, caneta, toque ou mouse | [GitHub](https://github.com/HeraldoAntunes/giz-livre) | [Baixar](https://github.com/HeraldoAntunes/giz-livre/releases/latest) |
+| <img src="https://raw.githubusercontent.com/HeraldoAntunes/giz-na-tela/main/docs/img/icone.png" alt="" width="36"> | **Giz na Tela** | Escrever por cima de qualquer programa aberto no computador | [GitHub](https://github.com/HeraldoAntunes/giz-na-tela) | [Baixar](https://github.com/HeraldoAntunes/giz-na-tela/releases/latest) |
+| <img src="https://raw.githubusercontent.com/HeraldoAntunes/bancada-livre/main/src/assets/icone.svg" alt="" width="36"> | **Bancada Livre** | **Simulador de lógica digital: portas, CIs 74xx, flip-flops e tabela-verdade · você está aqui** | [GitHub](https://github.com/HeraldoAntunes/bancada-livre) | [Baixar](https://github.com/HeraldoAntunes/bancada-livre/releases/latest) |

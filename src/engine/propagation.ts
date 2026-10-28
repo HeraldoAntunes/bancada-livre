@@ -13,6 +13,11 @@ export interface PropagationInfo {
   levels: Map<string, number>
   /** Maior nível finito (0 quando o circuito está vazio). */
   maxLevel: number
+  /**
+   * Nível das saídas de cada elemento de memória (Q e Q̄ vêm do estado guardado e ficam prontas cedo, mesmo quando
+   * a leitura do D está no fim da cadeia).
+   */
+  saidas: Map<string, number>
 }
 
 export function propagationLevels(components: CircuitComponent[], wires: Wire[]): PropagationInfo {
@@ -53,7 +58,11 @@ export function propagationLevels(components: CircuitComponent[], wires: Wire[])
   for (const lv of levels.values()) {
     if (Number.isFinite(lv) && lv > maxLevel) maxLevel = lv
   }
-  return { levels, maxLevel }
+  const saidas = new Map<string, number>()
+  for (const u of graph.seqSaida) {
+    saidas.set(graph.unitComp.get(u)!, unitLevel.has(u) ? unitLevel.get(u)! : Number.POSITIVE_INFINITY)
+  }
+  return { levels, maxLevel, saidas }
 }
 
 /**
@@ -66,18 +75,19 @@ export function stepFilteredSim(
   wires: Wire[],
   levels: Map<string, number>,
   step: number,
+  saidas?: Map<string, number>,
 ): SimResult {
   const pins = new Map(sim.pins)
+  const nivelDaSaida = (id: string) => saidas?.get(id) ?? levels.get(id) ?? 0
   for (const c of components) {
     const lv = levels.get(c.id) ?? 0
-    if (lv <= step) continue
-    for (const p of allInputPins(c)) pins.set(pinKey(c.id, p), 'X')
-    for (const p of allOutputPins(c)) pins.set(pinKey(c.id, p), 'X')
+    if (lv > step) for (const p of allInputPins(c)) pins.set(pinKey(c.id, p), 'X')
+    if (nivelDaSaida(c.id) > step) for (const p of allOutputPins(c)) pins.set(pinKey(c.id, p), 'X')
   }
   const wireVals = new Map<string, Signal>()
   for (const [wid, v] of sim.wires) {
     const w = wires.find((x) => x.id === wid)
-    const lv = w ? (levels.get(w.from.comp) ?? 0) : 0
+    const lv = w ? nivelDaSaida(w.from.comp) : 0
     wireVals.set(wid, lv > step ? 'X' : v)
   }
   return { ...sim, pins, wires: wireVals }

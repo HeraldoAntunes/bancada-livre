@@ -22,6 +22,7 @@ export default function App() {
   const linhaAtiva = useCircuit((s) => s.linhaAtiva)
   const wires = useCircuit((s) => s.wires)
   const clockRunning = useCircuit((s) => s.clockRunning)
+  const oscilando = useCircuit((s) => s.oscilando)
   const tickClocks = useCircuit((s) => s.tickClocks)
   const hasClock = components.some((c) => c.type === 'CLOCK' || c.type === 'COUNTER')
   const tab = useCircuit((s) => s.abaPaleta)
@@ -36,7 +37,7 @@ export default function App() {
   const semEnergia = components.find((c) => c.type === 'IC' && !icPowered(c, sim.pins))
   const prop = useMemo(() => propagationLevels(components, wires), [components, wires])
   const shownSim = useMemo(
-    () => (stepMode ? stepFilteredSim(sim, components, wires, prop.levels, stepIndex) : sim),
+    () => (stepMode ? stepFilteredSim(sim, components, wires, prop.levels, stepIndex, prop.saidas) : sim),
     [stepMode, sim, components, wires, prop, stepIndex],
   )
 
@@ -122,6 +123,11 @@ export default function App() {
         {sim.cycleComps.size > 0 && (
           <span className="warn">
             <Icon name="alerta" size={14} /> Laço combinacional detectado: sinal marcado como E
+          </span>
+        )}
+        {oscilando && (
+          <span className="warn">
+            <Icon name="alerta" size={14} /> Oscilação: um flip-flop ou trava não parou de mudar e ficou indefinido (X)
           </span>
         )}
         {sim.conflictPins.size > 0 && (

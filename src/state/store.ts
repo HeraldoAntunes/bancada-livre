@@ -207,6 +207,30 @@ const AUTOSAVE_KEY = 'simulador-portas:autosave'
 export const AUTOSAVE_RECUSADO_KEY = 'simulador-portas:autosave-recusado'
 const SHOW_NAMES_KEY = 'simulador-portas:nomes'
 
+/** Atraso que o clock recupera em passos curtos (ms); o excesso anda num salto só. */
+const MAX_ATRASO_MS = 2000
+
+/** Um passo do tempo virtual: nível de cada CLOCK e contagem de cada COUNTER em clockMs + deltaMs. */
+function avancar(s: CircuitStore, deltaMs: number): Partial<CircuitStore> {
+  const clockMs = s.clockMs + deltaMs
+  let changed = false
+  const components = s.components.map((c) => {
+    if (c.type === 'COUNTER') {
+      // conta um a cada período e volta a 0 depois do último valor
+      const n = Math.floor((clockMs / 1000) * (c.freq ?? 1)) % 2 ** bitsDe(c)
+      if (n === (c.contagem ?? 0)) return c
+      changed = true
+      return { ...c, contagem: n }
+    }
+    if (c.type !== 'CLOCK') return c
+    const st = (Math.floor((clockMs / 1000) * (c.freq ?? 1) * 2) % 2) as 0 | 1
+    if (st === (c.state ?? 0)) return c
+    changed = true
+    return { ...c, state: st }
+  })
+  return changed ? { clockMs, components } : { clockMs }
+}
+
 /** Restaura o circuito salvo automaticamente. */
 function loadAutosave(): Snapshot {
   const empty: Snapshot = { components: [], wires: [] }
@@ -258,6 +282,8 @@ export interface CircuitStore {
   past: Snapshot[]
   future: Snapshot[]
   clockRunning: boolean
+  /** Algum flip-flop ou trava não parou de mudar no último assentamento e ficou indefinido. */
+  oscilando: boolean
   clockMs: number
   /** Mostrar o nome do tipo sob cada porta na bancada. */
   showNames: boolean
@@ -340,6 +366,7 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   past: [],
   future: [],
   clockRunning: true,
+  oscilando: false,
   clockMs: 0,
   showNames: loadShowNames(),
   carregamentos: 0,
@@ -636,27 +663,23 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
 
   setClockRunning: (running) => set({ clockRunning: running }),
 
-  // Tempo virtual: estado do clock = função de clockMs e da frequência.
-  tickClocks: (deltaMs) =>
-    set((s) => {
-      const clockMs = s.clockMs + deltaMs
-      let changed = false
-      const components = s.components.map((c) => {
-        if (c.type === 'COUNTER') {
-          // conta um a cada período e volta a 0 depois do último valor
-          const n = Math.floor((clockMs / 1000) * (c.freq ?? 1)) % 2 ** bitsDe(c)
-          if (n === (c.contagem ?? 0)) return c
-          changed = true
-          return { ...c, contagem: n }
-        }
-        if (c.type !== 'CLOCK') return c
-        const st = (Math.floor((clockMs / 1000) * (c.freq ?? 1) * 2) % 2) as 0 | 1
-        if (st === (c.state ?? 0)) return c
-        changed = true
-        return { ...c, state: st }
-      })
-      return changed ? { clockMs, components } : { clockMs }
-    }),
+  // Tempo virtual: estado do clock = função de clockMs e da frequência. Um atraso maior que meio período (aba em
+  // segundo plano, programa ocupado) é dividido em passos menores, e cada passo assenta os flip-flops: assim
+  // nenhuma borda se perde. O que passar de MAX_ATRASO_MS anda num salto só, para não travar a tela recuperando
+  // o tempo.
+  tickClocks: (deltaMs) => {
+    const passos = get().components.flatMap((c) =>
+      c.type === 'CLOCK' ? [250 / (c.freq ?? 1)] : c.type === 'COUNTER' ? [500 / (c.freq ?? 1)] : [],
+    )
+    const passo = passos.length > 0 ? Math.min(...passos) : deltaMs
+    let resta = Math.min(deltaMs, MAX_ATRASO_MS)
+    if (deltaMs > resta) set((s) => avancar(s, deltaMs - resta))
+    while (resta > 0) {
+      const d = Math.min(resta, passo)
+      set((s) => avancar(s, d))
+      resta -= d
+    }
+  },
 
   // Avança meio período do clock mais rápido (modo passo).
   stepClock: () => {
@@ -708,13 +731,20 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
 
 // Elementos de memória: a cada mudança do circuito (chave, clock, fio novo), procura as bordas do clock e atualiza
 // o estado dos flip-flops até tudo parar de mudar. Não é passo do Desfazer: é o circuito reagindo.
+// A marca de oscilação vale até a próxima mudança feita fora do assentamento.
+let vindoDoAssentar = false
 useCircuit.subscribe((s, antes) => {
   if (s.components === antes.components && s.wires === antes.wires) return
-  const { components } = assentar(s.components, s.wires)
+  const veio = vindoDoAssentar
+  vindoDoAssentar = false
+  const { components, oscilando } = assentar(s.components, s.wires)
+  const osc = oscilando.size > 0 || (veio && s.oscilando)
   if (components !== s.components) {
-    useCircuit.setState({ components })
+    vindoDoAssentar = true
+    useCircuit.setState({ components, oscilando: osc })
     return
   }
+  if (osc !== s.oscilando) useCircuit.setState({ oscilando: osc })
   // circuito assentado: com a linha do tempo aberta, vira uma amostra (só se algum sinal mudou)
   if (s.linhaAtiva) {
     const linhaDoTempo = acrescentar(s.linhaDoTempo, amostrar(s.components, s.wires))
@@ -722,8 +752,11 @@ useCircuit.subscribe((s, antes) => {
   }
 })
 {
-  const { components } = assentar(useCircuit.getState().components, useCircuit.getState().wires)
-  if (components !== useCircuit.getState().components) useCircuit.setState({ components })
+  const { components, oscilando } = assentar(useCircuit.getState().components, useCircuit.getState().wires)
+  if (components !== useCircuit.getState().components) {
+    vindoDoAssentar = true
+    useCircuit.setState({ components, oscilando: oscilando.size > 0 })
+  }
 }
 
 // Salvamento automático: grava o circuito no localStorage com

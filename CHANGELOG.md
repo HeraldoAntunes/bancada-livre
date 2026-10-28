@@ -9,6 +9,21 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+### Corrigido
+- Contador que se limpa sozinho (porta no CLR ou no CLR̄ do 74161, saída de um flip-flop no CLR̄ do outro) não é
+  mais marcado como laço combinacional: o reset age na hora seguinte, como no chip real.
+- O clock não perde bordas quando o navegador atrasa (aba em segundo plano, programa ocupado).
+- No passo a passo, as saídas Q e Q̄ dos flip-flops aparecem desde o começo, porque vêm do estado guardado.
+- A mensagem de erro do gabarito não sai mais na cor de certo; gabarito sem nenhuma linha comparável ganha aviso
+  próprio.
+
+### Adicionado
+- Aviso no rodapé quando um flip-flop ou trava oscila e fica indefinido.
+
+### Alterado
+- README no modelo comum dos Programas Livres: topo centralizado, selos só com o que foi testado e a tabela da
+  família no fim.
+
 ## [2.0.0] - 2026-10-27 · "Memória e tempo"
 
 Lógica sequencial: o Bancada Livre passa a ter flip-flops, e com eles a outra metade da disciplina. Circuitos

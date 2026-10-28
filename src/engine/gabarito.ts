@@ -88,3 +88,16 @@ export function conferir(g: Gabarito, t: CircuitTable): Conferencia {
   }
   return { linhas, acertos: linhas.filter((l) => l.erros.length === 0).length, saidas, sobram, faltam }
 }
+
+/** Frase do resumo da conferência e se ela merece a cor de certo (só quando houve linhas comparadas e todas bateram). */
+export function resumoConferencia(c: Conferencia): { texto: string; certo: boolean } {
+  let texto: string
+  if (c.faltam.length > 0) texto = `O gabarito não tem a entrada ${c.faltam.join(', ')}: confira os nomes das chaves.`
+  else if (c.saidas.length === 0) texto = 'Nenhuma coluna do gabarito tem o nome de uma saída deste circuito.'
+  else if (c.linhas.length === 0)
+    texto = 'Nenhuma linha do gabarito tem uma combinação de entradas deste circuito: use 0 e 1 nas entradas.'
+  else texto = `Gabarito: ${c.acertos} de ${c.linhas.length} linhas certas (saídas ${c.saidas.join(', ')}).`
+  if (c.sobram.length > 0) texto += ` Colunas sem par no circuito: ${c.sobram.join(', ')}.`
+  const certo = c.faltam.length === 0 && c.saidas.length > 0 && c.linhas.length > 0 && c.acertos === c.linhas.length
+  return { texto, certo }
+}
