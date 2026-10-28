@@ -9,6 +9,8 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+## [2.0.1] - 2026-10-28
+
 ### Corrigido
 - Contador que se limpa sozinho (porta no CLR ou no CLR̄ do 74161, saída de um flip-flop no CLR̄ do outro) não é
   mais marcado como laço combinacional: o reset age na hora seguinte, como no chip real.

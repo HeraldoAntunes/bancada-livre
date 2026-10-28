@@ -36,13 +36,13 @@ tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e se
 
 ## Qual arquivo baixar?
 
-Versão 2.0.0:
+Versão 2.0.1:
 
 | Para quê | Baixar |
 |---|---|
-| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-2.0.0.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.0/Instalar-BancadaLivre-2.0.0.exe) |
-| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-2.0.0-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.0/BancadaLivre-2.0.0-portatil.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.0.0.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.0/BancadaLivre-2.0.0.html) |
+| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-2.0.1.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.1/Instalar-BancadaLivre-2.0.1.exe) |
+| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-2.0.1-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.1/BancadaLivre-2.0.1-portatil.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.0.1.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.1/BancadaLivre-2.0.1.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na
@@ -237,3 +237,4 @@ sem internet e sem conta.
 | <img src="https://raw.githubusercontent.com/HeraldoAntunes/giz-livre/main/docs/img/icone.png" alt="" width="36"> | **Giz Livre** | Lousa digital para dar aula com mesa digitalizadora, caneta, toque ou mouse | [GitHub](https://github.com/HeraldoAntunes/giz-livre) | [Baixar](https://github.com/HeraldoAntunes/giz-livre/releases/latest) |
 | <img src="https://raw.githubusercontent.com/HeraldoAntunes/giz-na-tela/main/docs/img/icone.png" alt="" width="36"> | **Giz na Tela** | Escrever por cima de qualquer programa aberto no computador | [GitHub](https://github.com/HeraldoAntunes/giz-na-tela) | [Baixar](https://github.com/HeraldoAntunes/giz-na-tela/releases/latest) |
 | <img src="https://raw.githubusercontent.com/HeraldoAntunes/bancada-livre/main/src/assets/icone.svg" alt="" width="36"> | **Bancada Livre** | **Simulador de lógica digital: portas, CIs 74xx, flip-flops e tabela-verdade · você está aqui** | [GitHub](https://github.com/HeraldoAntunes/bancada-livre) | [Baixar](https://github.com/HeraldoAntunes/bancada-livre/releases/latest) |
+| <img src="https://raw.githubusercontent.com/HeraldoAntunes/tarja-livre/main/docs/img/icone.svg" alt="" width="36"> | **Tarja Livre** | Tarjar dados pessoais em PDF sem internet, de um jeito que a tarja não sai | [GitHub](https://github.com/HeraldoAntunes/tarja-livre) | [Baixar](https://github.com/HeraldoAntunes/tarja-livre/releases/latest) |
