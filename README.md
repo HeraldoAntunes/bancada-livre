@@ -36,13 +36,13 @@ tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e se
 
 ## Qual arquivo baixar?
 
-Versão 2.0.2:
+Versão 2.0.3:
 
 | Para quê | Baixar |
 |---|---|
-| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-2.0.2.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.2/Instalar-BancadaLivre-2.0.2.exe) |
-| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-2.0.2-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.2/BancadaLivre-2.0.2-portatil.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.0.2.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.2/BancadaLivre-2.0.2.html) |
+| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-2.0.3.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.3/Instalar-BancadaLivre-2.0.3.exe) |
+| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-2.0.3-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.3/BancadaLivre-2.0.3-portatil.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.0.3.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.3/BancadaLivre-2.0.3.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na

@@ -48,52 +48,29 @@ class TestLancador(unittest.TestCase):
                     mock.patch("builtins.print") as imprimir:
                 self.assertEqual(lancador.main(["--mostrar"]), 0)
                 popen.assert_not_called()
-                imprimir.assert_called_once()
+                self.assertEqual(imprimir.call_count, 2)
 
 
 class TestBarraDeTarefas(unittest.TestCase):
-    def test_reconhece_so_a_janela_do_simulador(self):
-        self.assertTrue(lancador.e_janela_do_programa("Chrome_WidgetWin_1", "Bancada Livre"))
-        self.assertFalse(lancador.e_janela_do_programa("Chrome_WidgetWin_1", "Bancada Livre - Pessoal - Microsoft Edge"))
-        self.assertFalse(lancador.e_janela_do_programa("Notepad", "Bancada Livre"))
+    # identidades lidas de janelas reais do Edge em 28/10/2026
+    def test_identidade_igual_a_do_edge(self):
+        casos = {
+            "file:///C:/a%20b/bancada-livre.html": "MSEdge._/C:/a%20b/bancada-livre.html",
+            "file:///C:/abcdefg/bancada-livre.html": "MSEdge._/C:/abcdefg/bancada-livre.html",
+            "file:///C:/abcdefgh/bancada-livre.html": "MSEdge._/C:/abcdefgh/bncada-livre.html",
+            "file:///C:/A%C3%A7%C3%A3o/bancada-livre.html": "MSEdge._/C:/A%C3%A7%C3ncada-livre.html",
+            "file:///C:/Users/heral/AppData/Local/Programs/Bancada%20Livre/_internal/bancada-livre.html":
+                "MSEdge._/C:/Users/herancada-livre.html",
+        }
+        for url, esperado in casos.items():
+            self.assertEqual(lancador.id_da_janela(url), esperado)
 
-    def test_comando_relancar_cabe_no_limite_e_aponta_o_icone(self):
-        cmd, ico = lancador.comando_relancar()
-        self.assertLess(len(cmd), 260)
-        self.assertTrue(ico.endswith(",0"))
+    def test_endereco_codifica_como_o_edge_espera(self):
+        url = lancador.endereco(Path("C:/Ação/bancada-livre.html"))
+        self.assertEqual(url, "file:///C:/A%C3%A7%C3%A3o/bancada-livre.html")
 
-    def test_marca_a_janela_com_o_id_e_o_comando_de_reabrir(self):
-        marcadas = {}
-        relogio = iter(range(1000)).__next__
-        aumid = lambda: (lambda h, v: marcadas.__setitem__(h, v), lambda h: marcadas.get(h, {}).get(5, ""),
-                         lambda: [7])
-        n = lancador.marcar_janelas_na_barra(dormir=lambda s: None, relogio=relogio, com_aumid=aumid)
-        self.assertEqual(n, 1)
-        self.assertEqual(marcadas[7][5], "BancadaLivre")
-        self.assertIn(2, marcadas[7])   # comando para reabrir
-        self.assertTrue(marcadas[7][3].endswith(",0"))   # ícone
-
-    def test_sem_janela_desiste_no_prazo(self):
-        relogio = iter(range(1000)).__next__
-        aumid = lambda: (lambda h, v: None, lambda h: "", lambda: [])
-        self.assertEqual(lancador.marcar_janelas_na_barra(espera_s=5, dormir=lambda s: None, relogio=relogio,
-                                                          com_aumid=aumid), 0)
-
-    def test_falha_do_windows_nao_impede_abrir(self):
-        def quebra():
-            raise OSError("sem IPropertyStore")
-        self.assertEqual(lancador.marcar_janelas_na_barra(com_aumid=quebra), 0)
-
-    def test_depois_de_abrir_no_edge_marca_a_janela(self):
-        with tempfile.TemporaryDirectory() as pasta:
-            (Path(pasta) / lancador.NOME_HTML).write_text("<!doctype html>", encoding="utf-8")
-            with mock.patch.object(lancador, "pasta_do_programa", return_value=Path(pasta)), \
-                    mock.patch.object(lancador, "navegadores", return_value=[__file__]), \
-                    mock.patch.object(lancador.subprocess, "Popen"), \
-                    mock.patch.object(lancador.os, "name", "nt"), \
-                    mock.patch.object(lancador, "marcar_janelas_na_barra") as marcar:
-                self.assertEqual(lancador.main([]), 0)
-                marcar.assert_called_once()
+    def test_abre_sempre_no_perfil_padrao(self):
+        self.assertIn("--profile-directory=Default", lancador.comando("msedge.exe", "file:///C:/x.html"))
 
 
 if __name__ == "__main__":

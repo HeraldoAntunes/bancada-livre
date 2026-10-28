@@ -9,6 +9,13 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+## [2.0.3] - 2026-10-28
+
+### Corrigido
+- O instalador da 2.0.2 era barrado por alguns antivírus, entre eles o Microsoft Defender em alguns computadores.
+  O lançador voltou a só abrir o simulador e fechar, sem mexer na janela. O ícone próprio na barra de tarefas
+  continua: agora quem cuida dele é o atalho criado pelo instalador.
+
 ## [2.0.2] - 2026-10-28
 
 ### Corrigido
