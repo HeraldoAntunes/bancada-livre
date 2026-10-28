@@ -1,12 +1,13 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Exporta a bancada (SVG) como imagem PNG: o circuito inteiro em tamanho real, seja qual for o
-// zoom da tela (ver vistaDeExportacao).
+// Exporta a bancada como imagem PNG ou como desenho vetorial SVG (nítido em qualquer tamanho, bom para prova e
+// slides): o circuito inteiro em tamanho real, seja qual for o zoom da tela (ver vistaDeExportacao).
 import { useCircuit } from '../state/store'
 import { limitesDosComponentes, vistaDeExportacao } from './vista'
 
-export function exportBenchPng() {
+/** O desenho da bancada pronto para sair do programa: SVG solto, com os estilos embutidos. */
+function svgDaBancada(): { xml: string; rect: { width: number; height: number } } | null {
   const svg = document.querySelector('.bench svg') as SVGSVGElement | null
-  if (!svg) return
+  if (!svg) return null
   const tela = svg.getBoundingClientRect()
   const regiao = limitesDosComponentes(useCircuit.getState().components)
   const exp = regiao ? vistaDeExportacao(regiao) : null
@@ -33,7 +34,29 @@ export function exportBenchPng() {
     const tr = getComputedStyle(vivos[i]).transform
     if (tr && tr !== 'none') t.setAttribute('style', `transform-box: fill-box; transform-origin: center; transform: ${tr}`)
   })
-  const xml = new XMLSerializer().serializeToString(clone)
+  return { xml: new XMLSerializer().serializeToString(clone), rect }
+}
+
+function baixarArquivo(blob: Blob, nome: string) {
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = nome
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
+export function exportBenchSvg() {
+  const pronto = svgDaBancada()
+  if (!pronto) return
+  // fundo branco embaixo de tudo: sem ele, o desenho fica transparente no editor de slides
+  const xml = pronto.xml.replace(/(<svg[^>]*>)/, '$1<rect width="100%" height="100%" fill="#ffffff"/>')
+  baixarArquivo(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n', xml], { type: 'image/svg+xml;charset=utf-8' }), 'circuito.svg')
+}
+
+export function exportBenchPng() {
+  const pronto = svgDaBancada()
+  if (!pronto) return
+  const { xml, rect } = pronto
   const url = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }))
   const img = new Image()
   img.onload = () => {
@@ -48,12 +71,7 @@ export function exportBenchPng() {
     ctx.drawImage(img, 0, 0)
     URL.revokeObjectURL(url)
     canvas.toBlob((blob) => {
-      if (!blob) return
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = 'circuito.png'
-      a.click()
-      URL.revokeObjectURL(a.href)
+      if (blob) baixarArquivo(blob, 'circuito.png')
     })
   }
   img.src = url

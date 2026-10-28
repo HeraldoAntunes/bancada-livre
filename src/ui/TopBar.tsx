@@ -9,6 +9,7 @@ import { useCircuit } from '../state/store'
 import { executarNaTela as cmd } from '../comandos'
 import { AboutDialog } from './AboutDialog'
 import { GuideDialog } from './GuideDialog'
+import { KarnaughDialog } from './KarnaughDialog'
 import type { Tab } from './Palette'
 import { Icon, type IconName } from './icons'
 import { Marca } from './Marca'
@@ -16,6 +17,7 @@ import { Marca } from './Marca'
 const TABS: { id: Tab; name: string; icon: IconName }[] = [
   { id: 'ENTRADAS', name: 'ENTRADAS', icon: 'chave' },
   { id: 'PORTAS', name: 'PORTAS', icon: 'porta' },
+  { id: 'MEMORIA', name: 'MEMÓRIA', icon: 'memoria' },
   { id: 'SAIDAS', name: 'SAÍDAS', icon: 'lampada' },
   { id: 'CIS', name: 'CIs', icon: 'chip' },
 ]
@@ -31,7 +33,9 @@ export function TopBar({ tab, stepMode, onToggleStep }: TopBarProps) {
   const canRedo = useCircuit((s) => s.future.length > 0)
   const showNames = useCircuit((s) => s.showNames)
   const guideChip = useCircuit((s) => s.guideChip)
+  const karnaughAberto = useCircuit((s) => s.karnaughAberto)
   const tabelaSolta = useCircuit((s) => s.tabelaSolta)
+  const linhaAtiva = useCircuit((s) => s.linhaAtiva)
   const fileRef = useRef<HTMLInputElement>(null)
   const [showAbout, setShowAbout] = useState(false)
 
@@ -64,6 +68,13 @@ export function TopBar({ tab, stepMode, onToggleStep }: TopBarProps) {
           </button>
           <button className="action" title="Exportar a imagem do circuito" onClick={() => cmd('imagem.exportar')}>
             <Icon name="imagem" size={15} /> PNG
+          </button>
+          <button
+            className="action"
+            title="Exportar o desenho vetorial (SVG): nítido em qualquer tamanho, bom para prova e slides"
+            onClick={() => cmd('imagem.exportar', { formato: 'svg' })}
+          >
+            <Icon name="imagem" size={15} /> SVG
           </button>
         </div>
       </div>
@@ -128,6 +139,13 @@ export function TopBar({ tab, stepMode, onToggleStep }: TopBarProps) {
           >
             <Icon name="tabela" size={15} /> Tabela
           </button>
+          <button
+            className={'action' + (linhaAtiva ? ' active' : '')}
+            title="Linha do tempo: a onda de cada sinal ao longo do tempo (clock, chaves, flip-flops e LEDs)"
+            onClick={() => cmd('linha_do_tempo.mostrar', { mostrar: !linhaAtiva })}
+          >
+            <Icon name="onda" size={15} /> Tempo
+          </button>
           <button className="action" title="Guia de CIs: pinagem, função e exemplos" onClick={() => cmd('guia.abrir')}>
             <Icon name="livro" size={15} /> Guia
           </button>
@@ -151,6 +169,7 @@ export function TopBar({ tab, stepMode, onToggleStep }: TopBarProps) {
       </button>
       {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
       {guideChip && <GuideDialog initial={guideChip} onClose={() => cmd('guia.fechar')} />}
+      {karnaughAberto && <KarnaughDialog />}
       <input
         ref={fileRef}
         type="file"

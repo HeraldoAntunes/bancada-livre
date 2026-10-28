@@ -396,3 +396,69 @@ describe('validação do arquivo aberto', () => {
     expect(abrir([sw, led], fio({ comp: 'b', pin: 'in' }, { comp: 'a', pin: 'out' }))).toMatch(/pino/)
   })
 })
+
+describe('flip-flop no estado do programa', () => {
+  const montar = () =>
+    st().loadJSON(
+      JSON.stringify({
+        version: 1,
+        components: [
+          { id: 'd', type: 'SWITCH', x: 0, y: 0, state: 1 },
+          { id: 'c', type: 'SWITCH', x: 0, y: 100, state: 0 },
+          { id: 'f', type: 'FF_D', x: 200, y: 0 },
+        ],
+        wires: [
+          { id: 'w1', from: { comp: 'd', pin: 'out' }, to: { comp: 'f', pin: 'd' } },
+          { id: 'w2', from: { comp: 'c', pin: 'out' }, to: { comp: 'f', pin: 'clk' } },
+        ],
+      }),
+    )
+  const qDe = () => st().components.find((c) => c.id === 'f')!.q ?? 0
+
+  it('guarda D na borda de subida da chave de clock, sozinho, a cada mudança', () => {
+    expect(montar()).toBeNull()
+    expect(qDe()).toBe(0)
+    st().toggleSwitch('c')
+    expect(qDe()).toBe(1)
+    st().toggleSwitch('d')
+    expect(qDe()).toBe(1)
+  })
+
+  it('recusa estado de flip-flop malformado e estado em componente que não guarda', () => {
+    const um = (c: object) => st().loadJSON(JSON.stringify({ version: 1, components: [c], wires: [] }))
+    expect(um({ id: 'f', type: 'FF_JK', x: 0, y: 0, q: 2 })).toMatch(/estado do flip-flop/)
+    expect(um({ id: 's', type: 'SWITCH', x: 0, y: 0, q: 1 })).toMatch(/estado do flip-flop/)
+    expect(um({ id: 'f', type: 'FF_T', x: 0, y: 0, q: 'X', clkVisto: 1 })).toBeNull()
+  })
+
+  it('o novo flip-flop ganha rótulo FF1', () => {
+    st().addComponent('FF_JK', 0, 0)
+    expect(st().components[st().components.length - 1].label).toBe('FF1')
+  })
+})
+
+describe('CI sequencial no arquivo', () => {
+  const um = (c: object) => st().loadJSON(JSON.stringify({ version: 1, components: [c], wires: [] }))
+  it('aceita estado do tamanho certo e recusa o resto', () => {
+    expect(um({ id: 'c', type: 'IC', chip: '74161', x: 0, y: 0, estadoCi: [1, 0, 1, 'X'], clksVistos: [0] })).toBeNull()
+    expect(um({ id: 'c', type: 'IC', chip: '74161', x: 0, y: 0, estadoCi: [1, 0] })).toMatch(/estado do CI/)
+    expect(um({ id: 'c', type: 'IC', chip: '7400', x: 0, y: 0, estadoCi: [0] })).toMatch(/estado do CI/)
+    expect(um({ id: 'c', type: 'IC', chip: '7474', x: 0, y: 0, clksVistos: [0, 2] })).toMatch(/estado do CI/)
+  })
+})
+
+describe('linha do tempo no estado do programa', () => {
+  it('aberta, cada mudança vira um momento; recomeçar volta a um momento só', () => {
+    st().loadJSON(JSON.stringify({ version: 1, components: [{ id: 'a', type: 'SWITCH', x: 0, y: 0, label: 'A' }], wires: [] }))
+    st().setLinhaAtiva(true)
+    expect(st().linhaDoTempo).toHaveLength(1)
+    st().toggleSwitch('a')
+    st().toggleSwitch('a')
+    expect(st().linhaDoTempo.map((m) => m['a:out'])).toEqual([0, 1, 0])
+    st().limparLinhaDoTempo()
+    expect(st().linhaDoTempo).toHaveLength(1)
+    st().setLinhaAtiva(false)
+    st().toggleSwitch('a')
+    expect(st().linhaDoTempo).toHaveLength(1)
+  })
+})

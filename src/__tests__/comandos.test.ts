@@ -1,7 +1,7 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
 // Cada ação é um comando: toda ação da tela existe também como comando com nome, descrição e parâmetros
 // validados, para um agente de IA usar o programa sem clicar (window.bancadaLivre.executar).
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { executar, listar } from '../comandos'
 import { CHIP_IDS } from '../engine/ics'
 import { useCircuit } from '../state/store'
@@ -43,6 +43,9 @@ const NUCLEO = [
   'tabela.destacar', 'tabela.exportar_csv', 'historico.desfazer', 'historico.refazer', 'nomes.mostrar',
   'guia.abrir', 'guia.fechar', 'guia.carregar_exemplo', 'paleta.aba', 'passo.ligar', 'passo.sair',
   'passo.ir_para', 'passo.proximo', 'passo.anterior', 'arquivo.salvar', 'imagem.exportar',
+  'memoria.definir', 'linha_do_tempo.mostrar', 'linha_do_tempo.limpar', 'linha_do_tempo.ler',
+  'karnaugh.abrir', 'karnaugh.fechar', 'karnaugh.ler', 'gabarito.importar', 'gabarito.conferir', 'gabarito.remover',
+  'versao.ver_nova',
 ]
 
 describe('registro de comandos', () => {
@@ -184,5 +187,67 @@ describe('montar e usar um circuito só com comandos', () => {
     expect(st().showNames).toBe(false)
     ok('clock.pausar')
     expect(st().clockRunning).toBe(false)
+  })
+})
+
+describe('comandos da 2.0: memória, linha do tempo e Karnaugh', () => {
+  it('monta um flip-flop D só com comandos, guarda na borda e mostra na linha do tempo', () => {
+    const d = ok('componente.adicionar', { tipo: 'SWITCH' }).id as string
+    const c = ok('componente.adicionar', { tipo: 'SWITCH' }).id as string
+    const f = ok('componente.adicionar', { tipo: 'FF_D' }).id as string
+    ok('fio.ligar', { de: `${d}:out`, para: `${f}:d` })
+    ok('fio.ligar', { de: `${c}:out`, para: `${f}:clk` })
+    ok('linha_do_tempo.mostrar', { mostrar: true })
+    ok('chave.definir', { id: d, valor: 1 })
+    ok('chave.definir', { id: c, valor: 1 })
+    expect(st().components.find((x) => x.id === f)!.q).toBe(1)
+    const linha = ok('linha_do_tempo.ler').sinais as { nome: string; valores: unknown[] }[]
+    const q = linha.find((s) => s.nome.endsWith('.Q'))!.valores
+    expect(q[q.length - 1]).toBe(1)
+    ok('memoria.definir', { id: f, q: 0 })
+    expect(st().components.find((x) => x.id === f)!.q).toBe(0)
+    expect(erro('memoria.definir', { id: d, q: 1 })).toMatch(/vale para/)
+  })
+
+  it('lê o mapa de Karnaugh do somador completo e recusa saída que não existe', () => {
+    ok('exemplo.abrir', { nome: 'Somador completo' })
+    const m = ok('karnaugh.ler', { saida: 'Cout' })
+    expect((m.grupos as unknown[]).length).toBe(3)
+    expect(erro('karnaugh.abrir', { saida: 'Z9' })).toMatch(/não encontrada/)
+    ok('karnaugh.abrir', { saida: 'Cout' })
+    expect(st().karnaughAberto).toBe(true)
+    ok('karnaugh.fechar')
+    expect(st().karnaughAberto).toBe(false)
+  })
+})
+
+describe('gabarito em CSV', () => {
+  it('importa, confere o meio-somador, recusa CSV torto e remove', () => {
+    ok('exemplo.abrir', { nome: 'Meio-somador' })
+    expect(erro('gabarito.conferir')).toMatch(/nenhum gabarito/)
+    expect(erro('gabarito.importar', { csv: 'A;B\n0' })).toMatch(/colunas/)
+    ok('gabarito.importar', { csv: 'A;B;S;Cout\n0;0;0;0\n0;1;1;0\n1;0;1;0\n1;1;0;1' })
+    const c = ok('gabarito.conferir')
+    expect([c.certas, c.total]).toEqual([4, 4])
+    ok('gabarito.remover')
+    expect(st().gabarito).toBeNull()
+  })
+})
+
+describe('ver se há versão nova', () => {
+  it('só abre a página de versões no navegador e devolve a versão instalada', () => {
+    const abrir = vi.fn()
+    vi.stubGlobal('window', { open: abrir })
+    try {
+      const r = ok('versao.ver_nova')
+      expect(abrir).toHaveBeenCalledWith(
+        'https://github.com/HeraldoAntunes/bancada-livre/releases/latest',
+        '_blank',
+        'noopener,noreferrer',
+      )
+      expect(r.instalada).toMatch(/^\d+\.\d+\.\d+$/)
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })

@@ -23,6 +23,8 @@ export type IconName =
   | 'porta'
   | 'lampada'
   | 'chip'
+  | 'memoria'
+  | 'onda'
 
 // Cada ícone: as formas cheias e os traços, numa grade de 24 × 24.
 const DESENHOS: Record<IconName, { cheio?: string; traco?: string; ponto?: [number, number] }> = {
@@ -47,6 +49,8 @@ const DESENHOS: Record<IconName, { cheio?: string; traco?: string; ponto?: [numb
   chave: { traco: 'M8 6.5h8a5.5 5.5 0 0 1 0 11H8a5.5 5.5 0 0 1 0-11z', cheio: 'M16 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z' },
   porta: { cheio: 'M6 5h5.5a7 7 0 0 1 0 14H6z', traco: 'M2 9h4 M2 15h4 M18.5 12H22' },
   lampada: { cheio: 'M12 2.5a6.5 6.5 0 0 0-3.8 11.8V17h7.6v-2.7A6.5 6.5 0 0 0 12 2.5z', traco: 'M9 20.5h6' },
+  onda: { traco: 'M2 17h4V7h5v10h5V7h4v10h2' },
+  memoria: { cheio: 'M10.5 5.5h5v5h-5z', traco: 'M6 3h12v18H6z M6 13.5l3.5 2.5L6 18.5 M2 7.5h4 M2 16h4 M18 7.5h4 M18 16.5h4' },
   chip: { cheio: 'M8 3.5h8v17H8z', traco: 'M3.5 7.5H8 M3.5 12H8 M3.5 16.5H8 M16 7.5h4.5 M16 12h4.5 M16 16.5h4.5' },
 }
 

@@ -2,7 +2,7 @@
 // Campos editáveis de um componente (rótulo, entradas, modo, frequência...): os mesmos no painel de
 // propriedades e na janela de edição aberta com duplo clique.
 import { chipOf } from '../engine/ics'
-import { bitsDe, entradaUnica, inputCount, isGate, type CircuitComponent } from '../engine/types'
+import { bitsDe, entradaUnica, inputCount, isGate, isSeq, type CircuitComponent } from '../engine/types'
 import { useCircuit } from '../state/store'
 import { executarNaTela as cmd } from '../comandos'
 import { Icon } from './icons'
@@ -20,9 +20,14 @@ const NOMES: Record<string, string> = {
   DISPLAY: 'Display 7 segmentos',
   PROBE: 'Sonda (valor lógico)',
   LABEL: 'Texto (anotação)',
+  FF_D: 'Flip-flop D',
+  FF_JK: 'Flip-flop JK',
+  FF_T: 'Flip-flop T',
+  FF_SR: 'Flip-flop SR',
+  LATCH_D: 'Trava D (latch)',
 }
 
-const COM_ROTULO = new Set(['SWITCH', 'PUSH_BUTTON', 'LED', 'DISPLAY', 'PROBE', 'CLOCK', 'LABEL', 'DIP_SWITCH', 'LED_BAR', 'COUNTER'])
+const COM_ROTULO = new Set(['SWITCH', 'PUSH_BUTTON', 'LED', 'DISPLAY', 'PROBE', 'CLOCK', 'LABEL', 'DIP_SWITCH', 'LED_BAR', 'COUNTER', 'FF_D', 'FF_JK', 'FF_T', 'FF_SR', 'LATCH_D'])
 
 export function nomeDoComponente(c: CircuitComponent): string {
   return c.type === 'IC' ? `CI ${chipOf(c).id}` : (NOMES[c.type] ?? `Porta ${c.type}`)
@@ -119,6 +124,19 @@ export function CamposDoComponente({ comp }: { comp: CircuitComponent }) {
             <option value={3}>3 (0 a 7)</option>
             <option value={4}>4 (0 a 15)</option>
           </select>
+        </label>
+      )}
+      {isSeq(comp.type) && (
+        <label className="field">
+          Estado guardado (Q){' '}
+          <select
+            value={comp.q === 1 ? 1 : 0}
+            onChange={(e) => cmd('memoria.definir', { id: comp.id, q: Number(e.target.value) })}
+          >
+            <option value={0}>0</option>
+            <option value={1}>1</option>
+          </select>
+          {comp.q === 'X' && ' (agora indefinido)'}
         </label>
       )}
       {isGate(comp.type) && !entradaUnica(comp.type) && (

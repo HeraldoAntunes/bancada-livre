@@ -23,13 +23,13 @@ booleana do circuito inteiro.
   &nbsp;·&nbsp; <a href="#perguntas-frequentes">Perguntas frequentes</a>
 </p>
 
-### ⬇ Qual arquivo baixar? (versão 1.0.2)
+### ⬇ Qual arquivo baixar? (versão 2.0.0)
 
 | Para quê | Baixar |
 |---|---|
-| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-1.0.2.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.2/Instalar-BancadaLivre-1.0.2.exe) |
-| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-1.0.2-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.2/BancadaLivre-1.0.2-portatil.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-1.0.2.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v1.0.2/BancadaLivre-1.0.2.html) |
+| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-2.0.0.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.0/Instalar-BancadaLivre-2.0.0.exe) |
+| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-2.0.0-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.0/BancadaLivre-2.0.0-portatil.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.0.0.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.0/BancadaLivre-2.0.0.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na
@@ -75,6 +75,8 @@ certutil -hashfile Instalar-BancadaLivre-x.y.z.exe SHA256
 - **Entradas:** chave (SWITCH), CLOCK de 0,5 a 10 Hz (com rodar, pausar e avançar meio período no próprio
   componente), NÍVEL ALTO (1), NÍVEL BAIXO (0), PUSH BUTTON, **banco de chaves** de 4 ou 8 posições e
   **contador automático** de 2 a 4 bits, que gera as combinações no ritmo escolhido.
+- **Memória (aba MEMÓRIA):** flip-flops D, JK, T e SR, disparados na subida do clock, com PR e CLR, e a trava D
+  (latch). Cada um mostra o valor que guarda.
 - **Saídas:** LED (azul, vermelho, verde ou amarelo), **barra de LEDs** de 4 ou 8, display de 7 segmentos (BCD
   de 0 a 9, hexadecimal de 0 a F, ou segmento a segmento) e SONDA.
 - **Fios que mostram o estado** pela cor e pela espessura: em 1, azul e grosso; em 0, cinza e fino. Estados 0, 1,
@@ -82,15 +84,19 @@ certutil -hashfile Instalar-BancadaLivre-x.y.z.exe SHA256
 - **Tabela-verdade** automática de cada porta e do circuito, com os bits do contador como entradas. Clicar numa
   linha aplica aquela combinação ao circuito. Abaixo dela aparece a **expressão booleana**, e o botão **Destacar**
   abre a tabela numa janela grande, boa para projetar.
+- **Mapa de Karnaugh** de 2 a 4 variáveis, com os grupos coloridos e a **expressão simplificada**.
+- **Linha do tempo:** a onda de cada clock, chave, flip-flop e LED ao longo do tempo (diagrama de tempo).
+- **Conferir com gabarito:** importe a tabela esperada em CSV e veja, linha a linha, onde o circuito bate ou não.
 - **CIs da série 74xx** com a pinagem real e alimentação VCC e GND obrigatória, como na protoboard: 7400, 7402,
-  7404, 7408, 7432, 7486, o decodificador 7448, o decodificador 74138, o multiplexador 74151 e o somador de 4 bits
-  74283. O **Guia de CIs** mostra a pinagem e dicas de bancada de cada chip.
+  7404, 7408, 7432, 7486, o decodificador 7448, o decodificador 74138, o multiplexador 74151, o somador de 4 bits
+  74283 e os sequenciais 7474 (dois flip-flops D), 7476 (dois JK), 74161 (contador de 4 bits) e 74164
+  (registrador de deslocamento de 8 bits). O **Guia de CIs** mostra a pinagem e dicas de bancada de cada chip.
 - **Modo passo a passo:** o sinal avança uma porta de cada vez.
-- **30 circuitos de exemplo** em quatro grupos (Básico, Intermediário, Avançado e CIs), da porta AND sozinha até o
-  semáforo com contador e o somador de 4 bits com o 74283.
+- **40 circuitos de exemplo** em cinco grupos (Básico, Intermediário, Avançado, Memória e CIs), da porta AND
+  sozinha até o contador assíncrono com JK, o registrador de deslocamento e o contador 74161 no display.
 - **Bancada confortável:** zoom no ponto do cursor, **Ajustar** para ver o circuito inteiro, espelhar e girar
   componentes, texto livre para anotar, nome das portas (`Aa`), desfazer e refazer.
-- **Salvar e exportar:** salvamento automático, circuito em `.json`, imagem PNG da bancada e tabela em CSV.
+- **Salvar e exportar:** salvamento automático, circuito em `.json`, imagem PNG ou SVG da bancada e tabela em CSV.
 - **Agentes de IA:** cada ação do programa existe também como comando, para um agente de IA que controla o
   navegador usar o simulador sem clicar (ver [Para quem desenvolve](#para-quem-desenvolve)).
 
@@ -132,7 +138,8 @@ só: o aluno abre com dois cliques, sem instalar nada.
 conferir o SHA-256 e a assinatura do Sigstore. Alertas de "editor desconhecido" acontecem porque não há assinatura
 digital paga. Veja [SECURITY.md](.github/SECURITY.md).
 
-**Tem flip-flop e memória?** Ainda não: esta versão é de lógica combinacional. Lógica sequencial está nos planos.
+**Tem flip-flop e memória?** Tem, desde a 2.0: flip-flops D, JK, T e SR, a trava D e os CIs 7474, 7476, 74161
+e 74164, com a linha do tempo para ver o que acontece a cada pulso do clock.
 
 **Posso usar na minha escola ou rede de ensino?** Pode, à vontade, mantendo o aviso de licença.
 
@@ -164,13 +171,16 @@ bancadaLivre.executar('fio.ligar', { de: 'c1:out', para: 'c2:in0' })
 bancadaLivre.executar('tabela.ler')
 ```
 
-Cada comando é um passo do Desfazer. O registro fica em `src/comandos.ts`.
+Montar e editar por comando entra no Desfazer, como pelo mouse; mexer nas chaves e no clock não entra. O registro
+fica em `src/comandos.ts`.
 
 ## Privacidade
 
 Tudo roda no seu computador. O circuito fica guardado só no navegador (salvamento automático) e nos arquivos que
 você mesmo baixar. O simulador não envia nada pela internet, não usa contas nem login e não tem propaganda ou
-rastreamento. O arquivo HTML traz uma política de segurança que bloqueia qualquer acesso à rede.
+rastreamento. O arquivo HTML traz uma política de segurança que bloqueia qualquer acesso à rede. O botão **Ver se
+há versão nova**, na janela Sobre, só abre a página de versões no seu navegador quando você clica nele: o programa
+não consulta a internet sozinho.
 
 *This program will not transfer any information to other networked systems unless specifically requested by the user or
 the person installing or operating it.*

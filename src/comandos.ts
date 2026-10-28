@@ -11,7 +11,7 @@ import { CHIP_IDS, chipOf, icPowered } from './engine/ics'
 import { allInputPins, allOutputPins } from './engine/pins'
 import { propagationLevels } from './engine/propagation'
 import { simulate } from './engine/simulate'
-import { circuitTruthTable } from './engine/truthTable'
+import { circuitTruthTable, outputColumns } from './engine/truthTable'
 import {
   bitsDe,
   bitsPermitidos,
@@ -20,6 +20,7 @@ import {
   GATE_TYPES,
   isGate,
   SINK_TYPES,
+  SEQ_TYPES,
   SOURCE_TYPES,
   type CircuitComponent,
   type ComponentType,
@@ -28,7 +29,11 @@ import {
 } from './engine/types'
 import { useCircuit, type AbaPaleta } from './state/store'
 import { chipDemo } from './ui/demoDoChip'
-import { exportBenchPng } from './ui/exportPng'
+import { exportBenchPng, exportBenchSvg } from './ui/exportPng'
+import { sinaisObservados } from './engine/linhaDoTempo'
+import { mapaKarnaugh } from './engine/karnaugh'
+import { conferir, lerGabarito } from './engine/gabarito'
+import { version } from '../package.json'
 
 export interface Param {
   tipo: 'texto' | 'numero' | 'inteiro' | 'logico'
@@ -152,7 +157,7 @@ function tabela() {
   return t
 }
 
-const TIPOS: ComponentType[] = [...SOURCE_TYPES, ...GATE_TYPES, ...SINK_TYPES, 'IC', 'LABEL']
+const TIPOS: ComponentType[] = [...SOURCE_TYPES, ...GATE_TYPES, ...SEQ_TYPES, ...SINK_TYPES, 'IC', 'LABEL']
 const id = { tipo: 'texto', descricao: 'id do componente (ex.: "c3"), como em circuito.ler' } as const
 const nada = {} as Record<string, Param>
 
@@ -215,9 +220,9 @@ registrar('arquivo.salvar', {
 })
 
 registrar('imagem.exportar', {
-  descricao: 'Baixa a imagem PNG do circuito inteiro',
-  params: nada,
-  executar: () => exportBenchPng(),
+  descricao: 'Baixa a imagem do circuito inteiro: PNG (padrão) ou SVG, o desenho vetorial nítido em qualquer tamanho',
+  params: { formato: { tipo: 'texto', descricao: 'png ou svg', valores: ['png', 'svg'], opcional: true } },
+  executar: (p) => (p.formato === 'svg' ? exportBenchSvg() : exportBenchPng()),
 })
 
 registrar('exemplo.listar', {
@@ -444,6 +449,14 @@ registrar('clock.frequencia', {
   executar: (p) => st().setClockFreq(comp(p.id, ['CLOCK', 'COUNTER']).id, p.hz as number),
 })
 
+// ---------------------------------------------------------------- memória
+
+registrar('memoria.definir', {
+  descricao: 'Estado guardado de um flip-flop ou trava D (Q = 0 ou 1), sem esperar o clock',
+  params: { id, q: { tipo: 'inteiro', descricao: 'novo estado', valores: [0, 1] } },
+  executar: (p) => st().setEstadoMemoria(comp(p.id, [...SEQ_TYPES]).id, p.q as 0 | 1),
+})
+
 // ---------------------------------------------------------------- tabela-verdade
 
 registrar('tabela.ler', {
@@ -490,6 +503,103 @@ registrar('tabela.exportar_csv', {
   },
 })
 
+// ---------------------------------------------------------------- gabarito
+
+registrar('gabarito.importar', {
+  descricao: 'Lê uma tabela-verdade esperada em CSV (mesmo formato do Exportar CSV) para conferir o circuito linha a linha',
+  params: { csv: { tipo: 'texto', descricao: 'conteúdo do arquivo .csv: nomes das colunas na primeira linha' } },
+  executar: (p) => {
+    const g = lerGabarito(p.csv as string)
+    if (typeof g === 'string') throw new Falha(g)
+    st().setGabarito(g)
+  },
+})
+
+registrar('gabarito.conferir', {
+  descricao: 'Compara o circuito com o gabarito importado: linhas certas, e em cada linha errada o esperado e o obtido',
+  params: nada,
+  executar: () => {
+    const g = st().gabarito
+    if (!g) throw new Falha('nenhum gabarito importado (use gabarito.importar)')
+    const c = conferir(g, tabela())
+    return {
+      certas: c.acertos,
+      total: c.linhas.length,
+      erradas: c.linhas.filter((l) => l.erros.length > 0),
+      faltam: c.faltam,
+      sobram: c.sobram,
+    }
+  },
+})
+
+registrar('gabarito.remover', {
+  descricao: 'Tira o gabarito: a tabela volta a mostrar só o circuito',
+  params: nada,
+  executar: () => st().setGabarito(null),
+})
+
+// ---------------------------------------------------------------- mapa de Karnaugh
+
+/** Posição da saída pedida entre as que dão 0 ou 1 (o display fica de fora). */
+function saidaDoMapa(nome: unknown): number {
+  const saidas = outputColumns(st().components).filter((o) => o.comp.type !== 'DISPLAY')
+  if (nome === undefined) return 0
+  const i = saidas.findIndex((o) => o.name === nome)
+  if (i < 0) throw new Falha(`saída "${String(nome)}" não encontrada (saídas: ${saidas.map((o) => o.name).join(', ')})`)
+  return i
+}
+
+registrar('karnaugh.abrir', {
+  descricao: 'Abre o mapa de Karnaugh do circuito (2 a 4 entradas), com os grupos e a expressão simplificada',
+  params: { saida: { tipo: 'texto', descricao: 'nome da saída (LED, sonda...); sem ela, a primeira', opcional: true } },
+  executar: (p) => st().setKarnaugh(true, saidaDoMapa(p.saida)),
+})
+
+registrar('karnaugh.fechar', { descricao: 'Fecha o mapa de Karnaugh', params: nada, executar: () => st().setKarnaugh(false) })
+
+registrar('karnaugh.ler', {
+  descricao: 'Mapa de Karnaugh de uma saída: rótulos em código Gray, valor de cada célula, grupos e expressão simplificada',
+  params: { saida: { tipo: 'texto', descricao: 'nome da saída; sem ela, a primeira', opcional: true } },
+  executar: (p) => {
+    const t = tabela()
+    const nome = outputColumns(st().components).filter((o) => o.comp.type !== 'DISPLAY')[saidaDoMapa(p.saida)]?.name
+    const m = mapaKarnaugh(t, t.outputs.findIndex((o) => o.name === nome))
+    if (!m) throw new Falha('o mapa vale para 2 a 4 entradas e uma saída que dá 0 ou 1 em todas as linhas')
+    return {
+      linhas: { variaveis: m.varsLinha, rotulos: m.rotulosLinha },
+      colunas: { variaveis: m.varsColuna, rotulos: m.rotulosColuna },
+      valores: m.valor,
+      grupos: m.grupos.map((g) => ({ termo: g.termo, mintermos: g.mintermos })),
+      expressao: m.expressao,
+    }
+  },
+})
+
+// ---------------------------------------------------------------- linha do tempo
+
+registrar('linha_do_tempo.mostrar', {
+  descricao: 'Abre (true) ou fecha (false) a linha do tempo dos sinais; aberta, cada mudança do circuito vira um momento',
+  params: { mostrar: { tipo: 'logico', descricao: 'true abre, false fecha' } },
+  executar: (p) => st().setLinhaAtiva(p.mostrar as boolean),
+})
+
+registrar('linha_do_tempo.limpar', {
+  descricao: 'Apaga o que a linha do tempo guardou e recomeça do momento atual',
+  params: nada,
+  executar: () => st().limparLinhaDoTempo(),
+})
+
+registrar('linha_do_tempo.ler', {
+  descricao: 'Os sinais da linha do tempo e o valor de cada um em cada momento guardado, do mais antigo ao mais novo',
+  params: nada,
+  executar: () => {
+    const { components, linhaDoTempo } = st()
+    return {
+      sinais: sinaisObservados(components).map((s) => ({ nome: s.nome, valores: linhaDoTempo.map((a) => a[s.chave] ?? 'X') })),
+    }
+  },
+})
+
 // ---------------------------------------------------------------- histórico, vista e aula
 
 registrar('historico.desfazer', { descricao: 'Desfaz a última mudança (Ctrl+Z)', params: nada, executar: () => st().undo() })
@@ -503,8 +613,20 @@ registrar('nomes.mostrar', {
 
 registrar('paleta.aba', {
   descricao: 'Abre uma aba da paleta de componentes',
-  params: { aba: { tipo: 'texto', descricao: 'aba da paleta', valores: ['ENTRADAS', 'PORTAS', 'SAIDAS', 'CIS'] } },
+  params: { aba: { tipo: 'texto', descricao: 'aba da paleta', valores: ['ENTRADAS', 'PORTAS', 'MEMORIA', 'SAIDAS', 'CIS'] } },
   executar: (p) => st().setAbaPaleta(p.aba as AbaPaleta),
+})
+
+/** Página da versão mais recente: o botão do Sobre só abre esta página, o programa nunca a consulta sozinho. */
+export const PAGINA_VERSOES = 'https://github.com/HeraldoAntunes/bancada-livre/releases/latest'
+
+registrar('versao.ver_nova', {
+  descricao: 'Abre no navegador a página da versão mais recente (o programa não consulta a internet sozinho) e devolve a versão instalada',
+  params: nada,
+  executar: () => {
+    window.open(PAGINA_VERSOES, '_blank', 'noopener,noreferrer')
+    return { instalada: version, pagina: PAGINA_VERSOES }
+  },
 })
 
 registrar('guia.abrir', {

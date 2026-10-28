@@ -9,10 +9,35 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+## [2.0.0] - 2026-10-27 · "Memória e tempo"
+
+Lógica sequencial: o Bancada Livre passa a ter flip-flops, e com eles a outra metade da disciplina. Circuitos
+salvos nesta versão que usem as peças novas não abrem na 1.0.x; os circuitos antigos abrem normalmente aqui.
+
+### Adicionado
+- **Aba MEMÓRIA:** flip-flops D, JK, T e SR, que mudam na subida do clock, com PR e CLR que agem na hora, e a
+  trava D (latch), que acompanha D enquanto EN está em 1. Cada um mostra o valor guardado, que dá para mudar no
+  painel. A realimentação através de um flip-flop funciona, e uma trava que oscila fica indefinida em vez de
+  travar o programa.
+- **CIs sequenciais** com a pinagem real: 7474 (dois flip-flops D), 7476 (dois JK, que mudam na descida do clock),
+  74161 (contador síncrono de 4 bits, com carga e limpar) e 74164 (registrador de deslocamento de 8 bits), cada um
+  com a sua página no Guia de CIs.
+- **Linha do tempo** (botão Tempo): a onda de cada clock, chave, flip-flop e LED ao longo do tempo, numa janela
+  que dá para mover e aumentar.
+- **Mapa de Karnaugh** de circuitos com 2 a 4 entradas: células em ordem de código Gray, grupos coloridos e a
+  expressão simplificada. Clicar numa célula põe as chaves naquela combinação.
+- **Conferir com gabarito:** importar uma tabela-verdade esperada em CSV (o mesmo formato do Exportar CSV) e ver,
+  linha a linha, onde o circuito bate ou não.
+- **Exportar SVG:** o desenho do circuito nítido em qualquer tamanho, para prova e slides.
+- **Ver se há versão nova**, na janela Sobre: abre a página de versões no navegador, ao lado da versão instalada.
+  O programa continua sem consultar a internet sozinho.
+- 10 circuitos de exemplo novos, um grupo Memória e quatro exemplos de CIs sequenciais: 40 ao todo.
+- Comandos novos para agentes de IA: memória, linha do tempo, mapa de Karnaugh e gabarito.
+
 ### Alterado
+- A tabela-verdade avisa quando o circuito tem memória (a saída depende do que veio antes).
 - Ferramenta de testes atualizada (Vitest 4.1.12), o que resolve os alertas de segurança das ferramentas de
-  montagem. Nada muda no programa: o arquivo HTML gerado é o mesmo da 1.0.2.
-- Instalador montado com setuptools 84.2.1 (correção de segurança da ferramenta de empacotamento).
+  montagem, e instalador montado com setuptools 84.2.1.
 - Cada release ganha um atestado de origem (SLSA), conferível com `gh attestation verify`.
 
 ## [1.0.2] - 2026-10-27 · "Arquivos mais seguros"

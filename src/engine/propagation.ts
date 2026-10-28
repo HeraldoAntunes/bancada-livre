@@ -25,7 +25,8 @@ export function propagationLevels(components: CircuitComponent[], wires: Wire[])
   while (queue.length > 0) {
     const u = queue.shift()!
     const c = byId.get(graph.unitComp.get(u)!)!
-    if (isSource(c.type)) {
+    // saída de flip-flop sem PR/CLR ligados é estado guardado: nasce pronta, como uma fonte
+    if (isSource(c.type) || (graph.seqSaida.has(u) && (graph.preds.get(u) ?? []).length === 0)) {
       unitLevel.set(u, 0)
     } else {
       const ps = graph.preds.get(u) ?? []

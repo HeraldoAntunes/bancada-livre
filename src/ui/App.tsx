@@ -8,6 +8,7 @@ import { executarNaTela as cmd } from '../comandos'
 import { Palette } from './Palette'
 import { BarraPasso } from './BarraPasso'
 import { JanelaEdicao } from './JanelaEdicao'
+import { JanelaLinhaDoTempo } from './JanelaLinhaDoTempo'
 import { JanelaTabela } from './JanelaTabela'
 import { descreverNivel } from './passos'
 import { SidePanel } from './SidePanel'
@@ -18,6 +19,7 @@ import { Icon } from './icons'
 export default function App() {
   const components = useCircuit((s) => s.components)
   const tabelaSolta = useCircuit((s) => s.tabelaSolta)
+  const linhaAtiva = useCircuit((s) => s.linhaAtiva)
   const wires = useCircuit((s) => s.wires)
   const clockRunning = useCircuit((s) => s.clockRunning)
   const tickClocks = useCircuit((s) => s.tickClocks)
@@ -104,6 +106,7 @@ export default function App() {
       )}
       <SidePanel sim={sim} />
       {tabelaSolta && <JanelaTabela />}
+      {linhaAtiva && <JanelaLinhaDoTempo />}
       <JanelaEdicao />
       <footer className="status">
         <span>

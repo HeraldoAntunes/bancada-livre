@@ -5,6 +5,9 @@
 import { create } from 'zustand'
 import { CHIPS, type ChipId } from '../engine/ics'
 import { allInputPins, allOutputPins } from '../engine/pins'
+import type { Gabarito } from '../engine/gabarito'
+import { acrescentar, amostrar, type Amostra } from '../engine/linhaDoTempo'
+import { assentar } from '../engine/sequencial'
 import {
   bitsDe,
   bitsPermitidos,
@@ -13,6 +16,8 @@ import {
   GATE_TYPES,
   inputPins,
   isGate,
+  isSeq,
+  SEQ_TYPES,
   SINK_TYPES,
   SOURCE_TYPES,
   type Circuit,
@@ -40,7 +45,7 @@ function bumpCounter(ids: string[]) {
   }
 }
 
-const VALID_TYPES = new Set<string>([...SOURCE_TYPES, ...GATE_TYPES, ...SINK_TYPES, 'IC', 'LABEL'])
+const VALID_TYPES = new Set<string>([...SOURCE_TYPES, ...GATE_TYPES, ...SINK_TYPES, ...SEQ_TYPES, 'IC', 'LABEL'])
 
 /**
  * Valida a forma de um circuito vindo de JSON externo antes de entrar no estado —
@@ -74,6 +79,23 @@ function validateCircuit(data: Circuit): string | null {
     // frequência zero ou absurda pararia o clock com contas infinitas
     if (c.freq !== undefined && !(Number.isFinite(c.freq) && c.freq >= 0.5 && c.freq <= 10)) {
       return `Arquivo inválido: frequência fora da faixa (${c.id}).`
+    }
+    // estado guardado dos elementos de memória (2.0)
+    if (c.q !== undefined && !(isSeq(c.type) && (c.q === 0 || c.q === 1 || c.q === 'X'))) {
+      return `Arquivo inválido: estado do flip-flop malformado (${c.id}).`
+    }
+    if (c.clkVisto !== undefined && !(isSeq(c.type) && (c.clkVisto === 0 || c.clkVisto === 1))) {
+      return `Arquivo inválido: clock do flip-flop malformado (${c.id}).`
+    }
+    if (c.estadoCi !== undefined || c.clksVistos !== undefined) {
+      const seq = c.type === 'IC' && typeof c.chip === 'string' && Object.prototype.hasOwnProperty.call(CHIPS, c.chip)
+        ? CHIPS[c.chip as ChipId].seq
+        : undefined
+      const bits = (v: unknown, n: number, aceita: unknown[]) =>
+        v === undefined || (Array.isArray(v) && v.length === n && v.every((x) => aceita.includes(x)))
+      if (!seq || !bits(c.estadoCi, seq.bits, [0, 1, 'X']) || !bits(c.clksVistos, seq.clocks.length, [0, 1])) {
+        return `Arquivo inválido: estado do CI malformado (${c.id}).`
+      }
     }
     if (c.mode !== undefined && !['bcd', 'hex', 'raw'].includes(c.mode)) {
       return `Arquivo inválido: modo do display desconhecido (${c.id}).`
@@ -163,12 +185,13 @@ function autoLabel(components: CircuitComponent[], type: ComponentType): string 
   if (type === 'PROBE') return firstFree((i) => `P${i + 1}`)
   if (type === 'CLOCK') return firstFree((i) => `CLK${i + 1}`)
   if (type === 'COUNTER') return firstFree((i) => `CT${i + 1}`)
+  if (isSeq(type)) return firstFree((i) => `FF${i + 1}`)
   if (type === 'LABEL') return 'Texto'
   return undefined
 }
 
 /** Abas da paleta. */
-export type AbaPaleta = 'ENTRADAS' | 'PORTAS' | 'SAIDAS' | 'CIS'
+export type AbaPaleta = 'ENTRADAS' | 'PORTAS' | 'MEMORIA' | 'SAIDAS' | 'CIS'
 
 interface Snapshot {
   components: CircuitComponent[]
@@ -242,6 +265,14 @@ export interface CircuitStore {
   carregamentos: number
   /** Tabela-verdade do circuito numa janela flutuante, fora do painel lateral. */
   tabelaSolta: boolean
+  /** Linha do tempo dos sinais aberta: enquanto aberta, cada mudança vira uma amostra. */
+  linhaAtiva: boolean
+  linhaDoTempo: Amostra[]
+  /** Mapa de Karnaugh aberto e qual saída ele mostra (posição entre as saídas de 0 ou 1). */
+  karnaughAberto: boolean
+  karnaughSaida: number
+  /** Tabela-verdade esperada, lida de CSV, para conferir o circuito (não vai no arquivo salvo). */
+  gabarito: Gabarito | null
   /** Componente aberto na janela de edição (duplo clique), ou null. */
   editandoId: string | null
   /** Aba aberta na paleta. */
@@ -252,6 +283,10 @@ export interface CircuitStore {
   setPasso: (passo: { ativo: boolean; nivel: number }) => void
   editar: (id: string | null) => void
   setTabelaSolta: (v: boolean) => void
+  setLinhaAtiva: (v: boolean) => void
+  limparLinhaDoTempo: () => void
+  setKarnaugh: (aberto: boolean, saida?: number) => void
+  setGabarito: (g: Gabarito | null) => void
   setShowNames: (v: boolean) => void
 
   /** Registra o estado atual no histórico antes de uma mutação estrutural. */
@@ -275,6 +310,8 @@ export interface CircuitStore {
   setDisplayMode: (id: string, mode: DisplayMode) => void
   /** Cor do LED; azul (o padrão) tira o campo do arquivo. */
   setCorLed: (id: string, cor: CorLed) => void
+  /** Estado guardado de um flip-flop ou trava (como ligar o circuito já com um valor). */
+  setEstadoMemoria: (id: string, q: 0 | 1) => void
   /** Espelha o desenho (entradas à direita, saída à esquerda), ou desfaz o espelho. */
   espelhar: (id: string) => void
   /** Gira 90 graus no sentido horário (0, 90, 180, 270 e volta). */
@@ -307,6 +344,11 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   showNames: loadShowNames(),
   carregamentos: 0,
   tabelaSolta: false,
+  linhaAtiva: false,
+  linhaDoTempo: [],
+  karnaughAberto: false,
+  karnaughSaida: 0,
+  gabarito: null,
   editandoId: null,
   abaPaleta: 'ENTRADAS',
   setAbaPaleta: (aba) => set({ abaPaleta: aba }),
@@ -314,6 +356,15 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   setPasso: (passo) => set({ passo }),
   editar: (id) => set(id ? { editandoId: id, selectedId: id } : { editandoId: null }),
   setTabelaSolta: (v) => set({ tabelaSolta: v }),
+  // ao abrir, começa do momento atual; fechar guarda o que foi visto até lá
+  setLinhaAtiva: (v) =>
+    set((s) => ({
+      linhaAtiva: v,
+      linhaDoTempo: v && !s.linhaAtiva ? [amostrar(s.components, s.wires)] : s.linhaDoTempo,
+    })),
+  limparLinhaDoTempo: () => set((s) => ({ linhaDoTempo: [amostrar(s.components, s.wires)] })),
+  setGabarito: (g) => set({ gabarito: g }),
+  setKarnaugh: (aberto, saida) => set((s) => ({ karnaughAberto: aberto, karnaughSaida: saida ?? s.karnaughSaida })),
 
   setShowNames: (v) => {
     try {
@@ -482,6 +533,11 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
     }))
   },
 
+  setEstadoMemoria: (id, q) => {
+    get().checkpoint()
+    set((s) => ({ components: s.components.map((c) => (c.id === id && isSeq(c.type) ? { ...c, q } : c)) }))
+  },
+
   setCorLed: (id, cor) => {
     get().checkpoint()
     set((s) => ({
@@ -553,7 +609,7 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
 
   clearAll: () => {
     get().checkpoint()
-    set({ components: [], wires: [], selectedId: null })
+    set({ components: [], wires: [], selectedId: null, linhaDoTempo: [] })
   },
 
   // Aplica apenas em SWITCH e no banco de chaves (chave `id:outN`): PUSH_BUTTON é
@@ -615,7 +671,7 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   loadCircuit: (components, wires) => {
     get().checkpoint()
     bumpCounter([...components.map((c) => c.id), ...wires.map((w) => w.id)])
-    set((s) => ({ components, wires, selectedId: null, editandoId: null, carregamentos: s.carregamentos + 1 }))
+    set((s) => ({ components, wires, selectedId: null, editandoId: null, carregamentos: s.carregamentos + 1, linhaDoTempo: [] }))
   },
 
   toJSON: () => {
@@ -649,6 +705,26 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
     }
   },
 }))
+
+// Elementos de memória: a cada mudança do circuito (chave, clock, fio novo), procura as bordas do clock e atualiza
+// o estado dos flip-flops até tudo parar de mudar. Não é passo do Desfazer: é o circuito reagindo.
+useCircuit.subscribe((s, antes) => {
+  if (s.components === antes.components && s.wires === antes.wires) return
+  const { components } = assentar(s.components, s.wires)
+  if (components !== s.components) {
+    useCircuit.setState({ components })
+    return
+  }
+  // circuito assentado: com a linha do tempo aberta, vira uma amostra (só se algum sinal mudou)
+  if (s.linhaAtiva) {
+    const linhaDoTempo = acrescentar(s.linhaDoTempo, amostrar(s.components, s.wires))
+    if (linhaDoTempo !== s.linhaDoTempo) useCircuit.setState({ linhaDoTempo })
+  }
+})
+{
+  const { components } = assentar(useCircuit.getState().components, useCircuit.getState().wires)
+  if (components !== useCircuit.getState().components) useCircuit.setState({ components })
+}
 
 // Salvamento automático: grava o circuito no localStorage com
 // debounce a cada mudança estrutural — fechar a aba não perde o trabalho.

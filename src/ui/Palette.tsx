@@ -2,7 +2,7 @@
 // Paleta lateral: itens da aba ativa (ENTRADAS / PORTAS / SAÍDAS / CIs).
 
 import { CHIPS, type ChipId } from '../engine/ics'
-import { entradaUnica, isGate, type ComponentType } from '../engine/types'
+import { entradaUnica, inputPins, isGate, isSeq, type ComponentType } from '../engine/types'
 import type { AbaPaleta } from '../state/store'
 import { executarNaTela as cmd } from '../comandos'
 import {
@@ -10,6 +10,7 @@ import {
   CounterBody,
   DipSwitchBody,
   DisplayBody,
+  FlipFlopBody,
   GateShape,
   LedBarBody,
   LedBody,
@@ -47,6 +48,13 @@ const CATALOG: Record<Tab, PaletteItem[]> = {
     { type: 'NOR', name: 'NOR' },
     { type: 'XOR', name: 'XOR' },
     { type: 'XNOR', name: 'XNOR' },
+  ],
+  MEMORIA: [
+    { type: 'FF_D', name: 'FLIP-FLOP D' },
+    { type: 'FF_JK', name: 'FLIP-FLOP JK' },
+    { type: 'FF_T', name: 'FLIP-FLOP T' },
+    { type: 'FF_SR', name: 'FLIP-FLOP SR' },
+    { type: 'LATCH_D', name: 'TRAVA D' },
   ],
   SAIDAS: [
     { type: 'LED', name: 'LED' },
@@ -95,6 +103,15 @@ function PaletteIcon({ type, chip }: { type: ComponentType; chip?: ChipId }) {
         )}
         <line x1={44} y1={24} x2={88} y2={24} stroke="#1a1a1a" strokeWidth={3} />
         <GateShape type={type} h={48} />
+      </svg>
+    )
+  }
+  if (isSeq(type)) {
+    const entradas = inputPins({ id: '', type, x: 0, y: 0 })
+    const h = 18 + Math.max(entradas.length - 1, 1) * 20 + 18
+    return (
+      <svg width={34} height={Math.round((h + 4) * 0.53)} viewBox={`-2 -2 68 ${h + 4}`}>
+        <FlipFlopBody tipo={type} entradas={entradas} q={0} />
       </svg>
     )
   }

@@ -206,6 +206,89 @@ export function GuideDialog({ initial, onClose }: { initial: ChipId; onClose: ()
                 </ul>
               </>
             )}
+            {chip === '7474' && (
+              <>
+                <h4>Como funciona</h4>
+                <ul>
+                  <li>
+                    Dois flip-flops D independentes. Na <strong>subida</strong> do clock (<strong>1CLK(3)</strong>,{' '}
+                    <strong>2CLK(11)</strong>), Q passa a valer o que está em D (<strong>1D(2)</strong>,{' '}
+                    <strong>2D(12)</strong>). Fora da subida, Q guarda o valor.
+                  </li>
+                  <li>
+                    <strong>PR</strong> (predefinir) e <strong>CLR</strong> (limpar) agem na hora, sem esperar o clock, e
+                    são ativos em <em>0</em>: PR em 0 liga Q, CLR em 0 zera Q. Soltos, valem 1 e não atrapalham.
+                  </li>
+                  <li>
+                    <Icon name="alerta" size={14} /> PR e CLR em 0 ao mesmo tempo levam Q e Q̄ a 1. É uma combinação que
+                    não se usa: ao soltar os dois, o estado fica indefinido.
+                  </li>
+                  <li>Ligando D no próprio Q̄, o flip-flop inverte a cada subida e divide a frequência do clock por 2.</li>
+                </ul>
+              </>
+            )}
+            {chip === '7476' && (
+              <>
+                <h4>Como funciona</h4>
+                <ul>
+                  <li>
+                    Dois flip-flops JK. Com J e K em 0, guarda; J em 1 liga; K em 1 zera; os dois em 1, inverte.
+                  </li>
+                  <li>
+                    <Icon name="alerta" size={14} /> Este chip muda na <strong>descida</strong> do clock (de 1 para 0),
+                    não na subida. Por isso, ligando o 1Q no clock do segundo, a contagem sobe.
+                  </li>
+                  <li>
+                    <Icon name="alerta" size={14} /> A alimentação fica no meio: <strong>VCC no pino 5</strong> e{' '}
+                    <strong>GND no pino 13</strong>, não nos cantos como na maioria dos chips.
+                  </li>
+                  <li>
+                    PR e CLR agem na hora e são ativos em 0, como no 7474. J e K precisam estar ligados: soltos, o
+                    estado fica indefinido.
+                  </li>
+                </ul>
+              </>
+            )}
+            {chip === '74161' && (
+              <>
+                <h4>Como funciona</h4>
+                <ul>
+                  <li>
+                    Conta de 0 a 15 em binário a cada <strong>subida</strong> do clock <strong>CLK(2)</strong>.{' '}
+                    <strong>QA(14)</strong> é o bit de peso 1 e <strong>QD(11)</strong> o de peso 8.
+                  </li>
+                  <li>
+                    Para contar, <strong>ENP(7)</strong> e <strong>ENT(10)</strong> ficam em 1. Com qualquer um em 0, a
+                    contagem para.
+                  </li>
+                  <li>
+                    <strong>LOAD(9)</strong> em 0 carrega o número de <strong>A</strong> a <strong>D</strong> na próxima
+                    subida do clock (a carga vence a contagem). <strong>CLR(1)</strong> em 0 zera na hora.
+                  </li>
+                  <li>
+                    <strong>RCO(15)</strong> vai a 1 quando a contagem chega a 15 com ENT em 1: ligado no ENT de outro
+                    74161, forma um contador de 8 bits.
+                  </li>
+                  <li>Entradas de controle soltas valem 1, então o chip conta sozinho só com VCC, GND e clock.</li>
+                </ul>
+              </>
+            )}
+            {chip === '74164' && (
+              <>
+                <h4>Como funciona</h4>
+                <ul>
+                  <li>
+                    A cada <strong>subida</strong> do clock <strong>CLK(8)</strong>, os bits andam uma casa: o que estava
+                    em QA vai para QB, e assim até QH. O bit que entra em QA é <strong>A(1) · B(2)</strong>.
+                  </li>
+                  <li>Ligue B em 1 e use A como entrada; com A ou B em 0, entra um 0.</li>
+                  <li>
+                    <strong>CLR(9)</strong> em 0 zera as oito saídas na hora. Solto, vale 1.
+                  </li>
+                  <li>Serve para transformar uma sequência de bits que chega um por vez em oito saídas ao mesmo tempo.</li>
+                </ul>
+              </>
+            )}
             {table && (
               <>
                 <h4>Tabela-verdade (cada porta)</h4>

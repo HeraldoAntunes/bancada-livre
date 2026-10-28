@@ -2,7 +2,7 @@
 // Geometria dos componentes na bancada: tamanho do corpo e posição dos pinos.
 
 import { chipOf } from '../engine/ics'
-import { bitsDe, inputCount, type CircuitComponent } from '../engine/types'
+import { bitsDe, inputCount, inputPins, isSeq, type CircuitComponent } from '../engine/types'
 import { transformarDirecao, transformarPonto } from './orientacao'
 
 /** Constantes do encapsulamento DIP (compartilhadas com o símbolo). */
@@ -16,6 +16,11 @@ export const bancoY = (i: number) => 26 + i * POSICAO_H
 export const barraY = (i: number) => 16 + i * POSICAO_H
 /** Contador: o valor em binário no alto e uma saída por fileira, do bit mais alto para o mais baixo. */
 export const contadorY = (i: number) => 38 + i * POSICAO_H
+
+/** Flip-flop e trava: uma entrada por fileira à esquerda (as do clock, depois PR e CLR), Q no alto e Q̄ embaixo. */
+export const FF_W = 64
+export const ffY = (i: number) => 18 + i * POSICAO_H
+export const ffAltura = (fileiras: number) => ffY(fileiras - 1) + 18
 
 /** Altura do corpo para um DIP de `totalPins` pinos (14 ou 16). */
 export function icHeight(totalPins: number): number {
@@ -42,6 +47,13 @@ export interface Geometry {
 }
 
 export function geometryOf(c: CircuitComponent): Geometry {
+  if (isSeq(c.type)) {
+    const ins = inputPins(c)
+    const fileiras = Math.max(ins.length, 2)
+    const pins: PinDef[] = ins.map((name, i) => ({ name, x: -20, y: ffY(i), dir: 'in' as const }))
+    pins.push({ name: 'q', x: FF_W + 20, y: ffY(0), dir: 'out' }, { name: 'qn', x: FF_W + 20, y: ffY(fileiras - 1), dir: 'out' })
+    return { w: FF_W, h: ffAltura(fileiras), pins }
+  }
   switch (c.type) {
     case 'SWITCH':
       return { w: 48, h: 60, pins: [{ name: 'out', x: 70, y: 30, dir: 'out' }] }
@@ -60,6 +72,7 @@ export function geometryOf(c: CircuitComponent): Geometry {
       const outs = new Set([
         ...def.gates.map((g) => g.output),
         ...(def.func?.outputs ?? []),
+        ...(def.seq?.saidas ?? []),
       ])
       const pins: PinDef[] = []
       for (let n = 1; n <= def.pins; n++) {

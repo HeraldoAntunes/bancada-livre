@@ -2,8 +2,8 @@
 // Corpos SVG dos componentes — estilo skeuomórfico + portas ANSI.
 
 import type { ChipDef } from '../engine/ics'
-import type { CorLed, GateType, Signal } from '../engine/types'
-import { bancoY, barraY, contadorY, IC_ROW_H, IC_W, icHeight, icPinY } from './geometry'
+import type { CorLed, GateType, SeqType, Signal } from '../engine/types'
+import { bancoY, barraY, contadorY, FF_W, ffAltura, ffY, IC_ROW_H, IC_W, icHeight, icPinY } from './geometry'
 
 const SHAPE = { fill: '#fdfdfd', stroke: '#1a1a1a', strokeWidth: 2.4 } as const
 
@@ -420,6 +420,56 @@ export function CounterBody({ bits, contagem }: { bits: number; contagem: number
           Q{bits - 1 - i}
         </text>
       ))}
+    </g>
+  )
+}
+
+/** Nome curto impresso no corpo de cada elemento de memória. */
+const NOME_FF: Record<SeqType, string> = { FF_D: 'D', FF_JK: 'JK', FF_T: 'T', FF_SR: 'SR', LATCH_D: 'Trava D' }
+
+/** Rótulo de cada entrada dentro do corpo; o clock é o triângulo de borda. */
+const ROTULO_PINO: Record<string, string> = { d: 'D', j: 'J', k: 'K', t: 'T', s: 'S', r: 'R', en: 'EN', pr: 'PR', clr: 'CLR' }
+
+/**
+ * Flip-flop ou trava: entradas à esquerda (o clock marcado com o triângulo de borda de subida), Q no alto e Q̄
+ * embaixo, à direita, e o estado guardado no meio.
+ */
+export function FlipFlopBody({ tipo, entradas, q }: { tipo: SeqType; entradas: string[]; q: 0 | 1 | 'X' }) {
+  const fileiras = Math.max(entradas.length, 2)
+  const h = ffAltura(fileiras)
+  return (
+    <g>
+      <rect x={0} y={0} width={FF_W} height={h} rx={4} fill="#14365c" stroke="#0b2340" strokeWidth={2.5} />
+      {entradas.map((p, i) =>
+        p === 'clk' ? (
+          <path key={p} d={`M 0 ${ffY(i) - 6} L 9 ${ffY(i)} L 0 ${ffY(i) + 6}`} fill="none" stroke="#cfe0f4" strokeWidth={1.6} />
+        ) : (
+          <text key={p} x={5} y={ffY(i) + 3} fontSize={9} fill="#cfe0f4" fontFamily="Consolas, monospace">
+            {ROTULO_PINO[p] ?? p}
+          </text>
+        ),
+      )}
+      <text x={FF_W - 5} y={ffY(0) + 3} textAnchor="end" fontSize={9} fill="#cfe0f4" fontFamily="Consolas, monospace">
+        Q
+      </text>
+      <text
+        x={FF_W - 5}
+        y={ffY(fileiras - 1) + 3}
+        textAnchor="end"
+        fontSize={9}
+        fill="#cfe0f4"
+        fontFamily="Consolas, monospace"
+        style={{ textDecoration: 'overline' }}
+      >
+        Q
+      </text>
+      <text x={FF_W / 2} y={h / 2 - 4} textAnchor="middle" fontSize={tipo === 'LATCH_D' ? 9 : 12} fontWeight={700} fill="#ffffff">
+        {NOME_FF[tipo]}
+      </text>
+      <rect x={FF_W / 2 - 9} y={h / 2 + 1} width={18} height={15} rx={3} fill="#0b2340" />
+      <text x={FF_W / 2} y={h / 2 + 12.5} textAnchor="middle" fontSize={12} fontWeight={700} fill="#8ce99a" fontFamily="Consolas, monospace">
+        {q}
+      </text>
     </g>
   )
 }

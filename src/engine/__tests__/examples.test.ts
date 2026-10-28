@@ -8,6 +8,7 @@ import { decodeDisplay, DIGIT_SEGMENTS } from '../display'
 import { evalGate } from '../gates'
 import { allInputPins, allOutputPins } from '../pins'
 import { simulate } from '../simulate'
+import { assentar } from '../sequencial'
 import { circuitTruthTable } from '../truthTable'
 import { inputPins, isGate, pinKey, type GateType, type Signal } from '../types'
 
@@ -44,7 +45,7 @@ describe('exemplos — estrutura', () => {
 
   it('todo exemplo tem nível e a tabela-verdade não contém X/E', () => {
     for (const ex of EXAMPLES) {
-      expect(['Básico', 'Intermediário', 'Avançado', 'CIs']).toContain(ex.level)
+      expect(['Básico', 'Intermediário', 'Avançado', 'Memória', 'CIs']).toContain(ex.level)
       const t = circuitTruthTable(ex.components, ex.wires)
       for (const r of t.rows) {
         for (const v of r.outputs) {
@@ -310,5 +311,104 @@ describe('exemplos — sanidade extra', () => {
         }
       }
     }
+  })
+})
+
+describe('exemplos — nível Memória', () => {
+  /** Abre o exemplo e devolve um jeito de mexer nas chaves e de ler pinos, assentando a cada mudança. */
+  function bancada(nome: string) {
+    const ex = EXAMPLES.find((e) => e.name === nome)!
+    let cs = assentar(ex.components, ex.wires).components
+    const porRotulo = (r: string) => cs.find((c) => c.label === r)!.id
+    return {
+      mudar(rotulo: string, v: 0 | 1) {
+        const id = porRotulo(rotulo)
+        cs = assentar(
+          cs.map((c) => (c.id === id ? { ...c, state: v } : c)),
+          ex.wires,
+        ).components
+      },
+      pulso(rotulo: string) {
+        this.mudar(rotulo, 1)
+        this.mudar(rotulo, 0)
+      },
+      led(rotulo: string) {
+        const c = cs.find((x) => x.label === rotulo)!
+        return simulate(cs, ex.wires).pins.get(pinKey(c.id, 'in'))
+      },
+      barra(rotulo: string) {
+        const c = cs.find((x) => x.label === rotulo)!
+        const sim = simulate(cs, ex.wires)
+        return inputPins(c).map((p) => sim.pins.get(pinKey(c.id, p)))
+      },
+    }
+  }
+
+  it('Flip-flop D: Q só copia D na subida do botão C', () => {
+    const b = bancada('Flip-flop D: guardar um bit')
+    b.mudar('D', 1)
+    expect(b.led('Q')).toBe(0)
+    b.pulso('C')
+    expect(b.led('Q')).toBe(1)
+    b.mudar('D', 0)
+    expect(b.led('Q')).toBe(1)
+  })
+
+  it('Divisor de frequência: Q inverte uma vez a cada período do clock', () => {
+    const b = bancada('Divisor de frequência com flip-flop T')
+    const q: unknown[] = []
+    for (let i = 0; i < 4; i++) {
+      b.pulso('CLK1')
+      q.push(b.led('Q'))
+    }
+    expect(q).toEqual([1, 0, 1, 0])
+  })
+
+  it('Contador assíncrono de 3 bits: conta de 0 a 7 e volta', () => {
+    const b = bancada('Contador assíncrono de 3 bits com JK')
+    const valores: number[] = []
+    for (let i = 0; i < 9; i++) {
+      b.pulso('CLK1')
+      valores.push(Number(b.led('Q2')) * 4 + Number(b.led('Q1')) * 2 + Number(b.led('Q0')))
+    }
+    expect(valores).toEqual([1, 2, 3, 4, 5, 6, 7, 0, 1])
+  })
+
+  it('Registrador de deslocamento: o 1 da entrada anda uma casa por toque', () => {
+    const b = bancada('Registrador de deslocamento de 4 bits')
+    b.mudar('E', 1)
+    b.pulso('C')
+    b.mudar('E', 0)
+    expect(b.barra('Y')).toEqual([1, 0, 0, 0])
+    b.pulso('C')
+    expect(b.barra('Y')).toEqual([0, 1, 0, 0])
+    b.pulso('C')
+    b.pulso('C')
+    expect(b.barra('Y')).toEqual([0, 0, 0, 1])
+  })
+
+  it('Trava D: segue D com EN = 1 e guarda com EN = 0', () => {
+    const b = bancada('Trava D: transparente e guardando')
+    b.mudar('EN', 1)
+    b.mudar('D', 1)
+    expect(b.led('Q')).toBe(1)
+    b.mudar('EN', 0)
+    b.mudar('D', 0)
+    expect(b.led('Q')).toBe(1)
+  })
+
+  it('Flip-flop SR: S liga, R desliga e S = R = 1 deixa Q indefinido', () => {
+    const b = bancada('Flip-flop SR: ligar, desligar e a combinação proibida')
+    b.mudar('S', 1)
+    b.pulso('C')
+    expect(b.led('Q')).toBe(1)
+    expect(b.led('Q̄')).toBe(0)
+    b.mudar('S', 0)
+    b.mudar('R', 1)
+    b.pulso('C')
+    expect(b.led('Q')).toBe(0)
+    b.mudar('S', 1)
+    b.pulso('C')
+    expect(b.led('Q')).toBe('X')
   })
 })

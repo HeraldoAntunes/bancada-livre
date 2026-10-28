@@ -5,6 +5,7 @@
 import { useEffect } from 'react'
 import { version } from '../../package.json'
 import bandeira from '../assets/bandeira-brasil.svg?raw'
+import { executarNaTela as cmd } from '../comandos'
 import { Marca } from './Marca'
 import { SOBRE } from './sobre'
 
@@ -27,7 +28,17 @@ export function AboutDialog({ onClose }: { onClose: () => void }) {
           <Marca size={32} /> Bancada Livre{' '}
           <img className="bandeira-br" src={BANDEIRA} width={20} height={14} alt="Brasil" title="Feito no Brasil" />
         </h2>
-        <p className="about-version">Versão {version} · 2026</p>
+        <p className="about-version">
+          Versão {version} · 2026{' '}
+          <button
+            className="about-nova"
+            title="Abre no navegador a página da versão mais recente. O programa não consulta a internet sozinho."
+            onClick={() => cmd('versao.ver_nova')}
+          >
+            Ver se há versão nova
+          </button>
+        </p>
+        <p className="hint">Você tem a versão {version}. Compare com o número que aparece na página aberta.</p>
 
         <dl className="about-list">
           <dt>Autor</dt>

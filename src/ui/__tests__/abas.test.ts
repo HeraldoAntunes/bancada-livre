@@ -26,7 +26,7 @@ const chip = (powered: boolean) =>
 describe('abas da paleta', () => {
   it('cada aba tem ícone e nome', () => {
     const abas = barra.match(/<button class="tab[^"]*"[^>]*>.*?<\/button>/g) ?? []
-    expect(abas).toHaveLength(4)
+    expect(abas).toHaveLength(5)
     for (const aba of abas) {
       expect(aba).toContain('<svg')
       expect(aba).toMatch(/<span class="tab-nome">[^<]+<\/span>/)

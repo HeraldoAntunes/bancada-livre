@@ -28,8 +28,8 @@ function powerWires(ic: string, chipId: keyof typeof CHIPS): Wire[] {
 }
 
 describe('definições dos chips', () => {
-  it('10 chips; pinos sem sobreposição e todos com papel definido', () => {
-    expect(CHIP_IDS).toHaveLength(10)
+  it('14 chips; pinos sem sobreposição e todos com papel definido', () => {
+    expect(CHIP_IDS).toHaveLength(14)
     for (const id of CHIP_IDS) {
       const def = CHIPS[id]
       const used = [
@@ -37,6 +37,7 @@ describe('definições dos chips', () => {
         def.gnd,
         ...def.gates.flatMap((g) => [...g.inputs, g.output]),
         ...(def.func ? [...def.func.inputs, ...def.func.outputs] : []),
+        ...(def.seq ? [...def.seq.sincronas, ...def.seq.assincronas, ...def.seq.saidas] : []),
       ]
       expect(new Set(used).size).toBe(def.pins) // cada pino com exatamente um papel
       for (const n of used) expect(n).toBeGreaterThanOrEqual(1)
@@ -51,7 +52,8 @@ describe('definições dos chips', () => {
     expect(CHIPS['7448'].func).toBeDefined()
     expect(CHIPS['7448'].pins).toBe(16)
     for (const id of ['74138', '74151', '74283'] as const) expect(CHIPS[id].func).toBeDefined()
-    for (const id of CHIP_IDS.filter((c) => c !== '7404' && !CHIPS[c].func)) {
+    for (const id of ['7474', '7476', '74161', '74164'] as const) expect(CHIPS[id].seq).toBeDefined()
+    for (const id of CHIP_IDS.filter((c) => c !== '7404' && !CHIPS[c].func && !CHIPS[c].seq)) {
       expect(CHIPS[id].gates).toHaveLength(4)
       for (const g of CHIPS[id].gates) expect(g.inputs).toHaveLength(2)
     }

@@ -7,8 +7,23 @@
 
 import { DIGIT_SEGMENTS } from './display'
 import { pinKey, type CircuitComponent, type GateType, type Signal } from './types'
+import { CHIP_7474, CHIP_7476, CHIP_74161, CHIP_74164, type ChipSeq } from './icsSequenciais'
 
-export type ChipId = '7400' | '7402' | '7404' | '7408' | '7432' | '7486' | '7448' | '74138' | '74151' | '74283'
+export type ChipId =
+  | '7400'
+  | '7402'
+  | '7404'
+  | '7408'
+  | '7432'
+  | '7486'
+  | '7448'
+  | '74138'
+  | '74151'
+  | '74283'
+  | '7474'
+  | '7476'
+  | '74161'
+  | '74164'
 
 export interface ChipGate {
   type: GateType
@@ -40,6 +55,8 @@ export interface ChipDef {
   gates: ChipGate[]
   /** Bloco de função única (ex.: decodificador). */
   func?: ChipFunc
+  /** Parte sequencial (flip-flops, contador, registrador), desde a 2.0. */
+  seq?: ChipSeq
   vcc: number
   gnd: number
   /** Rótulo de cada pino (1 → "1A", 14 → "VCC"…). */
@@ -304,6 +321,10 @@ export const CHIPS: Record<ChipId, ChipDef> = {
   '74138': CHIP_74138,
   '74151': CHIP_74151,
   '74283': CHIP_74283,
+  '7474': CHIP_7474,
+  '7476': CHIP_7476,
+  '74161': CHIP_74161,
+  '74164': CHIP_74164,
 }
 
 export const CHIP_IDS = Object.keys(CHIPS) as ChipId[]

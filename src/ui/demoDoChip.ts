@@ -4,18 +4,22 @@ import { EXAMPLES } from '../examples'
 import { CHIPS, type ChipId } from '../engine/ics'
 import type { CircuitComponent, Wire } from '../engine/types'
 
-/** Chips de função: a montagem da biblioteca de exemplos que o Guia carrega. */
+/** Chips de função e sequenciais: a montagem da biblioteca de exemplos que o Guia carrega. */
 const EXEMPLO_DO_CHIP: Partial<Record<ChipId, string>> = {
   '7448': 'Decodificador 7448 → Display',
   '74138': 'Decodificador 74138 → 8 LEDs',
   '74151': '74151 como gerador de função: maioria de 3',
   '74283': 'Somador de 4 bits com 74283',
+  '7474': '7474: contador de 0 a 3 com dois flip-flops D',
+  '7476': '7476: contador de 0 a 3 com JK',
+  '74161': '74161: contador de 0 a F no display',
+  '74164': '74164: registrador de 8 bits na barra de LEDs',
 }
 
 /** Circuito-demonstração gerado para qualquer chip: alimentação + porta 1 + LED. */
 export function chipDemo(chip: ChipId): { components: CircuitComponent[]; wires: Wire[] } {
   const def = CHIPS[chip]
-  if (def.func) {
+  if (def.func || def.seq) {
     const ex = EXAMPLES.find((e) => e.name === EXEMPLO_DO_CHIP[chip])
     if (ex) return structuredClone({ components: ex.components, wires: ex.wires })
   }

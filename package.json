@@ -1,7 +1,7 @@
 {
   "name": "bancada-livre",
   "private": true,
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Bancada Livre: simulador didático de portas lógicas e CIs 74xx, com simulação em tempo real, tabela-verdade e display de 7 segmentos",
   "author": "Heraldo Antunes",
   "license": "MIT",

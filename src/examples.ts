@@ -18,7 +18,7 @@ const W = (id: string, from: string, fromPin: string, to: string, toPin: string)
   to: { comp: to, pin: toPin },
 })
 
-export type ExampleLevel = 'Básico' | 'Intermediário' | 'Avançado' | 'CIs'
+export type ExampleLevel = 'Básico' | 'Intermediário' | 'Avançado' | 'Memória' | 'CIs'
 
 export interface Example {
   name: string
@@ -628,6 +628,222 @@ export const EXAMPLES: Example[] = [
       W('f4', 'e4', 'out', 'e5', 'in3'),
     ],
   },
+  // ---------- Memória: flip-flops e trava D ----------
+  {
+    // D só entra no flip-flop quando o botão C sobe; soltar o botão ou mudar D depois não muda Q.
+    name: 'Flip-flop D: guardar um bit',
+    level: 'Memória',
+    components: [
+      C('e1', 'SWITCH', 60, 40, { state: 0, label: 'D' }),
+      C('e2', 'PUSH_BUTTON', 60, 170, { state: 0, label: 'C' }),
+      C('e3', 'FF_D', 280, 60, { label: 'FF1' }),
+      C('e4', 'LED', 480, 30, { label: 'Q' }),
+    ],
+    wires: [W('f1', 'e1', 'out', 'e3', 'd'), W('f2', 'e2', 'out', 'e3', 'clk'), W('f3', 'e3', 'q', 'e4', 'in')],
+  },
+  {
+    // Com T = 1 o flip-flop inverte a cada subida do clock: Q pisca na metade da frequência do clock.
+    name: 'Divisor de frequência com flip-flop T',
+    level: 'Memória',
+    components: [
+      C('e1', 'LEVEL_HIGH', 60, 40),
+      C('e2', 'CLOCK', 60, 150, { state: 0, freq: 2, label: 'CLK1' }),
+      C('e3', 'FF_T', 280, 60, { label: 'FF1' }),
+      C('e4', 'LED', 480, 30, { label: 'Q', cor: 'verde' }),
+      C('e5', 'LED', 480, 170, { label: 'CLK', cor: 'amarelo' }),
+    ],
+    wires: [
+      W('f1', 'e1', 'out', 'e3', 't'),
+      W('f2', 'e2', 'out', 'e3', 'clk'),
+      W('f3', 'e3', 'q', 'e4', 'in'),
+      W('f4', 'e2', 'out', 'e5', 'in'),
+    ],
+  },
+  {
+    // Cada JK com J = K = 1 inverte; o Q̄ de um é o clock do de baixo, que sobe quando o de cima desce.
+    name: 'Contador assíncrono de 3 bits com JK',
+    level: 'Memória',
+    components: [
+      C('e1', 'CLOCK', 100, 60, { state: 0, freq: 2, label: 'CLK1' }),
+      C('e2', 'LEVEL_HIGH', 100, 0),
+      C('e3', 'LEVEL_HIGH', 100, 160),
+      C('e4', 'LEVEL_HIGH', 100, 310),
+      C('e5', 'FF_JK', 280, 10, { label: 'FF0' }),
+      C('e6', 'FF_JK', 280, 160, { label: 'FF1' }),
+      C('e7', 'FF_JK', 280, 310, { label: 'FF2' }),
+      C('e8', 'LED', 450, -20, { label: 'Q0' }),
+      C('e9', 'LED', 450, 130, { label: 'Q1' }),
+      C('e10', 'LED', 450, 280, { label: 'Q2' }),
+    ],
+    wires: [
+      W('f1', 'e2', 'out', 'e5', 'j'),
+      W('f2', 'e2', 'out', 'e5', 'k'),
+      W('f3', 'e1', 'out', 'e5', 'clk'),
+      W('f4', 'e3', 'out', 'e6', 'j'),
+      W('f5', 'e3', 'out', 'e6', 'k'),
+      W('f6', 'e5', 'qn', 'e6', 'clk'),
+      W('f7', 'e4', 'out', 'e7', 'j'),
+      W('f8', 'e4', 'out', 'e7', 'k'),
+      W('f9', 'e6', 'qn', 'e7', 'clk'),
+      W('f10', 'e5', 'q', 'e8', 'in'),
+      W('f11', 'e6', 'q', 'e9', 'in'),
+      W('f12', 'e7', 'q', 'e10', 'in'),
+    ],
+  },
+  {
+    // A cada toque em C, o bit da chave E entra à esquerda e os outros andam uma casa para a direita.
+    name: 'Registrador de deslocamento de 4 bits',
+    level: 'Memória',
+    components: [
+      C('e1', 'SWITCH', 30, 40, { state: 0, label: 'E' }),
+      C('e2', 'PUSH_BUTTON', 30, 220, { state: 0, label: 'C' }),
+      C('e3', 'FF_D', 190, 60, { label: 'FF1' }),
+      C('e4', 'FF_D', 340, 60, { label: 'FF2' }),
+      C('e5', 'FF_D', 490, 60, { label: 'FF3' }),
+      C('e6', 'FF_D', 640, 60, { label: 'FF4' }),
+      C('e7', 'LED_BAR', 820, 50, { bits: 4, label: 'Y', cor: 'verde' }),
+    ],
+    wires: [
+      W('f1', 'e1', 'out', 'e3', 'd'),
+      W('f2', 'e3', 'q', 'e4', 'd'),
+      W('f3', 'e4', 'q', 'e5', 'd'),
+      W('f4', 'e5', 'q', 'e6', 'd'),
+      W('f5', 'e2', 'out', 'e3', 'clk'),
+      W('f6', 'e2', 'out', 'e4', 'clk'),
+      W('f7', 'e2', 'out', 'e5', 'clk'),
+      W('f8', 'e2', 'out', 'e6', 'clk'),
+      W('f9', 'e3', 'q', 'e7', 'in0'),
+      W('f10', 'e4', 'q', 'e7', 'in1'),
+      W('f11', 'e5', 'q', 'e7', 'in2'),
+      W('f12', 'e6', 'q', 'e7', 'in3'),
+    ],
+  },
+  {
+    // Com EN = 1 a saída acompanha D na hora; com EN = 0 fica o último valor.
+    name: 'Trava D: transparente e guardando',
+    level: 'Memória',
+    components: [
+      C('e1', 'SWITCH', 60, 40, { state: 0, label: 'D' }),
+      C('e2', 'SWITCH', 60, 170, { state: 0, label: 'EN' }),
+      C('e3', 'LATCH_D', 280, 80, { label: 'T1' }),
+      C('e4', 'LED', 480, 50, { label: 'Q' }),
+    ],
+    wires: [W('f1', 'e1', 'out', 'e3', 'd'), W('f2', 'e2', 'out', 'e3', 'en'), W('f3', 'e3', 'q', 'e4', 'in')],
+  },
+  {
+    // S liga, R desliga e S = R = 1 na subida do clock é a combinação proibida (Q indefinido).
+    name: 'Flip-flop SR: ligar, desligar e a combinação proibida',
+    level: 'Memória',
+    components: [
+      C('e1', 'SWITCH', 60, 20, { state: 0, label: 'S' }),
+      C('e2', 'PUSH_BUTTON', 60, 130, { state: 0, label: 'C' }),
+      C('e3', 'SWITCH', 60, 230, { state: 0, label: 'R' }),
+      C('e4', 'FF_SR', 280, 80, { label: 'FF1' }),
+      C('e5', 'LED', 480, 50, { label: 'Q' }),
+      C('e6', 'LED', 480, 170, { label: 'Q̄', cor: 'vermelho' }),
+    ],
+    wires: [
+      W('f1', 'e1', 'out', 'e4', 's'),
+      W('f2', 'e2', 'out', 'e4', 'clk'),
+      W('f3', 'e3', 'out', 'e4', 'r'),
+      W('f4', 'e4', 'q', 'e5', 'in'),
+      W('f5', 'e4', 'qn', 'e6', 'in'),
+    ],
+  },
+  // ---------- CIs sequenciais ----------
+  {
+    // Cada flip-flop do 7474 com D ligado ao próprio Q̄ inverte a cada subida; o 1Q̄ é o clock do segundo.
+    name: '7474: contador de 0 a 3 com dois flip-flops D',
+    level: 'CIs',
+    components: [
+      C('e1', 'LEVEL_HIGH', 40, 20),
+      C('e2', 'LEVEL_LOW', 40, 300),
+      C('e3', 'CLOCK', 40, 110, { state: 0, freq: 2, label: 'CLK1' }),
+      C('e4', 'IC', 260, 40, { chip: '7474' }),
+      C('e5', 'LED', 500, 10, { label: 'Q1' }),
+      C('e6', 'LED', 500, 120, { label: 'Q0' }),
+    ],
+    wires: [
+      W('f1', 'e1', 'out', 'e4', 'p14'),
+      W('f2', 'e2', 'out', 'e4', 'p7'),
+      W('f3', 'e3', 'out', 'e4', 'p3'),
+      W('f4', 'e4', 'p6', 'e4', 'p2'),
+      W('f5', 'e4', 'p6', 'e4', 'p11'),
+      W('f6', 'e4', 'p8', 'e4', 'p12'),
+      W('f7', 'e4', 'p9', 'e5', 'in'),
+      W('f8', 'e4', 'p5', 'e6', 'in'),
+    ],
+  },
+  {
+    // J = K = 1: cada JK do 7476 inverte na DESCIDA do clock; 1Q é o clock do segundo, então a contagem sobe.
+    name: '7476: contador de 0 a 3 com JK',
+    level: 'CIs',
+    components: [
+      C('e1', 'LEVEL_HIGH', 30, 20),
+      C('e2', 'LEVEL_LOW', 30, 330),
+      C('e3', 'CLOCK', 30, 110, { state: 0, freq: 2, label: 'CLK1' }),
+      C('e4', 'LEVEL_HIGH', 30, 200),
+      C('e5', 'IC', 260, 40, { chip: '7476' }),
+      C('e6', 'LED', 520, 20, { label: 'Q1' }),
+      C('e7', 'LED', 520, 150, { label: 'Q0' }),
+    ],
+    wires: [
+      W('f1', 'e1', 'out', 'e5', 'p5'),
+      W('f2', 'e2', 'out', 'e5', 'p13'),
+      W('f3', 'e3', 'out', 'e5', 'p1'),
+      W('f4', 'e4', 'out', 'e5', 'p4'),
+      W('f5', 'e4', 'out', 'e5', 'p16'),
+      W('f6', 'e4', 'out', 'e5', 'p9'),
+      W('f7', 'e4', 'out', 'e5', 'p12'),
+      W('f8', 'e5', 'p15', 'e5', 'p6'),
+      W('f9', 'e5', 'p11', 'e6', 'in'),
+      W('f10', 'e5', 'p15', 'e7', 'in'),
+    ],
+  },
+  {
+    // Com CLR̄, LOAD̄, ENP e ENT soltos (TTL solto vale 1), o 74161 só conta: 0 a 15 no display em hexadecimal.
+    name: '74161: contador de 0 a F no display',
+    level: 'CIs',
+    components: [
+      C('e1', 'LEVEL_HIGH', 40, 20),
+      C('e2', 'LEVEL_LOW', 40, 300),
+      C('e3', 'CLOCK', 40, 110, { state: 0, freq: 2, label: 'CLK1' }),
+      C('e4', 'IC', 260, 40, { chip: '74161' }),
+      C('e5', 'DISPLAY', 520, 50, { mode: 'hex', label: 'D1' }),
+      C('e6', 'LED', 520, 220, { label: 'RCO', cor: 'vermelho' }),
+    ],
+    wires: [
+      W('f1', 'e1', 'out', 'e4', 'p16'),
+      W('f2', 'e2', 'out', 'e4', 'p8'),
+      W('f3', 'e3', 'out', 'e4', 'p2'),
+      W('f4', 'e4', 'p11', 'e5', 'in0'),
+      W('f5', 'e4', 'p12', 'e5', 'in1'),
+      W('f6', 'e4', 'p13', 'e5', 'in2'),
+      W('f7', 'e4', 'p14', 'e5', 'in3'),
+      W('f8', 'e4', 'p15', 'e6', 'in'),
+    ],
+  },
+  {
+    // A entrada serial é A·B: com B em 1, o bit da chave A entra em QA a cada toque em C e os outros andam.
+    name: '74164: registrador de 8 bits na barra de LEDs',
+    level: 'CIs',
+    components: [
+      C('e1', 'LEVEL_HIGH', 40, 0),
+      C('e2', 'LEVEL_LOW', 40, 330),
+      C('e3', 'SWITCH', 40, 60, { state: 0, label: 'A' }),
+      C('e4', 'PUSH_BUTTON', 40, 230, { state: 0, label: 'C' }),
+      C('e5', 'IC', 260, 40, { chip: '74164' }),
+      C('e6', 'LED_BAR', 520, 20, { bits: 8, label: 'Y', cor: 'verde' }),
+    ],
+    wires: [
+      W('f1', 'e1', 'out', 'e5', 'p14'),
+      W('f2', 'e2', 'out', 'e5', 'p7'),
+      W('f3', 'e3', 'out', 'e5', 'p1'),
+      W('f4', 'e1', 'out', 'e5', 'p2'),
+      W('f5', 'e4', 'out', 'e5', 'p8'),
+      ...[3, 4, 5, 6, 10, 11, 12, 13].map((n, i) => W(`f${6 + i}`, 'e5', `p${n}`, 'e6', `in${i}`)),
+    ],
+  },
 ]
 
-export const EXAMPLE_LEVELS: ExampleLevel[] = ['Básico', 'Intermediário', 'Avançado', 'CIs']
+export const EXAMPLE_LEVELS: ExampleLevel[] = ['Básico', 'Intermediário', 'Avançado', 'Memória', 'CIs']

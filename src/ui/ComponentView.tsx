@@ -9,6 +9,7 @@ import {
   bitsDe,
   inputCount,
   inputPins,
+  isSeq,
   isGate,
   pinKey,
   type CircuitComponent,
@@ -24,6 +25,7 @@ import {
   ChipBody,
   ClockBody,
   CounterBody,
+  FlipFlopBody,
   DipSwitchBody,
   DisplayBody,
   GateShape,
@@ -117,6 +119,8 @@ export function ComponentView({
       })()
     ) : comp.type === 'IC' ? (
       <ChipBody def={chipOf(comp)} powered={icPowered(comp, sim.pins)} />
+    ) : isSeq(comp.type) ? (
+      <FlipFlopBody tipo={comp.type} entradas={inputPins(comp)} q={comp.q ?? 0} />
     ) : comp.type === 'LABEL' ? (
       <text x={4} y={18} fontSize={15} fontWeight={700} fill="#2f4a66">
         {comp.label || 'Texto…'}

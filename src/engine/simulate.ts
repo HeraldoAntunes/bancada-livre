@@ -2,15 +2,21 @@
 // Motor de simulação combinacional.
 // A ordenação topológica trabalha sobre UNIDADES: componentes comuns são uma
 // unidade; cada porta interna de um CI é uma unidade própria — encadear portas
-// do mesmo chip não dispara falso laço.
+// do mesmo chip não dispara falso laço. Elementos de memória também viram duas unidades: uma só lê as entradas
+// que esperam o clock (não produz nada) e a outra produz Q e Q̄ a partir do estado guardado e de PR/CLR; assim a
+// realimentação através de um flip-flop não é laço.
 
 import { evalGate } from './gates'
 import { chipOf, type ChipFunc, type ChipGate } from './ics'
 import { allOutputPins } from './pins'
+import { saidasDe } from './sequencial'
 import {
   bitsDe,
+  entradasAssincronas,
+  entradasSincronas,
   inputPins,
   isGate,
+  isSeq,
   isSink,
   isSource,
   pinKey,
@@ -39,6 +45,8 @@ export interface UnitGraph {
   icGate: Map<string, ChipGate>
   /** unidade → bloco de função do CI (chips como o 7448). */
   icFunc: Map<string, ChipFunc>
+  /** Unidades que produzem Q e Q̄ de um elemento de memória (`compId#q`). */
+  seqSaida: Set<string>
   adj: Map<string, string[]>
   indeg: Map<string, number>
   preds: Map<string, string[]>
@@ -51,6 +59,7 @@ export function buildUnitGraph(components: CircuitComponent[], wires: Wire[]): U
   const unitComp = new Map<string, string>()
   const icGate = new Map<string, ChipGate>()
   const icFunc = new Map<string, ChipFunc>()
+  const seqSaida = new Set<string>()
   /** pino de saída → unidade que o produz */
   const outPinUnit = new Map<string, string>()
   /** pino de entrada → unidades que o consomem */
@@ -69,6 +78,19 @@ export function buildUnitGraph(components: CircuitComponent[], wires: Wire[]): U
         outPinUnit.set(pinKey(c.id, `p${g.output}`), u)
         for (const n of g.inputs) inPinUnits.set(pinKey(c.id, `p${n}`), [u])
       })
+      if (def.seq) {
+        // como nos flip-flops soltos: uma unidade só lê as entradas do clock, a outra produz as saídas
+        const ler = `${c.id}#s`
+        const saida = `${c.id}#o`
+        units.push(ler, saida)
+        unitComp.set(ler, c.id)
+        unitComp.set(saida, c.id)
+        seqSaida.add(saida)
+        chipUnits.push(ler, saida)
+        for (const n of def.seq.sincronas) inPinUnits.set(pinKey(c.id, `p${n}`), [ler])
+        for (const n of def.seq.assincronas) inPinUnits.set(pinKey(c.id, `p${n}`), [saida])
+        for (const n of def.seq.saidas) outPinUnit.set(pinKey(c.id, `p${n}`), saida)
+      }
       if (def.func) {
         const u = `${c.id}#f`
         units.push(u)
@@ -81,6 +103,15 @@ export function buildUnitGraph(components: CircuitComponent[], wires: Wire[]): U
       // VCC/GND alimentam todas as unidades do chip
       inPinUnits.set(pinKey(c.id, `p${def.vcc}`), chipUnits)
       inPinUnits.set(pinKey(c.id, `p${def.gnd}`), chipUnits)
+    } else if (isSeq(c.type)) {
+      const saida = `${c.id}#q`
+      units.push(c.id, saida)
+      unitComp.set(c.id, c.id)
+      unitComp.set(saida, c.id)
+      seqSaida.add(saida)
+      for (const p of entradasSincronas(c.type)) inPinUnits.set(pinKey(c.id, p), [c.id])
+      for (const p of entradasAssincronas(c.type)) inPinUnits.set(pinKey(c.id, p), [saida])
+      for (const p of allOutputPins(c)) outPinUnit.set(pinKey(c.id, p), saida)
     } else {
       units.push(c.id)
       unitComp.set(c.id, c.id)
@@ -103,7 +134,7 @@ export function buildUnitGraph(components: CircuitComponent[], wires: Wire[]): U
       preds.get(dst)!.push(src)
     }
   }
-  return { units, unitComp, icGate, icFunc, adj, indeg, preds }
+  return { units, unitComp, icGate, icFunc, seqSaida, adj, indeg, preds }
 }
 
 /**
@@ -165,7 +196,26 @@ export function simulate(
     const c = byId.get(graph.unitComp.get(u)!)!
     const gate = graph.icGate.get(u)
     const func = graph.icFunc.get(u)
-    if (func) {
+    if (c.type === 'IC' && chipOf(c).seq && !gate) {
+      const def = chipOf(c)
+      const seq = def.seq!
+      const vcc = readInput(c.id, `p${def.vcc}`)
+      const gnd = readInput(c.id, `p${def.gnd}`)
+      pins.set(pinKey(c.id, `p${def.vcc}`), vcc)
+      pins.set(pinKey(c.id, `p${def.gnd}`), gnd)
+      if (graph.seqSaida.has(u)) {
+        const asinc = seq.assincronas.map((n) => {
+          const v = readInput(c.id, `p${n}`)
+          pins.set(pinKey(c.id, `p${n}`), v)
+          return v
+        })
+        const estado = c.estadoCi ?? Array<0>(seq.bits).fill(0)
+        const outs = vcc === 1 && gnd === 0 ? seq.saida(estado, asinc) : seq.saidas.map(() => 'X' as Signal)
+        seq.saidas.forEach((n, i) => pins.set(pinKey(c.id, `p${n}`), outs[i]))
+      } else {
+        for (const n of seq.sincronas) pins.set(pinKey(c.id, `p${n}`), readInput(c.id, `p${n}`))
+      }
+    } else if (func) {
       // bloco de função (ex.: decodificador 7448) — avaliado inteiro de uma vez
       const def = chipOf(c)
       const vcc = readInput(c.id, `p${def.vcc}`)
@@ -194,6 +244,19 @@ export function simulate(
       })
       const powered = vcc === 1 && gnd === 0
       pins.set(pinKey(c.id, `p${gate.output}`), powered ? evalGate(gate.type, ins) : 'X')
+    } else if (isSeq(c.type)) {
+      if (graph.seqSaida.has(u)) {
+        const lidos = entradasAssincronas(c.type).map((p) => {
+          const v = readInput(c.id, p)
+          pins.set(pinKey(c.id, p), v)
+          return v
+        })
+        const [q, qn] = saidasDe(c.q ?? 0, lidos[0], lidos[1])
+        pins.set(pinKey(c.id, 'q'), q)
+        pins.set(pinKey(c.id, 'qn'), qn)
+      } else {
+        for (const p of entradasSincronas(c.type)) pins.set(pinKey(c.id, p), readInput(c.id, p))
+      }
     } else if (c.type === 'DIP_SWITCH') {
       allOutputPins(c).forEach((p, i) => {
         pins.set(pinKey(c.id, p), overrides?.get(pinKey(c.id, p)) ?? c.estados?.[i] ?? 0)
@@ -236,6 +299,13 @@ export function simulate(
     } else if (gate) {
       pins.set(pinKey(compId, `p${gate.output}`), 'E')
       for (const n of gate.inputs) pins.set(pinKey(compId, `p${n}`), 'E')
+    } else if (c.type === 'IC' && chipOf(c).seq) {
+      const seq = chipOf(c).seq!
+      const nomes = graph.seqSaida.has(u) ? [...seq.assincronas, ...seq.saidas] : seq.sincronas
+      for (const n of nomes) pins.set(pinKey(compId, `p${n}`), 'E')
+    } else if (isSeq(c.type)) {
+      const nomes = graph.seqSaida.has(u) ? [...entradasAssincronas(c.type), 'q', 'qn'] : entradasSincronas(c.type)
+      for (const p of nomes) pins.set(pinKey(compId, p), 'E')
     } else {
       for (const p of allOutputPins(c)) pins.set(pinKey(compId, p), 'E')
       for (const p of inputPins(c)) pins.set(pinKey(compId, p), 'E')
