@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
 
 export default tseslint.config(
-  { ignores: ['dist/', 'node_modules/'] },
+  { ignores: ['dist/', 'node_modules/', 'src-tauri/target/', 'src-tauri/gen/'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -18,7 +18,7 @@ export default tseslint.config(
   },
   {
     // scripts e configurações rodam no Node, não no navegador
-    files: ['scripts/**/*.mjs', '*.config.{js,ts}'],
-    languageOptions: { globals: { process: 'readonly', console: 'readonly' } },
+    files: ['scripts/**/*.mjs', 'instalador/**/*.mjs', '*.config.{js,ts}'],
+    languageOptions: { globals: { process: 'readonly', console: 'readonly', fetch: 'readonly', WebSocket: 'readonly' } },
   },
 )

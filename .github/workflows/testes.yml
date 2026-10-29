@@ -42,8 +42,5 @@ jobs:
       - name: Testes
         run: npm test
 
-      - name: Testes do lançador do Windows
-        run: python3 -m unittest discover -s instalador -p "test_*.py"
-
       - name: Montar o HTML único (conferência)
         run: npm run build

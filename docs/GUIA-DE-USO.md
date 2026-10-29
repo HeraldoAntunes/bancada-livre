@@ -23,7 +23,7 @@ Um passeio pelo programa, do primeiro circuito ao uso em sala. Para baixar, veja
 5. Clique nas chaves para alternar entre 0 e 1. O fio em 1 fica azul e grosso, o fio em 0 fica cinza e fino, e o
    LED acende quando as duas chaves estão em 1.
 
-Para começar mais rápido, abra o menu **Exemplos**: são 30 circuitos prontos, do básico aos CIs.
+Para começar mais rápido, abra o menu **Exemplos**: são 40 circuitos prontos, do básico aos CIs.
 
 ## 3. Editar componentes
 

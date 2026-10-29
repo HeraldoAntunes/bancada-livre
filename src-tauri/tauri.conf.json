@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Bancada Livre",
+  "version": "../package.json",
+  "identifier": "br.bancadalivre.simulador",
+  "build": { "frontendDist": "../dist" },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [],
+    "security": { "csp": null }
+  },
+  "bundle": { "active": false, "icon": ["../instalador/bancada-livre.ico"], "copyright": "Copyright (c) 2026 Heraldo Antunes - Licença MIT" }
+}

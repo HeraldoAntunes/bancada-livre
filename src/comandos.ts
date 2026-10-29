@@ -27,12 +27,12 @@ import {
   type CorLed,
   type DisplayMode,
 } from './engine/types'
-import { useCircuit, type AbaPaleta } from './state/store'
+import { programa, useCircuit, type AbaPaleta } from './state/store'
 import { chipDemo } from './ui/demoDoChip'
 import { exportBenchPng, exportBenchSvg } from './ui/exportPng'
 import { sinaisObservados } from './engine/linhaDoTempo'
 import { mapaKarnaugh } from './engine/karnaugh'
-import { conferir, lerGabarito } from './engine/gabarito'
+import { conferir, lerGabarito, tabelaParaCsv } from './engine/gabarito'
 import { version } from '../package.json'
 
 export interface Param {
@@ -493,13 +493,8 @@ registrar('tabela.exportar_csv', {
   descricao: 'Baixa a tabela-verdade do circuito em CSV (separador ponto e vírgula)',
   params: nada,
   executar: () => {
-    const t = tabela()
-    const linhas = [
-      [...t.inputs, ...t.outputs].map((c) => c.name).join(';'),
-      ...t.rows.map((r) => [...r.inputs, ...r.outputs].join(';')),
-    ]
     // o BOM na frente faz a planilha abrir com a acentuação correta
-    baixar('tabela-verdade.csv', '﻿' + linhas.join('\r\n'), 'text/csv;charset=utf-8')
+    baixar('tabela-verdade.csv', '﻿' + tabelaParaCsv(tabela()), 'text/csv;charset=utf-8')
   },
 })
 
@@ -624,7 +619,10 @@ registrar('versao.ver_nova', {
   descricao: 'Abre no navegador a página da versão mais recente (o programa não consulta a internet sozinho) e devolve a versão instalada',
   params: nada,
   executar: () => {
-    window.open(PAGINA_VERSOES, '_blank', 'noopener,noreferrer')
+    // no programa do Windows quem abre a página é o próprio programa, no navegador padrão (só este endereço)
+    const tauri = programa().__TAURI__
+    if (tauri) void tauri.core.invoke('ver_versao_nova')
+    else window.open(PAGINA_VERSOES, '_blank', 'noopener,noreferrer')
     return { instalada: version, pagina: PAGINA_VERSOES }
   },
 })

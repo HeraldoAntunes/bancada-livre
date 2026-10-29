@@ -1,0 +1,49 @@
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
+# "PC limpo": monta o programa a partir do código e testa a instalação num Windows novo a cada execução
+# (o programa se instala em silêncio, confere atalhos e registro, abre e fica vivo, procura o módulo do Warsaw, mede as conexões, tira um retrato da janela,
+# confere o salvamento em arquivo, desinstala e confere que o circuito ficou). Roda só quando alguém pede, antes de
+# publicar uma versão. Nada é publicado por aqui; o retrato e o resultado ficam como artefatos da execução.
+name: PC limpo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pc-limpo:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar as dependências exatamente como no package-lock.json
+        run: npm ci
+
+      - name: Montar o programa a partir do código
+        shell: pwsh
+        run: ./instalador/build.ps1 -SemDefender
+
+      - name: Testar o programa instalado
+        shell: pwsh
+        run: ./instalador/testar-instalado.ps1 -Programa (Get-ChildItem pacote/BancadaLivre-*.exe).FullName -Saida teste-instalado
+
+      - name: Guardar o retrato e o resultado
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pc-limpo-${{ matrix.os }}
+          path: teste-instalado
+          retention-days: 14

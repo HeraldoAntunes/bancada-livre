@@ -11,18 +11,16 @@ do próprio HTML distribuído, num comentário no fim do arquivo.
 | scheduler | 0.23.2 | MIT | Facebook, Inc. and its affiliates | https://github.com/facebook/react |
 | zustand | 5.0.16 | MIT | Paul Henschel | https://github.com/pmndrs/zustand |
 
-## Versão para Windows (executável e instalador)
+## Versão para Windows (instalador)
 
-O executável e o instalador levam, além do HTML acima:
+O programa do Windows (BancadaLivre.exe) mostra o HTML acima numa janela própria.
 
 | Componente | Versão | Licença | Para quê |
 |-|-|-|-|
-| Python | 3.13 | PSF License | roda o lançador que abre o simulador numa janela própria |
-| PyInstaller | 6.22.3 | GPL 2.0 com exceção para o executável gerado (runtime hooks Apache 2.0) | transforma o lançador em BancadaLivre.exe |
-| Inno Setup | 6 | licença do Inno Setup (livre, permite uso comercial) | monta o instalador |
+| Tauri e as bibliotecas Rust que ele usa | 2 | MIT ou Apache 2.0 (à escolha) | janela própria; a lista completa, com as versões, está em src-tauri/Cargo.lock |
+| WebView2 (Microsoft) | o do Windows | licença da Microsoft | desenha a janela; vem no Windows ou é instalado à parte pelo instalador oficial da Microsoft (no zip "para escola sem internet", sem alteração) |
 
-A exceção da licença do PyInstaller permite distribuir o executável gerado sob a licença do próprio programa (MIT).
-Os textos completos dessas licenças vão na pasta licencas, instalada junto com o programa.
+O programa se instala sozinho, sem empacotador de terceiros.
 
 As ferramentas usadas só para montar e testar o programa (Vite, TypeScript, Vitest, ESLint e seus complementos)
 não vão para o arquivo do aluno. Elas estão listadas, com as licenças, no package-lock.json.

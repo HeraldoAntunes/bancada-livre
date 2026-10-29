@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "padrao",
+  "description": "A janela do simulador só chama os comandos do próprio programa (salvar o circuito e abrir a página de versões)",
+  "windows": ["principal"],
+  "permissions": ["core:default"]
+}

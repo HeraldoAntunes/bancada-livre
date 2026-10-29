@@ -13,3 +13,7 @@ __pycache__/
 
 # marcador da cópia pública (scripts de exportação)
 .bancada-livre-publico
+
+# programa do Windows (Tauri): saídas do cargo e esquemas gerados
+src-tauri/target/
+src-tauri/gen/

@@ -38,10 +38,13 @@ let lastTagAt = 0
 /** Edições com a mesma tag além desta pausa contam como sessões distintas de undo. */
 const COALESCE_MS = 2500
 
+/** Acima disto o contador não acompanha o id do arquivo: perto de 2^53 o `counter++` para de mudar e repete ids. */
+const MAIOR_ID = 1_000_000_000
+
 function bumpCounter(ids: string[]) {
   for (const id of ids) {
     const n = parseInt(id.replace(/^\D+/, ''), 10)
-    if (!Number.isNaN(n) && n >= counter) counter = n + 1
+    if (!Number.isNaN(n) && n >= counter && n < MAIOR_ID) counter = n + 1
   }
 }
 
@@ -207,8 +210,13 @@ const AUTOSAVE_KEY = 'simulador-portas:autosave'
 export const AUTOSAVE_RECUSADO_KEY = 'simulador-portas:autosave-recusado'
 const SHOW_NAMES_KEY = 'simulador-portas:nomes'
 
-/** Atraso que o clock recupera em passos curtos (ms); o excesso anda num salto só. */
-const MAX_ATRASO_MS = 2000
+/**
+ * Quantos passos curtos o relógio usa, no máximo, para recuperar um atraso: cerca de 100 s num CLOCK de 1 Hz e 10 s
+ * num de 10 Hz, com custo de tela limitado. O que passar disso (computador suspenso) anda num salto só, com aviso.
+ */
+const MAX_PASSOS_ATRASO = 400
+/** Tempo virtual (clockMs) até o qual o aviso de salto do relógio fica na tela. */
+let avisoRelogioAte = 0
 
 /** Um passo do tempo virtual: nível de cada CLOCK e contagem de cada COUNTER em clockMs + deltaMs. */
 function avancar(s: CircuitStore, deltaMs: number): Partial<CircuitStore> {
@@ -231,13 +239,24 @@ function avancar(s: CircuitStore, deltaMs: number): Partial<CircuitStore> {
   return changed ? { clockMs, components } : { clockMs }
 }
 
+/**
+ * Programa do Windows (janela própria, Tauri): guarda o circuito também em arquivo, à prova de queda no meio da
+ * gravação, e entrega o último salvo em `__BANCADA_CIRCUITO__` antes de a página carregar. No navegador nada disso
+ * existe e vale só o localStorage.
+ */
+interface ProgramaWindows {
+  __BANCADA_CIRCUITO__?: string
+  __TAURI__?: { core: { invoke: (comando: string, args?: Record<string, unknown>) => Promise<unknown> } }
+}
+export const programa = (): ProgramaWindows => (typeof window === 'undefined' ? {} : (window as ProgramaWindows))
+
 /** Restaura o circuito salvo automaticamente. */
 function loadAutosave(): Snapshot {
   const empty: Snapshot = { components: [], wires: [] }
   let raw: string | null = null
   try {
     if (typeof localStorage === 'undefined') return empty
-    raw = localStorage.getItem(AUTOSAVE_KEY)
+    raw = programa().__BANCADA_CIRCUITO__ || localStorage.getItem(AUTOSAVE_KEY)
     if (!raw) return empty
     const data = JSON.parse(raw) as Circuit
     const err =
@@ -284,6 +303,10 @@ export interface CircuitStore {
   clockRunning: boolean
   /** Algum flip-flop ou trava não parou de mudar no último assentamento e ficou indefinido. */
   oscilando: boolean
+  /** Texto do aviso quando o salvamento automático falha (vazio quando está gravando normalmente). */
+  falhaSalvamento: string
+  /** Aviso de que o relógio pulou um atraso grande sem passar borda a borda (vazio quando não pulou). */
+  avisoRelogio: string
   clockMs: number
   /** Mostrar o nome do tipo sob cada porta na bancada. */
   showNames: boolean
@@ -367,6 +390,8 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   future: [],
   clockRunning: true,
   oscilando: false,
+  falhaSalvamento: '',
+  avisoRelogio: '',
   clockMs: 0,
   showNames: loadShowNames(),
   carregamentos: 0,
@@ -665,20 +690,28 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
 
   // Tempo virtual: estado do clock = função de clockMs e da frequência. Um atraso maior que meio período (aba em
   // segundo plano, programa ocupado) é dividido em passos menores, e cada passo assenta os flip-flops: assim
-  // nenhuma borda se perde. O que passar de MAX_ATRASO_MS anda num salto só, para não travar a tela recuperando
-  // o tempo.
+  // nenhuma borda se perde. Só o que passar de MAX_PASSOS_ATRASO passos anda num salto só, para não travar a tela
+  // recuperando o tempo; nesse caso a barra de baixo avisa que o relógio pulou.
   tickClocks: (deltaMs) => {
     const passos = get().components.flatMap((c) =>
       c.type === 'CLOCK' ? [250 / (c.freq ?? 1)] : c.type === 'COUNTER' ? [500 / (c.freq ?? 1)] : [],
     )
     const passo = passos.length > 0 ? Math.min(...passos) : deltaMs
-    let resta = Math.min(deltaMs, MAX_ATRASO_MS)
-    if (deltaMs > resta) set((s) => avancar(s, deltaMs - resta))
+    let resta = Math.min(deltaMs, passo * MAX_PASSOS_ATRASO)
+    if (deltaMs > resta) {
+      const pulou = Math.round((deltaMs - resta) / 1000)
+      avisoRelogioAte = get().clockMs + deltaMs + 20_000
+      set((s) => ({
+        ...avancar(s, deltaMs - resta),
+        avisoRelogio: `O relógio pulou ${pulou} s (computador suspenso ou programa parado): os flip-flops não viram as bordas desse intervalo.`,
+      }))
+    }
     while (resta > 0) {
       const d = Math.min(resta, passo)
       set((s) => avancar(s, d))
       resta -= d
     }
+    if (get().avisoRelogio && get().clockMs > avisoRelogioAte) set({ avisoRelogio: '' })
   },
 
   // Avança meio período do clock mais rápido (modo passo).
@@ -694,7 +727,15 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   loadCircuit: (components, wires) => {
     get().checkpoint()
     bumpCounter([...components.map((c) => c.id), ...wires.map((w) => w.id)])
-    set((s) => ({ components, wires, selectedId: null, editandoId: null, carregamentos: s.carregamentos + 1, linhaDoTempo: [] }))
+    set((s) => ({
+      components,
+      wires,
+      selectedId: null,
+      editandoId: null,
+      carregamentos: s.carregamentos + 1,
+      linhaDoTempo: [],
+      avisoRelogio: '',
+    }))
   },
 
   toJSON: () => {
@@ -759,29 +800,78 @@ useCircuit.subscribe((s, antes) => {
   }
 }
 
-// Salvamento automático: grava o circuito no localStorage com
-// debounce a cada mudança estrutural — fechar a aba não perde o trabalho.
+/**
+ * Texto do salvamento automático. O nível de cada CLOCK e a contagem de cada COUNTER saem dele: são do tempo
+ * virtual, recalculados ao abrir, e mudam a cada batida. Assim o clock rodando não gera gravação nenhuma.
+ */
+export function textoDoAutosave(snap: Snapshot): string {
+  const components = snap.components.map((c) => {
+    if (c.type !== 'CLOCK' && c.type !== 'COUNTER') return c
+    const copia = { ...c }
+    delete copia[c.type === 'CLOCK' ? 'state' : 'contagem']
+    return copia
+  })
+  return JSON.stringify({ version: 1, components, wires: snap.wires })
+}
+
+/** Espera entre a mudança e a gravação; mudanças seguidas não adiam a gravação além disso. */
+export const ESPERA_AUTOSAVE_MS = 400
+
+// Salvamento automático: grava o circuito no localStorage (e, no programa do Windows, também em arquivo) no máximo
+// ESPERA_AUTOSAVE_MS depois de cada mudança, e só se o texto mudou. A espera não recomeça a cada mudança: com um
+// circuito que muda sozinho (flip-flops num clock rápido) a gravação continua acontecendo. Ao sair da página (aba
+// fechada, janela escondida) e ao fechar a janela do programa, a mudança que ainda esperava é gravada na hora. Se a
+// gravação falhar, o aviso aparece na barra de baixo até a próxima gravação dar certo.
+const FALHA_SALVAMENTO =
+  'O salvamento automático falhou: use Salvar para guardar o circuito num arquivo antes de fechar.'
 if (typeof window !== 'undefined') {
   let timer: number | undefined
-  let avisou = false
   let prev: Snapshot = { components: initial.components, wires: initial.wires }
+  let ultimo = textoDoAutosave(prev)
+  const avisar = (falhou: boolean, e?: unknown) => {
+    if (falhou) console.warn('Bancada Livre: o salvamento automático falhou.', e)
+    const texto = falhou ? FALHA_SALVAMENTO : ''
+    if (useCircuit.getState().falhaSalvamento !== texto) useCircuit.setState({ falhaSalvamento: texto })
+  }
+  const gravar = (): Promise<void> => {
+    if (timer !== undefined) window.clearTimeout(timer)
+    timer = undefined
+    const texto = textoDoAutosave(prev)
+    if (texto === ultimo) return Promise.resolve()
+    ultimo = texto
+    let local = true
+    try {
+      localStorage.setItem(AUTOSAVE_KEY, texto)
+    } catch (e) {
+      // modo privado ou cota cheia
+      local = false
+      avisar(true, e)
+    }
+    const tauri = programa().__TAURI__
+    if (!tauri) {
+      if (local) avisar(false)
+      return Promise.resolve()
+    }
+    return tauri.core.invoke('salvar_circuito', { texto }).then(
+      () => avisar(!local),
+      (e: unknown) => avisar(true, e),
+    )
+  }
   useCircuit.subscribe((s) => {
     if (s.components === prev.components && s.wires === prev.wires) return
     prev = { components: s.components, wires: s.wires }
-    window.clearTimeout(timer)
-    timer = window.setTimeout(() => {
-      try {
-        localStorage.setItem(
-          AUTOSAVE_KEY,
-          JSON.stringify({ version: 1, components: prev.components, wires: prev.wires }),
-        )
-      } catch (e) {
-        // modo privado ou cota cheia: segue sem salvamento automático, com um aviso só
-        if (!avisou) console.warn('Bancada Livre: o salvamento automático falhou; use Salvar para guardar o circuito.', e)
-        avisou = true
-      }
-    }, 400)
+    if (timer !== undefined) return
+    timer = window.setTimeout(() => void gravar(), ESPERA_AUTOSAVE_MS)
   })
+  const descarregar = () => {
+    if (timer !== undefined) void gravar()
+  }
+  window.addEventListener?.('pagehide', descarregar)
+  window.addEventListener?.('visibilitychange', () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') descarregar()
+  })
+  // o programa do Windows chama isto ao fechar a janela e só fecha depois que o arquivo foi gravado
+  ;(window as unknown as { __bancadaAoFechar?: () => Promise<void> }).__bancadaAoFechar = () => gravar()
 }
 
 // Acesso de depuração no dev server (não existe no build de produção nem em testes node).

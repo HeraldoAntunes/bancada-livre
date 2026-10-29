@@ -14,6 +14,11 @@ import topBarFonte from '../ui/TopBar.tsx?raw'
 import sobreFonte from '../ui/AboutDialog.tsx?raw'
 import { EXAMPLES } from '../examples'
 import { SOBRE } from '../ui/sobre'
+import { PAGINA_VERSOES } from '../comandos'
+import tauriConf from '../../src-tauri/tauri.conf.json'
+import cargoToml from '../../src-tauri/Cargo.toml?raw'
+import sistemaRs from '../../src-tauri/src/sistema.rs?raw'
+import instalacaoRs from '../../src-tauri/src/instalacao.rs?raw'
 
 describe('versão igual em todos os lugares', () => {
   // A tela Sobre e a barra leem a versão do package.json; os demais lugares são texto.
@@ -151,9 +156,9 @@ describe('GitHub Actions', () => {
     eager: true,
   }) as Record<string, string>
 
-  it('existem os workflows de testes, CodeQL, Scorecard e release', () => {
+  it('existem os workflows de testes, PC limpo, CodeQL, Scorecard e release', () => {
     const nomes = Object.keys(workflows).map((c) => c.split('/').pop())
-    expect(nomes.sort()).toEqual(['assinar-release.yml', 'codeql.yml', 'scorecard.yml', 'testes.yml'])
+    expect(nomes.sort()).toEqual(['assinar-release.yml', 'codeql.yml', 'pc-limpo.yml', 'scorecard.yml', 'testes.yml'])
   })
 
   it('toda action está fixada pelo hash do commit, com a versão no comentário', () => {
@@ -230,21 +235,46 @@ describe('executável e instalador (Windows)', () => {
   }) as Record<string, string>
   const arq = (nome: string) => instalador[`../../instalador/${nome}`] ?? ''
 
-  it('a versão não fica escrita no instalador: vem do package.json pelo build', () => {
-    expect(arq('bancada-livre.iss')).toMatch(/#ifndef AppVer/)
-    expect(arq('bancada-livre.iss')).not.toMatch(/#define AppVer "/)
+  it('a versão não fica escrita em lugar nenhum além do package.json e do Cargo.toml', () => {
     expect(arq('build.ps1')).toMatch(/Get-Content package\.json -Raw \| ConvertFrom-Json\)\.version/)
-    expect(arq('build.ps1')).toContain('"/DAppVer=$versao"')
+    expect(instalacaoRs).toContain('pub const VERSAO: &str = env!("CARGO_PKG_VERSION");')
+    expect(tauriConf.version).toBe('../package.json')
+    expect(cargoToml).toMatch(new RegExp(`^version = "${pkg.version.replace(/\./g, '\\.')}"$`, 'm'))
   })
 
-  it('o lançador e o instalador usam o nome e o ícone do programa', () => {
-    expect(arq('lancador.py')).toContain('NOME_HTML = "bancada-livre.html"')
-    expect(arq('bancada-livre.iss')).toContain('SetupIconFile=bancada-livre.ico')
-    expect(arq('build.ps1')).toContain('bancada-livre.ico')
+  it('o programa se instala sozinho, sem empacotador (Inno Setup, NSIS, MSI ou PyInstaller)', () => {
+    expect(arq('build.ps1')).not.toMatch(/ISCC|\.iss\b|pyinstaller|\.venv-build|makensis|wix/i)
+    expect(tauriConf.bundle.active).toBe(false)
+    expect(arq('testar-instalado.ps1')).toContain("-ArgumentList '--instalar'")
+    expect(arq('testar-instalado.ps1')).toContain("-ArgumentList '--desinstalar', '--silencioso'")
   })
 
-  it('THIRD-PARTY-NOTICES cita o que vai no executável e no instalador', () => {
-    for (const nome of ['Python', 'PyInstaller', 'Inno Setup']) expect(notices).toContain(nome)
+  it('toma o lugar da instalação feita pelo Inno Setup até a 2.1.0, na mesma pasta e na mesma chave', () => {
+    expect(instalacaoRs).toContain(String.raw`Uninstall\{B3D1A6E0-5C2F-4A87-9E14-7F0C2B8D4E61}_is1`)
+    expect(instalacaoRs).toContain('local.join("Programs").join("Bancada Livre")')
+    expect(instalacaoRs).toMatch(/"unins000\.exe", "unins000\.dat"/)
+  })
+
+  it('mesma identidade na barra de tarefas na janela e nos atalhos, com o ícone do programa', () => {
+    expect(sistemaRs).toContain('pub const APP_ID: &str = "BancadaLivre";')
+    expect(instalacaoRs).toContain('crate::sistema::APP_ID')
+    expect(tauriConf.bundle.icon).toEqual(['../instalador/bancada-livre.ico'])
+  })
+
+  it('escola sem internet: o zip leva o instalador do WebView2 que o programa procura ao lado dele', () => {
+    const nome = /pub const WEBVIEW2_COMPLETO: &str = "([^"]+)";/.exec(sistemaRs)?.[1] ?? '(sem nome)'
+    expect(arq('build.ps1')).toContain(nome)
+    expect(sistemaRs).toContain('"Microsoft Corporation"')
+  })
+
+  it('o programa não tem rede: só abre a página de versões, que é a mesma do simulador', () => {
+    expect(sistemaRs).toContain(`pub const PAGINA_VERSOES: &str = "${PAGINA_VERSOES}";`)
+    expect(cargoToml).not.toMatch(/reqwest|ureq|hyper|winhttp|tauri-plugin-(http|updater|shell)/)
+  })
+
+  it('THIRD-PARTY-NOTICES cita o que vai no programa', () => {
+    for (const nome of ['Tauri', 'WebView2']) expect(notices).toContain(nome)
+    for (const nome of ['PyInstaller', 'Inno Setup']) expect(notices).not.toContain(nome)
   })
 })
 

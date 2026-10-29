@@ -9,6 +9,37 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+## [2.1.0] - 2026-10-28
+
+### Adicionado
+- No Windows, o Bancada Livre tem janela própria: o programa instalado não usa mais o navegador do dia a dia. Ele
+  desenha com o WebView2 da Microsoft, que vem no Windows 11 e nos Windows 10 atualizados. Uma queda ou extensão do
+  Edge não derruba mais o simulador.
+- O programa se instala sozinho: é um arquivo só, `BancadaLivre-x.y.z.exe`. Aberto, ele pergunta se instala (para a
+  conta, sem pedir administrador, com atalhos no menu Iniciar e na Área de Trabalho) ou se só abre, sem instalar.
+  Para atualizar, basta abrir o arquivo novo. Desinstala por Aplicativos instalados, sem apagar os circuitos.
+- Pacote para escola sem internet: um zip com o programa e o instalador oficial do WebView2 da Microsoft, que o
+  programa oferece instalar se faltar (só depois de conferir que a assinatura é da Microsoft).
+- O circuito em andamento também fica guardado em arquivo, com uma cópia anterior: nem uma queda de energia no meio
+  da gravação deixa o circuito ilegível.
+
+### Corrigido
+- Com um CLOCK rápido rodando (acima de uns 2 Hz), o salvamento automático ficava esperando o circuito parar de
+  mudar e uma peça posta nesse meio-tempo podia se perder se o programa caísse. Agora a gravação acontece no máximo
+  0,4 s depois de cada mudança, e o clock sozinho não grava nada. Vale também para o arquivo HTML no navegador.
+- Fechar a janela logo depois de uma mudança podia perder essa mudança. Agora ela é gravada antes de a janela fechar
+  (e, no navegador, ao fechar a aba). Se o salvamento automático falhar, a barra de baixo avisa.
+- O CSV da tabela-verdade com `;` ou aspas no nome de uma chave não abria de volta como gabarito.
+- Um arquivo com número de peça muito grande fazia o simulador repetir números nas peças seguintes.
+- Depois de alguns segundos com o programa parado ou em segundo plano, o CLOCK pulava as bordas que passavam de 2 s.
+  Agora recupera até uns 100 s (a 1 Hz) borda a borda; além disso (computador suspenso), pula e avisa na tela.
+
+### Alterado
+- O programa do Windows foi refeito (antes era um lançador em Python que abria o Edge, barrado por alguns
+  antivírus). Ao atualizar, o circuito que estava aberto não passa sozinho para a versão nova: use Salvar antes.
+- Sai o instalador montado pelo Inno Setup e sai o zip portátil: o próprio programa faz os dois papéis. Instalado
+  por cima de uma versão anterior, ele toma o lugar dela em Aplicativos instalados.
+
 ## [2.0.3] - 2026-10-28
 
 ### Corrigido

@@ -9,8 +9,8 @@ export const SOBRE = {
     'MIT. É software livre: pode usar, copiar, modificar e distribuir, inclusive em outras ' +
     'instituições de ensino, desde que mantenha o aviso de autoria e a licença.',
   privacidade:
-    'Nunca se conecta à internet: nada é enviado a servidores. O circuito em uso e os ajustes ficam ' +
-    'guardados só neste navegador. Os arquivos que você salvar vão para a pasta de downloads.',
+    'O simulador nunca se conecta à internet: nada é enviado a servidores. O circuito em uso e os ajustes ' +
+    'ficam guardados só neste computador. Os arquivos que você salvar vão para a pasta de downloads.',
   ia:
     'Feito com apoio de inteligência artificial (Claude, da Anthropic), usada como ferramenta. ' +
     'A ideia, os requisitos, as decisões e a revisão de cada versão são do autor.',

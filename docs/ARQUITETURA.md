@@ -19,8 +19,9 @@ src/
 └── examples.ts  os circuitos de exemplo
 ```
 
-Fora de `src/`, a pasta `instalador/` monta a versão para Windows: um lançador em Python (empacotado pelo
-PyInstaller) abre o HTML numa janela própria, e o Inno Setup gera o instalador.
+Fora de `src/`, a pasta `src-tauri/` é o programa do Windows (Tauri 2, Rust): o mesmo HTML embutido numa janela própria do
+WebView2, sem rede, com o circuito guardado também em arquivo (`salvamento.rs`). A pasta `instalador/` monta o
+instalador com o Inno Setup.
 
 **Memória (2.0).** A simulação continua combinacional e sem laço: a saída de cada flip-flop, trava ou CI
 sequencial entra como uma fonte, que só depende do estado guardado e das entradas que agem na hora (PR, CLR). Depois
@@ -76,5 +77,5 @@ estrutura é validada antes de carregar.
   aviso das licenças de terceiros embutidos.
 - `npm test` roda os testes do núcleo, do estado, da interface, dos comandos, da política de segurança e do
   projeto (versão igual em todos os lugares, cabeçalhos, componentes de terceiros, ausência de emoji na interface,
-  workflows fixados por hash). O lançador do Windows tem testes próprios em Python (`instalador/test_lancador.py`).
+  workflows fixados por hash).
 - `npm run lint` roda o ESLint sem tolerar avisos.

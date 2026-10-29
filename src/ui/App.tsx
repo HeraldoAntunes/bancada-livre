@@ -23,6 +23,8 @@ export default function App() {
   const wires = useCircuit((s) => s.wires)
   const clockRunning = useCircuit((s) => s.clockRunning)
   const oscilando = useCircuit((s) => s.oscilando)
+  const falhaSalvamento = useCircuit((s) => s.falhaSalvamento)
+  const avisoRelogio = useCircuit((s) => s.avisoRelogio)
   const tickClocks = useCircuit((s) => s.tickClocks)
   const hasClock = components.some((c) => c.type === 'CLOCK' || c.type === 'COUNTER')
   const tab = useCircuit((s) => s.abaPaleta)
@@ -114,6 +116,16 @@ export default function App() {
           {components.length} componente{components.length === 1 ? '' : 's'} · {wires.length} fio
           {wires.length === 1 ? '' : 's'}
         </span>
+        {falhaSalvamento && (
+          <span className="warn" role="alert">
+            <Icon name="alerta" size={14} /> {falhaSalvamento}
+          </span>
+        )}
+        {avisoRelogio && (
+          <span className="warn" role="status">
+            <Icon name="alerta" size={14} /> {avisoRelogio}
+          </span>
+        )}
         {semEnergia && (
           <span className="warn">
             <Icon name="raio" size={14} /> {chipOf(semEnergia).id} sem alimentação: ligue VCC (pino{' '}

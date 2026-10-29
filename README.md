@@ -36,13 +36,13 @@ tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e se
 
 ## Qual arquivo baixar?
 
-Versão 2.0.3:
+Versão 2.1.0:
 
 | Para quê | Baixar |
 |---|---|
-| **Instalar no computador (Windows)** | [**Instalar-BancadaLivre-2.0.3.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.3/Instalar-BancadaLivre-2.0.3.exe) |
-| Usar sem instalar (versão portátil, para pendrive) | [BancadaLivre-2.0.3-portatil.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.3/BancadaLivre-2.0.3-portatil.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.0.3.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.0.3/BancadaLivre-2.0.3.html) |
+| **Windows: instalar ou usar sem instalar** | [**BancadaLivre-2.1.0.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.0/BancadaLivre-2.1.0.exe) |
+| Windows de escola sem internet (traz o WebView2 da Microsoft) | [BancadaLivre-2.1.0-sem-internet.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.0/BancadaLivre-2.1.0-sem-internet.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.1.0.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.0/BancadaLivre-2.1.0.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na
@@ -63,8 +63,8 @@ programa é gratuito e não tem assinatura paga). Versões anteriores e a confer
 
    | Arquivo | Para quem |
    |---|---|
-   | **`Instalar-BancadaLivre-x.y.z.exe`** ⭐ | **quase todo mundo no Windows.** Dois cliques e "Avançar": cria o atalho no menu Iniciar, abre numa janela própria e não pede senha de administrador |
-   | `BancadaLivre-x.y.z-portatil.zip` | quem quer levar num pendrive sem instalar: descompacte e abra `BancadaLivre.exe` |
+   | **`BancadaLivre-x.y.z.exe`** ⭐ | **quase todo mundo no Windows.** Abra com dois cliques e responda **Sim** para instalar: ele cria os atalhos no menu Iniciar e na Área de Trabalho, abre numa janela própria e não pede senha de administrador. Responda **Não** para só usar agora, sem instalar (serve para pendrive). Para atualizar, baixe o novo e abra do mesmo jeito; os circuitos salvos ficam |
+   | `BancadaLivre-x.y.z-sem-internet.zip` | escola sem internet num Windows sem o WebView2 da Microsoft (que desenha a janela): descompacte e abra `BancadaLivre.exe`; ele oferece instalar o WebView2 que vem junto |
    | `BancadaLivre-x.y.z.html` | qualquer sistema: abra com dois cliques no navegador. É um arquivo só, que dá para pôr no Moodle ou mandar por e-mail |
    | Código-fonte | só para quem vai estudar ou modificar o programa |
 
@@ -73,7 +73,7 @@ programa é gratuito e não tem assinatura paga). Versões anteriores e a confer
 Para conferir se o arquivo é legítimo, compare o SHA-256 com o `SHA256SUMS.txt` da mesma página (troque `x.y.z` pela
 versão que baixou):
 ```bash
-certutil -hashfile Instalar-BancadaLivre-x.y.z.exe SHA256
+certutil -hashfile BancadaLivre-x.y.z.exe SHA256
 ```
 
 ## Como é
@@ -119,8 +119,8 @@ certutil -hashfile Instalar-BancadaLivre-x.y.z.exe SHA256
 | Instalador, atalho e janela própria | ✅ | não (use o HTML) | não (use o HTML) |
 | Arquivo HTML no navegador | ✅ testado no Microsoft Edge | ⚠️ deve funcionar, não testado | ⚠️ deve funcionar, não testado |
 
-O instalador e a versão portátil abrem o simulador numa janela própria do **Microsoft Edge** ou do **Google
-Chrome**, um dos dois precisa estar instalado. O arquivo HTML funciona em navegadores atuais (Chrome, Edge, Firefox,
+O programa instalado tem janela própria, desenhada pelo **WebView2** da Microsoft, que já vem no Windows 10 e 11
+(se faltar, o zip "sem internet" traz o instalador oficial dele). Não depende do navegador do dia a dia. O arquivo HTML funciona em navegadores atuais (Chrome, Edge, Firefox,
 Safari); foi testado no Windows 11 com o Microsoft Edge. Em telas com menos de 1366 px de largura, a barra superior
 passa a ocupar duas linhas.
 
@@ -189,10 +189,17 @@ fica em `src/comandos.ts`.
 
 ## Privacidade
 
-O Bancada Livre nunca se conecta à internet. O arquivo HTML traz uma política de segurança que bloqueia qualquer
-acesso à rede. O botão **Ver se há versão nova**, na janela Sobre, só abre a página do programa no seu navegador.
+O simulador nunca se conecta à internet. O arquivo HTML traz uma política de segurança que bloqueia qualquer
+acesso à rede, e o programa do Windows não tem nenhum recurso de rede. O botão **Ver se há versão nova**, na janela
+Sobre, só abre a página do programa no seu navegador.
 
-O circuito em uso fica guardado no próprio navegador, neste computador (salvamento automático). Lá também ficam os
+No programa do Windows, a janela é desenhada pelo WebView2, um componente da Microsoft que vem no Windows. O
+programa desliga os serviços de rede dele, mas o WebView2 ainda abre por conta própria uma conexão com servidores
+da Microsoft. O simulador não tem acesso a essa conexão e não envia nada por ela. O arquivo HTML aberto no
+navegador não usa o WebView2.
+
+O circuito em uso fica guardado neste computador (salvamento automático): no navegador e, no programa do Windows,
+também num arquivo na pasta `%LOCALAPPDATA%\Bancada Livre`. Lá também ficam os
 ajustes: o botão **Aa** (nomes das portas) e a posição das janelas da tabela-verdade e da linha do tempo. Quando você
 clica em **Salvar**, **PNG** ou **SVG**, o arquivo vai para a pasta de downloads do navegador, ou para onde ele perguntar. Não há conta, login,
 propaganda nem rastreamento.

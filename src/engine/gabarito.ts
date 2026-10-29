@@ -37,8 +37,55 @@ const MAX_COLUNAS = 40
 /** Valor de célula como texto comparável: "1", "0", "X", ou o dígito do display em maiúscula. */
 const normal = (v: string) => v.trim().toUpperCase()
 
+/** Célula de CSV: entre aspas quando tem separador, aspas ou quebra de linha (aspas internas dobradas). */
+const celula = (v: string | number) => {
+  const t = String(v)
+  return /[;,\t"\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t
+}
+
+/** A tabela-verdade do circuito em CSV com ponto e vírgula, no formato que `lerGabarito` lê de volta. */
+export function tabelaParaCsv(t: CircuitTable): string {
+  const linhas = [
+    [...t.inputs, ...t.outputs].map((c) => celula(c.name)).join(';'),
+    ...t.rows.map((r) => [...r.inputs, ...r.outputs].map(celula).join(';')),
+  ]
+  return linhas.join('\r\n')
+}
+
+/** Divide uma linha pelo separador, respeitando as aspas (`"A;B"` é uma célula só; `""` dentro delas é uma aspa). */
+function dividirLinha(linha: string, sep: string): string[] {
+  const celulas: string[] = []
+  let atual = ''
+  let aspas = false
+  for (let i = 0; i < linha.length; i++) {
+    const ch = linha[i]
+    if (aspas) {
+      if (ch === '"' && linha[i + 1] === '"') {
+        atual += '"'
+        i++
+      } else if (ch === '"') aspas = false
+      else atual += ch
+    } else if (ch === '"' && atual.trim() === '') {
+      aspas = true
+      atual = ''
+    } else if (ch === sep) {
+      celulas.push(atual.trim())
+      atual = ''
+    } else atual += ch
+  }
+  celulas.push(atual.trim())
+  return celulas
+}
+
+/** Separador da linha de nomes: o primeiro que aparece fora das aspas. */
+function separador(linha: string): string {
+  const fora = linha.replace(/"(?:[^"]|"")*"/g, '')
+  return [';', '\t', ','].find((s) => fora.includes(s)) ?? ';'
+}
+
 /**
- * Lê o CSV. Aceita ponto e vírgula (o que o programa exporta), vírgula ou tabulação, e a marca BOM no começo.
+ * Lê o CSV. Aceita ponto e vírgula (o que o programa exporta), vírgula ou tabulação, células entre aspas e a marca
+ * BOM no começo.
  * Devolve o gabarito ou o motivo da recusa.
  */
 export function lerGabarito(texto: string): Gabarito | string {
@@ -49,8 +96,8 @@ export function lerGabarito(texto: string): Gabarito | string {
     .map((l) => l.trim())
     .filter((l) => l !== '')
   if (linhas.length < 2) return 'O arquivo precisa da linha de nomes e de pelo menos uma linha da tabela.'
-  const sep = [';', '\t', ','].find((s) => linhas[0].includes(s)) ?? ';'
-  const dividir = (l: string) => l.split(sep).map((c) => c.trim())
+  const sep = separador(linhas[0])
+  const dividir = (l: string) => dividirLinha(l, sep)
   const colunas = dividir(linhas[0])
   if (colunas.length < 2 || colunas.length > MAX_COLUNAS) return 'A tabela precisa de 2 a 40 colunas.'
   if (colunas.some((c) => c === '') || new Set(colunas).size !== colunas.length) {
