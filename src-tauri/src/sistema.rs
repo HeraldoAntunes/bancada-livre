@@ -35,7 +35,21 @@ pub fn abrir_pagina_versoes() {
     unsafe { ShellExecuteW(0, largo("open").as_ptr(), url.as_ptr(), std::ptr::null(), std::ptr::null(), 1) };
 }
 
+/// Caixa de pergunta do Windows; devolve o botão escolhido (6 = Sim).
+pub fn perguntar(texto: &str, tipo: u32) -> i32 {
+    unsafe { MessageBoxW(0, largo(texto).as_ptr(), largo("Bancada Livre").as_ptr(), tipo) }
+}
+
+/// Aviso de erro. Com a variável BANCADA_SEM_CAIXAS (um caminho de arquivo), vai para esse arquivo em vez de virar
+/// caixa na tela: os testes automáticos não podem deixar caixas para o professor responder.
 pub fn avisar_erro(msg: &str) {
+    if let Some(arquivo) = std::env::var_os("BANCADA_SEM_CAIXAS") {
+        use std::io::Write;
+        if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(arquivo) {
+            let _ = writeln!(f, "{}", msg.replace('\n', " "));
+        }
+        return;
+    }
     unsafe { MessageBoxW(0, largo(msg).as_ptr(), largo("Bancada Livre").as_ptr(), 0x10) };
 }
 
@@ -58,6 +72,155 @@ pub fn tem_webview2() -> bool {
     };
     ler(HKLM, format!(r"SOFTWARE\{CHAVE}"), SO_TEXTO | VISTA_32) || ler(HKLM, format!(r"SOFTWARE\{CHAVE}"), SO_TEXTO)
         || ler(HKCU, format!(r"Software\{CHAVE}"), SO_TEXTO)
+}
+
+// ---- uma janela só por perfil ----
+// Duas janelas gravando o mesmo circuito.json: a última a gravar apagaria em silêncio o trabalho da outra (reproduzido
+// na auditoria de 29/10/2026). Como no Giz na Tela, uma trava com nome por pasta de dados: a segunda abertura traz para a
+// frente a janela que já está aberta e sai.
+#[link(name = "kernel32")]
+extern "system" {
+    fn CreateMutexW(atributos: *const u8, dono: i32, nome: *const u16) -> isize;
+    fn GetLastError() -> u32;
+    fn CloseHandle(h: isize) -> i32;
+}
+#[link(name = "user32")]
+extern "system" {
+    fn FindWindowW(classe: *const u16, titulo: *const u16) -> isize;
+    fn ShowWindow(hwnd: isize, modo: i32) -> i32;
+    fn SetForegroundWindow(hwnd: isize) -> i32;
+    fn IsIconic(hwnd: isize) -> i32;
+}
+
+/// `true`: esta é a única janela desta pasta de dados (a trava fica aberta até o programa sair). `false`: já havia uma;
+/// ela foi trazida para a frente. `espera`: reaberto logo depois de fechar, o anterior pode estar terminando de gravar.
+pub fn janela_unica(dados: &std::path::Path, espera: std::time::Duration) -> bool {
+    let chave = dados.to_string_lossy().to_lowercase();
+    let h = chave.bytes().fold(0xcbf29ce484222325u64, |h, b| (h ^ b as u64).wrapping_mul(0x100000001b3));
+    let nome = largo(&format!(r"Local\BancadaLivre-{h:016x}"));
+    let limite = std::time::Instant::now() + espera;
+    loop {
+        unsafe {
+            let m = CreateMutexW(std::ptr::null(), 0, nome.as_ptr());
+            if m == 0 || GetLastError() != 183 { return true; }
+            CloseHandle(m);   // ERROR_ALREADY_EXISTS: solta a nossa cópia, senão a trava nunca some
+        }
+        // a outra janela está aberta: vem para a frente na hora. Mas ela pode estar fechando (a pessoa fechou e abriu
+        // de novo logo em seguida; achado na bateria da 2.1.1): se a trava se soltar em alguns segundos, esta abre.
+        let janela = unsafe { FindWindowW(largo("Tauri Window").as_ptr(), largo("Bancada Livre").as_ptr()) };
+        if janela != 0 {
+            unsafe {
+                if IsIconic(janela) != 0 { ShowWindow(janela, 9); }   // SW_RESTORE
+                SetForegroundWindow(janela);
+            }
+            let ate = std::time::Instant::now() + std::time::Duration::from_secs(5);
+            while std::time::Instant::now() < ate {
+                std::thread::sleep(std::time::Duration::from_millis(200));
+                unsafe {
+                    let m = CreateMutexW(std::ptr::null(), 0, nome.as_ptr());
+                    if m != 0 && GetLastError() != 183 { return true; }   // a anterior fechou: a trava agora é desta
+                    if m != 0 { CloseHandle(m); }
+                }
+            }
+            return false;
+        }
+        if std::time::Instant::now() >= limite { break; }
+        std::thread::sleep(std::time::Duration::from_millis(250));
+    }
+    avisar_erro("O Bancada Livre já está aberto nesta conta. Use a janela que já está aberta.");
+    false
+}
+
+// ---- WebView2 órfão ----
+// Depois de uma queda do Bancada Livre (fechado à força, energia, travamento), o processo principal do WebView2 que ele
+// abriu pode ficar vivo, órfão, segurando o perfil; a próxima abertura não consegue criar a janela (visto em 29/10/2026,
+// com o processo órfão vivo por mais de uma hora). Ao abrir, já sozinho na pasta de dados (`janela_unica`), o programa
+// encerra só esses processos: msedgewebview2.exe, processo principal (sem --type), com o perfil exato deste programa na
+// linha de comando e com o pai já morto. Nada de outro programa é tocado.
+#[link(name = "kernel32")]
+extern "system" {
+    fn CreateToolhelp32Snapshot(flags: u32, pid: u32) -> isize;
+    fn Process32FirstW(h: isize, e: *mut EntradaDeProcesso) -> i32;
+    fn Process32NextW(h: isize, e: *mut EntradaDeProcesso) -> i32;
+    fn OpenProcess(acesso: u32, herdar: i32, pid: u32) -> isize;
+    fn TerminateProcess(h: isize, codigo: u32) -> i32;
+    fn WaitForSingleObject(h: isize, ms: u32) -> u32;
+}
+#[link(name = "ntdll")]
+extern "system" {
+    fn NtQueryInformationProcess(h: isize, classe: u32, dados: *mut u8, tam: u32, devolvido: *mut u32) -> i32;
+}
+#[repr(C)]
+struct EntradaDeProcesso {
+    tam: u32, uso: u32, pid: u32, heap: usize, modulo: u32, threads: u32, pai: u32, prioridade: i32, flags: u32,
+    nome: [u16; 260],
+}
+
+/// Só conta como morto o pai que o Windows diz não existir: sem permissão para consultar, conta como vivo, e o WebView2
+/// dele não é encerrado (auditoria do modelo nativo, 29/10/2026).
+fn processo_vivo(pid: u32) -> bool {
+    unsafe {
+        let h = OpenProcess(0x0010_0000, 0, pid);      // SYNCHRONIZE
+        if h == 0 { return GetLastError() != 87; }      // ERROR_INVALID_PARAMETER: não há processo com esse número
+        let vivo = WaitForSingleObject(h, 0) == 258;    // WAIT_TIMEOUT: ainda rodando
+        CloseHandle(h);
+        vivo
+    }
+}
+
+fn linha_de_comando(h: isize) -> Option<String> {
+    let mut buf = vec![0u8; 65536];
+    let mut devolvido = 0u32;
+    // ProcessCommandLineInformation (60): um UNICODE_STRING seguido do texto, no próprio buffer
+    if unsafe { NtQueryInformationProcess(h, 60, buf.as_mut_ptr(), buf.len() as u32, &mut devolvido) } < 0 { return None; }
+    let tam = u16::from_le_bytes([buf[0], buf[1]]) as usize / 2;
+    let ptr = usize::from_le_bytes(buf[8..16].try_into().ok()?) as *const u16;
+    if ptr.is_null() { return None; }
+    Some(String::from_utf16_lossy(unsafe { std::slice::from_raw_parts(ptr, tam) }))
+}
+
+/// Encerra os processos principais do WebView2 órfãos deste perfil. Devolve quantos foram encerrados.
+pub fn encerrar_webview2_orfao(perfil: &std::path::Path) -> usize {
+    encerrar_webview2(perfil, |pai| !processo_vivo(pai))
+}
+
+/// Encerra o processo principal do WebView2 que este programa abriu para o perfil. Usado entre as tentativas de criar a
+/// janela: se a primeira falha, o WebView2 dela pode ficar preso e as seguintes o reaproveitariam (bateria da
+/// 2.1.1-rc.2, 29/10/2026). Os processos filhos dele acabam junto.
+pub fn encerrar_webview2_deste_programa(perfil: &std::path::Path) -> usize {
+    let eu = std::process::id();
+    encerrar_webview2(perfil, |pai| pai == eu)
+}
+
+fn encerrar_webview2(perfil: &std::path::Path, escolher_pelo_pai: impl Fn(u32) -> bool) -> usize {
+    let marca = format!("--user-data-dir=\"{}\"", perfil.display()).to_lowercase();
+    let mut encerrados = 0;
+    unsafe {
+        let foto = CreateToolhelp32Snapshot(0x2, 0);    // TH32CS_SNAPPROCESS
+        if foto == -1 { return 0; }
+        let mut e: EntradaDeProcesso = std::mem::zeroed();
+        e.tam = std::mem::size_of::<EntradaDeProcesso>() as u32;
+        let mut tem = Process32FirstW(foto, &mut e) != 0;
+        while tem {
+            let fim = e.nome.iter().position(|&c| c == 0).unwrap_or(e.nome.len());
+            let nome = String::from_utf16_lossy(&e.nome[..fim]).to_lowercase();
+            if nome == "msedgewebview2.exe" && escolher_pelo_pai(e.pai) {
+                let h = OpenProcess(0x1000 | 0x0001 | 0x0010_0000, 0, e.pid);   // consulta, encerrar, esperar
+                if h != 0 {
+                    let cmd = linha_de_comando(h).unwrap_or_default().to_lowercase();
+                    // só conta o que de fato acabou (WAIT_OBJECT_0 = 0)
+                    if cmd.contains(&marca) && !cmd.contains("--type=")
+                        && TerminateProcess(h, 1) != 0 && WaitForSingleObject(h, 3000) == 0 {
+                        encerrados += 1;
+                    }
+                    CloseHandle(h);
+                }
+            }
+            tem = Process32NextW(foto, &mut e) != 0;
+        }
+        CloseHandle(foto);
+    }
+    encerrados
 }
 
 // ---- WebView2 para escola sem internet ----
@@ -159,5 +322,13 @@ mod testes {
         if wv2.exists() { assert!(assinado_pela_microsoft(&wv2)); }
         assert!(!assinado_pela_microsoft(&std::env::current_exe().unwrap()));
         assert!(!assinado_pela_microsoft(std::path::Path::new(r"C:\nao-existe\nada.exe")));
+    }
+
+    // um pai que não dá para consultar (o System, pid 4, nega acesso a uma conta comum) não é um pai morto
+    #[test]
+    fn pai_sem_permissao_de_consulta_conta_como_vivo() {
+        assert!(processo_vivo(std::process::id()));
+        assert!(processo_vivo(4));
+        assert!(!processo_vivo(0xFFFF_FFF0));
     }
 }

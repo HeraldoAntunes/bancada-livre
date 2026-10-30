@@ -1,0 +1,210 @@
+// Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+const KEY = 'simulador-portas:autosave'
+const legado = (id: string) => JSON.stringify({ version: 1, components: [{ id, type: 'LED', x: 0, y: 0 }], wires: [] })
+const envelope = (id: string, revisao: number, hora: number) =>
+  JSON.stringify({ ...JSON.parse(legado(id)), salvamento: { revisao, hora } })
+const janela = () => ({ setTimeout, clearTimeout, addEventListener: vi.fn() })
+beforeEach(() => {
+  vi.resetModules(); vi.useFakeTimers(); vi.setSystemTime(10000)
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+})
+afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks() })
+function ambiente(local: string | null, atual: string, reservas: { texto: string; hora: number }[] = [], perguntar?: unknown) {
+  const data = new Map(local ? [[KEY, local], [KEY + '-hora', '9000']] : [])
+  const setItem = vi.fn((k: string, v: string) => data.set(k, v))
+  const invoke = vi.fn<(comando: string, args?: Record<string, unknown>) => Promise<unknown>>(async () => ({ ok: true }))
+  vi.stubGlobal('localStorage', { getItem: (k: string) => data.get(k) ?? null, setItem })
+  vi.stubGlobal('window', { ...janela(), __BANCADA_CIRCUITO__: atual, __BANCADA_CIRCUITO_HORA__: 9500,
+    __BANCADA_RESERVAS__: reservas, __TAURI__: { core: { invoke } },
+    ...(perguntar === undefined ? {} : { __BANCADA_PERGUNTAR_MIGRACAO__: perguntar }) })
+  return { data, setItem, invoke }
+}
+it('storage com revisão alta e nativo legado diferentes pedem escolha sem abrir a cópia velha', async () => {
+  const local = envelope('velho', 10, 9000), atual = legado('novo')
+  const { data, setItem, invoke } = ambiente(local, atual)
+  const { useCircuit } = await import('../store')
+  const s = useCircuit.getState()
+  expect(s.components).toHaveLength(0)
+  expect(s.recuperacao).toHaveLength(2)
+  expect(s.recuperacao!.map(c => [c.componentes, c.fios, c.hora])).toEqual([[1, 0, 9500], [1, 0, 9000]])
+  expect(data.get(KEY)).toBe(local)
+  expect(setItem).not.toHaveBeenCalled()
+  expect(invoke).not.toHaveBeenCalled()
+})
+it('atual legado velho e temporário legado novo precisam de escolha; a data é apenas informativa', async () => {
+  ambiente(null, legado('velho'), [{ texto: legado('novo'), hora: 1 }])
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components).toHaveLength(0)
+  expect(useCircuit.getState().recuperacao).toHaveLength(2)
+  useCircuit.getState().escolherRecuperacao(1)
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['novo'])
+  expect(useCircuit.getState().recuperacao).toBeNull()
+})
+it('cópias de conteúdo igual abrem sem perguntar, independentemente de ordem das chaves e envelope', async () => {
+  const base = JSON.parse(legado('igual'))
+  ambiente(envelope('igual', 10, 9000), JSON.stringify({ wires: base.wires, components: base.components, version: 1 }))
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['igual'])
+  expect(useCircuit.getState().recuperacao).toBeNull()
+})
+it('fechar sem responder não grava, mesmo com edição por comando e espera; a próxima abertura pergunta de novo', async () => {
+  const local = envelope('velho', 10, 9000), atual = legado('novo')
+  const { setItem, invoke } = ambiente(local, atual)
+  const { useCircuit } = await import('../store')
+  useCircuit.getState().addComponent('LED', 100, 0)
+  await vi.advanceTimersByTimeAsync(6000)
+  const fechar = (window as unknown as { __bancadaAoFechar: () => Promise<boolean> }).__bancadaAoFechar
+  expect(await fechar()).toBe(true)
+  expect(setItem).not.toHaveBeenCalled()
+  expect(invoke).not.toHaveBeenCalled()
+  vi.resetModules(); vi.clearAllTimers()
+  ambiente(local, atual)
+  const reopened = await import('../store')
+  expect(reopened.useCircuit.getState().recuperacao).toHaveLength(2)
+})
+it('todos com envelope continuam escolhendo maior revisão e maior hora sem pergunta', async () => {
+  ambiente(envelope('local', 4, 99999), envelope('atual', 8, 20), [{ texto: envelope('reserva', 8, 30), hora: 1 }])
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['reserva'])
+  expect(useCircuit.getState().recuperacao).toBeNull()
+})
+it('primeira gravação migra todas as versões e a próxima abertura não pergunta', async () => {
+  const local = envelope('velho', 10, 9000), atual = legado('novo')
+  const { data, invoke } = ambiente(local, atual)
+  const { useCircuit } = await import('../store')
+  useCircuit.getState().escolherRecuperacao(0)
+  await vi.advanceTimersByTimeAsync(401)
+  expect(invoke).toHaveBeenCalledTimes(1)
+  const [comando, plano] = invoke.mock.calls[0]
+  expect(comando).toBe('migrar_circuitos')
+  expect(plano!.reiniciarRevisao).toBe(false)
+  expect(plano!.texto).toBe(data.get(KEY))
+  const copias = plano!.copias as { original: string; envelope: string }[]
+  expect(copias.map(c => c.original)).toEqual([atual, local])
+  expect(copias.map(c => JSON.parse(c.envelope).components[0].id)).toEqual(['novo', 'velho'])
+  expect(copias.every(c => Number.isSafeInteger(JSON.parse(c.envelope).salvamento.revisao))).toBe(true)
+  expect(JSON.parse(data.get(KEY)!).salvamento.revisao).toBe(11)
+  vi.resetModules(); vi.clearAllTimers()
+  ambiente(data.get(KEY)!, data.get(KEY)!, copias.map(c => ({ texto: c.envelope, hora: 1 })))
+  const reopened = await import('../store')
+  expect(reopened.useCircuit.getState().components.map(c => c.id)).toEqual(['novo'])
+  expect(reopened.useCircuit.getState().recuperacao).toBeNull()
+})
+it.each(['indisponivel', 'sem-confirmacao'])('migração %s não sobrescreve o storage nem usa salvar_circuito', async (falha) => {
+  const local = envelope('velho', 10, 9000)
+  const { data, invoke, setItem } = ambiente(local, legado('novo'))
+  if (falha === 'indisponivel') invoke.mockRejectedValue(Error('unknown command'))
+  else invoke.mockResolvedValue(undefined)
+  const { useCircuit } = await import('../store')
+  useCircuit.getState().escolherRecuperacao(0)
+  await vi.advanceTimersByTimeAsync(401)
+  expect(invoke.mock.calls[0][0]).toBe('migrar_circuitos')
+  expect(invoke.mock.calls.every(([nome]) => nome === 'migrar_circuitos')).toBe(true)
+  expect(setItem).not.toHaveBeenCalled()
+  expect(data.get(KEY)).toBe(local)
+  expect(useCircuit.getState().falhaSalvamento).not.toBe('')
+})
+it('legado único no navegador ganha envelope preservando a cópia original', async () => {
+  const old = legado('navegador')
+  const { data, invoke } = ambiente(old, '')
+  vi.stubGlobal('window', janela())
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['navegador'])
+  await vi.advanceTimersByTimeAsync(401)
+  expect(JSON.parse(data.get(KEY)!).salvamento.revisao).toBe(1)
+  expect(JSON.parse(data.get('simulador-portas:copias-recuperadas')!)).toContain(old)
+  expect(invoke).not.toHaveBeenCalled()
+})
+
+it('flag false abre o principal válido em silêncio e migra todas as cópias acima da maior revisão', async () => {
+  const atual = legado('principal'), reserva = envelope('reserva', 30, 99999), local = envelope('navegador', 10, 9000)
+  const { data, invoke, setItem } = ambiente(local, atual, [{ texto: reserva, hora: 999999 }], false)
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['principal'])
+  expect(useCircuit.getState().recuperacao).toBeNull()
+  expect(setItem).not.toHaveBeenCalled()
+  expect(invoke).not.toHaveBeenCalled()
+  await vi.advanceTimersByTimeAsync(401)
+  expect(invoke).toHaveBeenCalledTimes(1)
+  const [comando, plano] = invoke.mock.calls[0]
+  expect(comando).toBe('migrar_circuitos')
+  expect(plano!.reiniciarRevisao).toBe(false)
+  expect(plano!.texto).toBe(data.get(KEY))
+  const salvo = JSON.parse(plano!.texto as string)
+  expect(salvo.components.map((c: { id: string }) => c.id)).toEqual(['principal'])
+  expect(salvo.salvamento).toEqual({ hora: 10400, revisao: 31 })
+  const copias = plano!.copias as { original: string; envelope: string }[]
+  expect(copias.map(c => c.original)).toEqual([atual, reserva, local])
+  expect(copias.map(c => JSON.parse(c.envelope).salvamento.revisao)).toEqual([0, 30, 10])
+  for (const copia of copias) {
+    const convertido = JSON.parse(copia.envelope), original = JSON.parse(copia.original)
+    expect(convertido.components).toEqual(original.components)
+    expect(convertido.wires).toEqual(original.wires)
+  }
+  expect(useCircuit.getState().falhaSalvamento).toBe('')
+  vi.resetModules(); vi.clearAllTimers()
+  ambiente(data.get(KEY)!, data.get(KEY)!, copias.map(c => ({ texto: c.envelope, hora: 1 })), false)
+  const reaberto = (await import('../store')).useCircuit.getState()
+  expect(reaberto.components.map(c => c.id)).toEqual(['principal'])
+  expect(reaberto.recuperacao).toBeNull()
+})
+it('flag false também prefere o principal com envelope quando o legado está no navegador', async () => {
+  ambiente(legado('navegador'), envelope('principal', 1, 10), [{ texto: envelope('reserva', 20, 50), hora: 50 }], false)
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['principal'])
+  expect(useCircuit.getState().recuperacao).toBeNull()
+})
+it('flag true mantém a pergunta e não grava antes da escolha', async () => {
+  const { invoke, setItem } = ambiente(envelope('navegador', 10, 9000), legado('principal'), [], true)
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components).toEqual([])
+  expect(useCircuit.getState().recuperacao).toHaveLength(2)
+  await vi.advanceTimersByTimeAsync(401)
+  expect(invoke).not.toHaveBeenCalled()
+  expect(setItem).not.toHaveBeenCalled()
+})
+it.each([
+  ['ausente', ''],
+  ['JSON recusado', '{'],
+  ['tipo recusado', JSON.stringify({ ...JSON.parse(legado('ruim')), components: [{ id: 'ruim', type: 'TIPO_INEXISTENTE', x: 0, y: 0 }] })],
+  ['fio recusado', JSON.stringify({ ...JSON.parse(legado('ruim')), wires: [{ id: 'w', from: { comp: 'ruim', pin: 'out' }, to: { comp: 'ausente', pin: 'in' } }] })],
+  ['envelope recusado', envelope('ruim', Number.MAX_SAFE_INTEGER + 1, 1)],
+])('flag false com principal %s pergunta entre as demais cópias válidas', async (_caso, atual) => {
+  const { invoke, setItem } = ambiente(envelope('navegador', 10, 9000), atual, [{ texto: legado('reserva'), hora: 1 }], false)
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components).toEqual([])
+  expect(useCircuit.getState().recuperacao).toHaveLength(2)
+  expect(useCircuit.getState().recuperacao!.map(c => c.origem)).toEqual(['Cópia do programa 2', 'Armazenamento do navegador'])
+  await vi.advanceTimersByTimeAsync(401)
+  expect(invoke).not.toHaveBeenCalled()
+  expect(setItem).not.toHaveBeenCalled()
+})
+it.each([null, 0, 'false'])('flag malformada %s não autoriza migração silenciosa', async (flag) => {
+  ambiente(envelope('navegador', 10, 9000), legado('principal'), [], flag)
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components).toEqual([])
+  expect(useCircuit.getState().recuperacao).toHaveLength(2)
+})
+it('flag false não muda a escolha por revisão quando todas as cópias têm envelope', async () => {
+  ambiente(envelope('navegador', 10, 9000), envelope('principal', 1, 99999), [{ texto: envelope('reserva', 20, 1), hora: 1 }], false)
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['reserva'])
+  expect(useCircuit.getState().recuperacao).toBeNull()
+})
+it('flag true não pergunta quando os conteúdos legados são iguais', async () => {
+  ambiente(envelope('igual', 10, 9000), legado('igual'), [], true)
+  const { useCircuit } = await import('../store')
+  expect(useCircuit.getState().components.map(c => c.id)).toEqual(['igual'])
+  expect(useCircuit.getState().recuperacao).toBeNull()
+})
+
+it('índice inválido não escolhe nem altera as fontes', async () => {
+  const { setItem, invoke } = ambiente(envelope('velho', 10, 9000), legado('novo'))
+  const { useCircuit } = await import('../store')
+  expect(() => useCircuit.getState().escolherRecuperacao(-1)).toThrow()
+  expect(useCircuit.getState().recuperacao).toHaveLength(2)
+  expect(useCircuit.getState().components).toHaveLength(0)
+  expect(setItem).not.toHaveBeenCalled()
+  expect(invoke).not.toHaveBeenCalled()
+})

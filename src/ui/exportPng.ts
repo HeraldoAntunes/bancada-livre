@@ -28,6 +28,13 @@ function svgDaBancada(): { xml: string; rect: { width: number; height: number } 
     pin.setAttribute('stroke', '#1a1a1a')
     pin.setAttribute('stroke-width', '2.5')
   }
+  // Os controles do CLOCK também dependem de classes que não acompanham o SVG.
+  for (const fundo of clone.querySelectorAll('.clock-botao rect')) {
+    fundo.setAttribute('fill', '#1b4f8a')
+    fundo.setAttribute('stroke', '#0f2f52')
+    fundo.setAttribute('stroke-width', '1')
+  }
+  for (const icon of clone.querySelectorAll('.clock-botao .icon')) icon.setAttribute('color', '#ffffff')
   // textos de componentes espelhados ou girados: o CSS que os mantém de pé vai junto, no atributo style
   const vivos = svg.querySelectorAll('text')
   clone.querySelectorAll('text').forEach((t, i) => {

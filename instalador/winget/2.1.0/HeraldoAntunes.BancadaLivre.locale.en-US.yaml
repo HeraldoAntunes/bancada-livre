@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.10.0.schema.json
+PackageIdentifier: HeraldoAntunes.BancadaLivre
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: Heraldo Antunes
+PublisherUrl: https://github.com/HeraldoAntunes
+PublisherSupportUrl: https://github.com/HeraldoAntunes/bancada-livre/issues
+Author: Heraldo Antunes
+PackageName: Bancada Livre
+PackageUrl: https://github.com/HeraldoAntunes/bancada-livre
+License: MIT
+LicenseUrl: https://github.com/HeraldoAntunes/bancada-livre/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Heraldo Antunes
+ShortDescription: Free and open educational digital logic simulator for the classroom (interface in Brazilian Portuguese).
+Description: |-
+  Workbench to build and test digital circuits: logic gates, flip-flops, counters, 7-segment display and 74xx ICs with
+  the real pinout. Shows the truth table, Karnaugh map and timeline, checks the circuit against an answer key and
+  includes 40 example circuits. Works offline, no account needed. Uses Microsoft Edge WebView2, included in Windows 11
+  and updated Windows 10. The interface is in Brazilian Portuguese.
+Tags:
+- education
+- electronics
+- digital-logic
+- logic-gates
+- simulator
+ReleaseNotesUrl: https://github.com/HeraldoAntunes/bancada-livre/releases/tag/v2.1.0
+ManifestType: locale
+ManifestVersion: 1.10.0

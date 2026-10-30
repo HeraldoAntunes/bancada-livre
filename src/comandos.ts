@@ -73,7 +73,7 @@ export function listar(): { nome: string; descricao: string; params: Record<stri
 
 function validar(params: Record<string, Param>, p: Record<string, unknown>): string | null {
   for (const nome of Object.keys(p)) {
-    if (!(nome in params)) return `parâmetro desconhecido: "${nome}"`
+    if (!Object.prototype.hasOwnProperty.call(params, nome)) return `parâmetro desconhecido: "${nome}"`
   }
   for (const [nome, def] of Object.entries(params)) {
     const v = p[nome]

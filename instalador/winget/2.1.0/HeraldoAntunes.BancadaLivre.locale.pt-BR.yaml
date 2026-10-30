@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+PackageIdentifier: HeraldoAntunes.BancadaLivre
+PackageVersion: 2.1.0
+PackageLocale: pt-BR
+Publisher: Heraldo Antunes
+PublisherUrl: https://github.com/HeraldoAntunes
+PublisherSupportUrl: https://github.com/HeraldoAntunes/bancada-livre/issues
+Author: Heraldo Antunes
+PackageName: Bancada Livre
+PackageUrl: https://github.com/HeraldoAntunes/bancada-livre
+License: MIT
+LicenseUrl: https://github.com/HeraldoAntunes/bancada-livre/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Heraldo Antunes
+ShortDescription: Simulador didático de lógica digital, livre e gratuito, para a sala de aula.
+Description: |-
+  Bancada para montar e testar circuitos digitais: portas lógicas, flip-flops, contadores, display de 7 segmentos e CIs
+  da série 74xx com a pinagem real. Mostra a tabela-verdade, o mapa de Karnaugh e a linha do tempo, confere o circuito
+  com um gabarito e traz 40 circuitos de exemplo. Funciona sem internet e sem conta. Usa o Microsoft Edge WebView2,
+  que vem no Windows 11 e nos Windows 10 atualizados.
+Moniker: bancada-livre
+Tags:
+- educacao
+- eletronica
+- logica-digital
+- portas-logicas
+- simulador
+ReleaseNotesUrl: https://github.com/HeraldoAntunes/bancada-livre/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

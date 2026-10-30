@@ -117,6 +117,36 @@ body,
   text-decoration: underline;
 }
 
+/* ---- escolha de uma cópia recuperada ---- */
+.modal.recuperacao {
+  max-width: 640px;
+}
+.recuperacao-copias {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 18px 0;
+}
+.recuperacao-copias li {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #b6c6d8;
+  border-radius: 8px;
+}
+.recuperacao-copias li strong {
+  overflow-wrap: anywhere;
+}
+.recuperacao-copias button {
+  justify-self: start;
+  margin-top: 4px;
+}
+.recuperacao button:focus-visible {
+  outline: 3px solid #1b4f8a;
+  outline-offset: 3px;
+}
+
 /* ---- janela Sobre ---- */
 .modal-overlay {
   position: fixed;

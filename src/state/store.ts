@@ -30,11 +30,24 @@ import {
 } from '../engine/types'
 
 let counter = 1
-const nid = (prefix: string) => `${prefix}${counter++}`
+/** Ids em uso no circuito aberto (definido depois que o store existe). */
+let idsEmUso: () => Set<string> = () => new Set()
+/** Id novo, conferido contra os que já existem: um arquivo pode trazer qualquer id (auditoria de 29/10/2026). */
+const nid = (prefix: string) => {
+  const usados = idsEmUso()
+  let id: string
+  do id = `${prefix}${counter++}`
+  while (usados.has(id))
+  return id
+}
 
 /** Tag do último checkpoint — coalesce edições contínuas (ex.: digitação de rótulo). */
 let lastTag: string | null = null
 let lastTagAt = 0
+let revisaoConteudo = 0
+let emSimulacao = false
+/** Conta alterações do conteúdo, incluindo edições agrupadas e desfazer/refazer, sem os ticks automáticos. */
+export const revisaoDeEdicao = () => revisaoConteudo
 /** Edições com a mesma tag além desta pausa contam como sessões distintas de undo. */
 const COALESCE_MS = 2500
 
@@ -61,10 +74,10 @@ function validateCircuit(data: Circuit): string | null {
     if (
       !c ||
       typeof c !== 'object' ||
-      typeof c.id !== 'string' ||
+      typeof c.id !== 'string' || !c.id || c.id.includes(':') ||
       !VALID_TYPES.has(c.type) ||
-      !Number.isFinite(c.x) ||
-      !Number.isFinite(c.y)
+      !Number.isFinite(c.x) || Math.abs(c.x) > 1_000_000 ||
+      !Number.isFinite(c.y) || Math.abs(c.y) > 1_000_000
     ) {
       return 'Arquivo inválido: componente malformado.'
     }
@@ -141,10 +154,10 @@ function validateCircuit(data: Circuit): string | null {
   }
   const wireIds = new Set<string>()
   for (const w of data.wires) {
-    if (!w || typeof w !== 'object' || typeof w.id !== 'string') {
+    if (!w || typeof w !== 'object' || typeof w.id !== 'string' || !w.id || w.id.includes(':')) {
       return 'Arquivo inválido: fio malformado.'
     }
-    if (wireIds.has(w.id)) return `Arquivo inválido: id de fio duplicado (${w.id}).`
+    if (wireIds.has(w.id) || compIds.has(w.id)) return `Arquivo inválido: id de fio duplicado (${w.id}).`
     wireIds.add(w.id)
     for (const end of [w.from, w.to]) {
       if (!end || typeof end !== 'object' || typeof end.comp !== 'string' || typeof end.pin !== 'string') {
@@ -206,6 +219,8 @@ const HISTORY_MAX = 50
 // qualquer circuito de aula e barram arquivo errado ou malicioso antes do JSON.parse.
 export const MAX_JSON_CHARS = 2_000_000
 const AUTOSAVE_KEY = 'simulador-portas:autosave'
+export const COPIAS_RECUPERADAS_KEY = 'simulador-portas:copias-recuperadas'
+let revisaoAutosave = 0
 /** Onde fica guardado um salvamento que não pôde ser aberto, para não ser sobrescrito na primeira edição. */
 export const AUTOSAVE_RECUSADO_KEY = 'simulador-portas:autosave-recusado'
 const SHOW_NAMES_KEY = 'simulador-portas:nomes'
@@ -239,39 +254,149 @@ function avancar(s: CircuitStore, deltaMs: number): Partial<CircuitStore> {
   return changed ? { clockMs, components } : { clockMs }
 }
 
-/**
- * Programa do Windows (janela própria, Tauri): guarda o circuito também em arquivo, à prova de queda no meio da
- * gravação, e entrega o último salvo em `__BANCADA_CIRCUITO__` antes de a página carregar. No navegador nada disso
- * existe e vale só o localStorage.
- */
+/** A camada nativa entrega os bytes de todas as cópias; a página decide qual circuito é válido e mais novo. */
 interface ProgramaWindows {
   __BANCADA_CIRCUITO__?: string
+  __BANCADA_CIRCUITO_HORA__?: number
+  __BANCADA_PERGUNTAR_MIGRACAO__?: boolean
+  __BANCADA_REVISOES_REINICIADAS__?: { original: string; envelope: string }[]
+  __BANCADA_RESERVAS__?: { texto: string; hora?: number; origem?: string }[]
   __TAURI__?: { core: { invoke: (comando: string, args?: Record<string, unknown>) => Promise<unknown> } }
 }
 export const programa = (): ProgramaWindows => (typeof window === 'undefined' ? {} : (window as ProgramaWindows))
+interface MetadadosSalvamento { hora: number; revisao: number }
 
-/** Restaura o circuito salvo automaticamente. */
+/** Espaço limitado para os dois inteiros e a chave do envelope, sem reduzir o teto do circuito. */
+const MAX_METADADOS_CHARS = 128
+const ERRO_TAMANHO = 'Arquivo grande demais para ser um circuito (limite de 2 milhões de caracteres).'
+function lerDadosCircuito(texto: string): Circuit & { salvamento?: MetadadosSalvamento } {
+  if (texto.length > MAX_JSON_CHARS + MAX_METADADOS_CHARS ||
+      (texto.length > MAX_JSON_CHARS && !texto.includes('"salvamento"'))) throw new Error(ERRO_TAMANHO)
+  const data = JSON.parse(texto) as Circuit & { salvamento?: MetadadosSalvamento }
+  if (!data || !Array.isArray(data.components) || !Array.isArray(data.wires)) {
+    throw new Error('Arquivo inválido: faltam "components" e "wires".')
+  }
+  const acrescimo = data.salvamento === undefined ? 0 : JSON.stringify({ salvamento: data.salvamento }).length - 1
+  if (acrescimo > MAX_METADADOS_CHARS || texto.length - acrescimo > MAX_JSON_CHARS) throw new Error(ERRO_TAMANHO)
+  const meta = data.salvamento
+  if (meta !== undefined && (!meta || !Number.isSafeInteger(meta.hora) || meta.hora < 0 ||
+      !Number.isSafeInteger(meta.revisao) || meta.revisao < 0)) throw new Error('Arquivo inválido: metadados de salvamento.')
+  return data
+}
+
+export interface CopiaRecuperacao {
+  origem: string
+  hora: number
+  componentes: number
+  fios: number
+}
+interface PlanoMigracao {
+  texto: string
+  copias: { original: string; envelope: string }[]
+  reiniciarRevisao: boolean
+}
+interface CandidatoRecuperacao {
+  nativa: boolean
+  texto: string
+  data: Circuit & { salvamento?: MetadadosSalvamento }
+  origem: string
+  hora: number
+}
+let copiasRecuperacao: CandidatoRecuperacao[] = []
+let opcoesRecuperacao: CopiaRecuperacao[] | null = null
+let precisaMigrar = false
+let reiniciarRevisao = false
+let corrigirLocalReiniciado = false
+const AVISO_CONTAGEM = 'O contador de salvamentos atingiu o limite. As cópias serão preservadas e a contagem recomeçará em 1.'
+const AVISO_CONTAGEM_REINICIADA = 'Contagem de salvamentos reiniciada; as versões anteriores foram preservadas.'
+
+/** As propriedades podem vir em outra ordem sem mudar o conteúdo do circuito. */
+function conteudoCanonico(valor: unknown): unknown {
+  if (Array.isArray(valor)) return valor.map(conteudoCanonico)
+  if (valor && typeof valor === 'object') return Object.fromEntries(
+    Object.entries(valor).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([k, v]) => [k, conteudoCanonico(v)]))
+  return valor
+}
+const horaInformativa = (hora: number | undefined) => Number.isSafeInteger(hora) && hora! >= 0 ? hora! : 0
+
+/** Com legado divergente, o Rust pode autorizar o principal válido; nos demais casos a pessoa escolhe. */
 function loadAutosave(): Snapshot {
   const empty: Snapshot = { components: [], wires: [] }
-  let raw: string | null = null
+  let recusado: { texto: string; motivo: string } | null = null
+  let local: string | null = null
+  let horaLocal = 0
   try {
-    if (typeof localStorage === 'undefined') return empty
-    raw = programa().__BANCADA_CIRCUITO__ || localStorage.getItem(AUTOSAVE_KEY)
-    if (!raw) return empty
-    const data = JSON.parse(raw) as Circuit
-    const err =
-      !Array.isArray(data.components) || !Array.isArray(data.wires)
-        ? 'faltam "components" e "wires"'
-        : validateCircuit(data)
-    if (err === null) {
-      bumpCounter([...data.components.map((c) => c.id), ...data.wires.map((w) => w.id)])
-      return { components: data.components, wires: data.wires }
+    if (typeof localStorage !== 'undefined') {
+      local = localStorage.getItem(AUTOSAVE_KEY)
+      horaLocal = Number(localStorage.getItem(AUTOSAVE_KEY + '-hora'))
     }
-    guardarRecusado(raw, err)
   } catch (e) {
-    if (raw) guardarRecusado(raw, String(e))
+    console.warn('Bancada Livre: não foi possível ler o armazenamento do navegador; tentando as cópias do programa.', e)
   }
-  return empty
+  const p = programa()
+  const lista: { texto: string; origem: string; hora?: number; nativa: boolean }[] = []
+  if (typeof p.__BANCADA_CIRCUITO__ === 'string' && p.__BANCADA_CIRCUITO__) {
+    lista.push({ texto: p.__BANCADA_CIRCUITO__, origem: 'Arquivo principal do programa', hora: p.__BANCADA_CIRCUITO_HORA__, nativa: true })
+  }
+  for (const [i, r] of (p.__BANCADA_RESERVAS__ ?? []).entries()) if (typeof r?.texto === 'string') {
+    lista.push({ texto: r.texto, origem: r.origem || `Cópia do programa ${i + 2}`, hora: r.hora, nativa: true })
+  }
+  if (local) lista.push({ texto: local, origem: 'Armazenamento do navegador', hora: horaLocal, nativa: false })
+  const validos: CandidatoRecuperacao[] = []
+  for (const candidato of lista) {
+    try {
+      let data = lerDadosCircuito(candidato.texto)
+      const err = validateCircuit(data)
+      if (err) throw new Error(err)
+      if (!candidato.nativa) {
+        // O registro durável distingue uma revisão aposentada de uma cópia realmente mais nova.
+        for (const registro of p.__BANCADA_REVISOES_REINICIADAS__ ?? []) {
+          if (registro.original !== candidato.texto) continue
+          try {
+            const convertida = lerDadosCircuito(registro.envelope)
+            if (validateCircuit(convertida) || convertida.salvamento?.revisao !== 0 ||
+                JSON.stringify(conteudoCanonico({ components: data.components, wires: data.wires })) !==
+                JSON.stringify(conteudoCanonico({ components: convertida.components, wires: convertida.wires }))) continue
+            data = convertida
+            corrigirLocalReiniciado = true
+            break
+          } catch { /* Registro incompleto não muda a cópia original. */ }
+        }
+      }
+      revisaoAutosave = Math.max(revisaoAutosave, data.salvamento?.revisao ?? 0)
+      validos.push({ ...candidato, data, hora: data.salvamento?.hora ?? horaInformativa(candidato.hora) })
+    } catch (e) {
+      recusado ??= { texto: candidato.texto, motivo: String(e) }
+    }
+  }
+  copiasRecuperacao = validos
+  const temLegado = validos.some(c => c.data.salvamento === undefined)
+  reiniciarRevisao = revisaoAutosave === Number.MAX_SAFE_INTEGER
+  precisaMigrar = temLegado || reiniciarRevisao
+  let principalSilencioso: CandidatoRecuperacao | undefined
+  if (temLegado && validos.length > 1) {
+    const conteudos = new Set(validos.map(c => JSON.stringify(conteudoCanonico({
+      components: c.data.components, wires: c.data.wires,
+    }))))
+    if (conteudos.size > 1) {
+      if (p.__BANCADA_PERGUNTAR_MIGRACAO__ === false) {
+        principalSilencioso = validos.find(c => c.nativa && c.texto === p.__BANCADA_CIRCUITO__)
+      }
+      if (!principalSilencioso) {
+        opcoesRecuperacao = validos.map(c => ({
+          origem: c.origem, hora: c.hora, componentes: c.data.components.length, fios: c.data.wires.length,
+        }))
+        return empty
+      }
+    }
+  }
+  if (recusado) guardarRecusado(recusado.texto, recusado.motivo)
+  const escolha = principalSilencioso?.data ?? [...validos].sort((a, b) =>
+    (b.data.salvamento?.revisao ?? 0) - (a.data.salvamento?.revisao ?? 0) ||
+    (b.data.salvamento?.hora ?? 0) - (a.data.salvamento?.hora ?? 0))[0]?.data
+  if (!escolha) return empty
+  bumpCounter([...escolha.components.map((c) => c.id), ...escolha.wires.map((w) => w.id)])
+  return { components: escolha.components, wires: escolha.wires }
 }
 
 /** Salvamento automático que não abriu: guarda à parte e avisa no console, em vez de perder em silêncio. */
@@ -295,6 +420,9 @@ function loadShowNames(): boolean {
 const initial = loadAutosave()
 
 export interface CircuitStore {
+  recuperacao: CopiaRecuperacao[] | null
+  avisoRecuperacao: string
+  escolherRecuperacao: (indice: number) => void
   components: CircuitComponent[]
   wires: Wire[]
   selectedId: string | null
@@ -383,6 +511,17 @@ export interface CircuitStore {
 }
 
 export const useCircuit = create<CircuitStore>()((set, get) => ({
+  recuperacao: opcoesRecuperacao,
+  avisoRecuperacao: reiniciarRevisao ? AVISO_CONTAGEM : '',
+  escolherRecuperacao: (indice) => {
+    if (!get().recuperacao || !Number.isInteger(indice) || !copiasRecuperacao[indice]) {
+      throw new Error('Escolha uma das versões apresentadas.')
+    }
+    const { data } = copiasRecuperacao[indice]
+    bumpCounter([...data.components.map(c => c.id), ...data.wires.map(w => w.id)])
+    set(s => ({ components: data.components, wires: data.wires, recuperacao: null,
+      past: [], future: [], selectedId: null, carregamentos: s.carregamentos + 1 }))
+  },
   components: initial.components,
   wires: initial.wires,
   selectedId: null,
@@ -693,25 +832,29 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   // nenhuma borda se perde. Só o que passar de MAX_PASSOS_ATRASO passos anda num salto só, para não travar a tela
   // recuperando o tempo; nesse caso a barra de baixo avisa que o relógio pulou.
   tickClocks: (deltaMs) => {
-    const passos = get().components.flatMap((c) =>
-      c.type === 'CLOCK' ? [250 / (c.freq ?? 1)] : c.type === 'COUNTER' ? [500 / (c.freq ?? 1)] : [],
-    )
-    const passo = passos.length > 0 ? Math.min(...passos) : deltaMs
-    let resta = Math.min(deltaMs, passo * MAX_PASSOS_ATRASO)
-    if (deltaMs > resta) {
-      const pulou = Math.round((deltaMs - resta) / 1000)
-      avisoRelogioAte = get().clockMs + deltaMs + 20_000
-      set((s) => ({
-        ...avancar(s, deltaMs - resta),
-        avisoRelogio: `O relógio pulou ${pulou} s (computador suspenso ou programa parado): os flip-flops não viram as bordas desse intervalo.`,
-      }))
-    }
-    while (resta > 0) {
-      const d = Math.min(resta, passo)
-      set((s) => avancar(s, d))
-      resta -= d
-    }
-    if (get().avisoRelogio && get().clockMs > avisoRelogioAte) set({ avisoRelogio: '' })
+    const estavaSimulando = emSimulacao
+    emSimulacao = true
+    try {
+      const passos = get().components.flatMap((c) =>
+        c.type === 'CLOCK' ? [250 / (c.freq ?? 1)] : c.type === 'COUNTER' ? [500 / (c.freq ?? 1)] : [],
+      )
+      const passo = passos.length > 0 ? Math.min(...passos) : deltaMs
+      let resta = Math.min(deltaMs, passo * MAX_PASSOS_ATRASO)
+      if (deltaMs > resta) {
+        const pulou = Math.round((deltaMs - resta) / 1000)
+        avisoRelogioAte = get().clockMs + deltaMs + 20_000
+        set((s) => ({
+          ...avancar(s, deltaMs - resta),
+          avisoRelogio: `O relógio pulou ${pulou} s (computador suspenso ou programa parado): os flip-flops não viram as bordas desse intervalo.`,
+        }))
+      }
+      while (resta > 0) {
+        const d = Math.min(resta, passo)
+        set((s) => avancar(s, d))
+        resta -= d
+      }
+      if (get().avisoRelogio && get().clockMs > avisoRelogioAte) set({ avisoRelogio: '' })
+    } finally { emSimulacao = estavaSimulando }
   },
 
   // Avança meio período do clock mais rápido (modo passo).
@@ -750,30 +893,38 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   },
 
   loadJSON: (text) => {
-    if (text.length > MAX_JSON_CHARS) {
-      return 'Arquivo grande demais para ser um circuito (limite de 2 milhões de caracteres).'
-    }
     try {
-      const data = JSON.parse(text) as Circuit
-      if (!Array.isArray(data.components) || !Array.isArray(data.wires)) {
-        return 'Arquivo inválido: faltam "components" e "wires".'
-      }
+      const data = lerDadosCircuito(text)
       // Valida ANTES do checkpoint do loadCircuit — dados ruins não podem
       // nem derrubar o render nem poluir o histórico de undo.
       const err = validateCircuit(data)
       if (err) return err
+      revisaoAutosave = Math.max(revisaoAutosave, data.salvamento?.revisao ?? 0)
+      if (data.salvamento?.revisao === Number.MAX_SAFE_INTEGER && !copiasRecuperacao.some(c => c.texto === text)) {
+        copiasRecuperacao.push({ texto: text, data, nativa: false, origem: 'Arquivo aberto', hora: data.salvamento.hora })
+      }
       get().loadCircuit(data.components, data.wires)
       return null
-    } catch {
-      return 'Arquivo inválido: JSON malformado.'
+    } catch (e) {
+      return e instanceof SyntaxError ? 'Arquivo inválido: JSON malformado.' : String(e instanceof Error ? e.message : e)
     }
   },
 }))
+
+idsEmUso = () => {
+  const s = useCircuit.getState()
+  return new Set([...s.components.map((c) => c.id), ...s.wires.map((w) => w.id)])
+}
 
 // Elementos de memória: a cada mudança do circuito (chave, clock, fio novo), procura as bordas do clock e atualiza
 // o estado dos flip-flops até tudo parar de mudar. Não é passo do Desfazer: é o circuito reagindo.
 // A marca de oscilação vale até a próxima mudança feita fora do assentamento.
 let vindoDoAssentar = false
+useCircuit.subscribe((s, antes) => {
+  if (!emSimulacao && !vindoDoAssentar && (s.components !== antes.components || s.wires !== antes.wires)) {
+    revisaoConteudo++
+  }
+})
 useCircuit.subscribe((s, antes) => {
   if (s.components === antes.components && s.wires === antes.wires) return
   const veio = vindoDoAssentar
@@ -820,42 +971,158 @@ export const ESPERA_AUTOSAVE_MS = 400
 // Salvamento automático: grava o circuito no localStorage (e, no programa do Windows, também em arquivo) no máximo
 // ESPERA_AUTOSAVE_MS depois de cada mudança, e só se o texto mudou. A espera não recomeça a cada mudança: com um
 // circuito que muda sozinho (flip-flops num clock rápido) a gravação continua acontecendo. Ao sair da página (aba
-// fechada, janela escondida) e ao fechar a janela do programa, a mudança que ainda esperava é gravada na hora. Se a
-// gravação falhar, o aviso aparece na barra de baixo até a próxima gravação dar certo.
+// fechada, janela escondida) e ao fechar a janela do programa, a mudança que ainda esperava é gravada na hora.
+// O texto só conta como gravado depois que a gravação deu certo: se falhar, o aviso aparece na barra de baixo, a
+// gravação é tentada de novo a cada NOVA_TENTATIVA_MS e ao fechar, e o aviso só sai quando ela der certo. Uma gravação
+// em arquivo nunca começa antes de a anterior terminar, e o fechamento espera a que estiver em andamento.
 const FALHA_SALVAMENTO =
   'O salvamento automático falhou: use Salvar para guardar o circuito num arquivo antes de fechar.'
+/** Intervalo entre as novas tentativas depois de uma gravação que falhou. */
+export const NOVA_TENTATIVA_MS = 5000
 if (typeof window !== 'undefined') {
   let timer: number | undefined
+  let novaTentativa: number | undefined
   let prev: Snapshot = { components: initial.components, wires: initial.wires }
-  let ultimo = textoDoAutosave(prev)
+  // o que já está gravado em cada lugar (ao abrir, o circuito aberto veio de um deles)
+  let noLocal = corrigirLocalReiniciado ? '' : textoDoAutosave(prev)
+  let noArquivo = textoDoAutosave(prev)
+  let emAndamento: Promise<void> | null = null
+  let preparado: { circuito: string; envelope: string; migracao?: PlanoMigracao } | null = null
+  let migrouNoNativo = false
+  let guardouOriginaisWeb = false
+  let reinicioIniciado = false
   const avisar = (falhou: boolean, e?: unknown) => {
     if (falhou) console.warn('Bancada Livre: o salvamento automático falhou.', e)
     const texto = falhou ? FALHA_SALVAMENTO : ''
     if (useCircuit.getState().falhaSalvamento !== texto) useCircuit.setState({ falhaSalvamento: texto })
   }
-  const gravar = (): Promise<void> => {
+  /** Grava o que falta gravar. `true`: tudo gravado. */
+  const gravar = async (): Promise<boolean> => {
     if (timer !== undefined) window.clearTimeout(timer)
     timer = undefined
+    if (useCircuit.getState().recuperacao) return true
+    while (emAndamento) await emAndamento
+    let falhou = false
     const texto = textoDoAutosave(prev)
-    if (texto === ultimo) return Promise.resolve()
-    ultimo = texto
-    let local = true
-    try {
-      localStorage.setItem(AUTOSAVE_KEY, texto)
-    } catch (e) {
-      // modo privado ou cota cheia
-      local = false
-      avisar(true, e)
-    }
     const tauri = programa().__TAURI__
-    if (!tauri) {
-      if (local) avisar(false)
-      return Promise.resolve()
+    let envelope: string | undefined
+    if (precisaMigrar || texto !== noLocal || (tauri && texto !== noArquivo)) {
+      try {
+        if (texto.length > MAX_JSON_CHARS) throw new Error(ERRO_TAMANHO)
+        if (!preparado || preparado.circuito !== texto) {
+          if (revisaoAutosave === Number.MAX_SAFE_INTEGER) {
+            // Inclui também bytes produzidos nesta sessão antes de reiniciar o contador. Armazenamento ausente ou
+            // ilegível conta como fonte ausente: as cópias já validadas seguem para a migração (BL-RC6-D01).
+            let local: string | null = null
+            try {
+              if (typeof localStorage !== 'undefined') local = localStorage.getItem(AUTOSAVE_KEY)
+            } catch (e) {
+              console.warn('Bancada Livre: armazenamento do navegador ilegível; reinício segue com as outras cópias.', e)
+            }
+            for (const original of [preparado?.envelope, local]) {
+              if (!original || copiasRecuperacao.some(c => c.texto === original)) continue
+              try {
+                const data = lerDadosCircuito(original)
+                if (validateCircuit(data)) continue
+                copiasRecuperacao.push({ texto: original, data, nativa: false,
+                  origem: 'Salvamento desta sessão', hora: data.salvamento?.hora ?? 0 })
+              } catch { /* cópia ilegível não entra entre as preservadas, como na abertura */ }
+            }
+          }
+          if (revisaoAutosave === Number.MAX_SAFE_INTEGER && !reiniciarRevisao) {
+            reiniciarRevisao = true
+            precisaMigrar = true
+            migrouNoNativo = false
+            guardouOriginaisWeb = false
+            reinicioIniciado = false
+            useCircuit.setState({ avisoRecuperacao: AVISO_CONTAGEM })
+          }
+          const revisao = reiniciarRevisao && !reinicioIniciado ? 1 : revisaoAutosave + 1
+          preparado = { circuito: texto, envelope: JSON.stringify({
+            ...JSON.parse(texto), salvamento: { hora: Date.now(), revisao },
+          }) }
+          if (precisaMigrar) preparado.migracao = {
+            texto: preparado.envelope,
+            copias: copiasRecuperacao.map(c => ({
+              original: c.texto, envelope: JSON.stringify({ ...c.data,
+                salvamento: reiniciarRevisao ? { hora: c.hora, revisao: 0 } : c.data.salvamento ?? { hora: c.hora, revisao: 0 } }),
+            })),
+            reiniciarRevisao,
+          }
+          if (reiniciarRevisao) reinicioIniciado = true
+          revisaoAutosave = revisao
+          noLocal = ''
+          noArquivo = ''
+        }
+        envelope = preparado.envelope
+      } catch (e) { falhou = true; avisar(true, e) }
     }
-    return tauri.core.invoke('salvar_circuito', { texto }).then(
-      () => avisar(!local),
-      (e: unknown) => avisar(true, e),
-    )
+    if (envelope && precisaMigrar && !migrouNoNativo) {
+      if (tauri) {
+        emAndamento = tauri.core.invoke('migrar_circuitos', { ...preparado!.migracao! })
+          .then(resposta => {
+            if (!resposta || typeof resposta !== 'object' || (resposta as { ok?: unknown }).ok !== true) {
+              throw new Error('A migração não confirmou que todas as cópias foram preservadas.')
+            }
+            migrouNoNativo = true
+            noArquivo = texto
+          })
+          .catch((e: unknown) => { falhou = true; avisar(true, e) })
+          .finally(() => (emAndamento = null))
+        await emAndamento
+      } else {
+        try {
+          if (copiasRecuperacao.some(c => c.nativa)) throw new Error('A ponte do programa não está disponível para migrar as cópias.')
+          if (!guardouOriginaisWeb) {
+            const anterior = localStorage.getItem(COPIAS_RECUPERADAS_KEY)
+            let existentes: string[] = []
+            if (anterior) {
+              try {
+                const lista: unknown = JSON.parse(anterior)
+                existentes = Array.isArray(lista) && lista.every(c => typeof c === 'string') ? lista : [anterior]
+              } catch { existentes = [anterior] }
+            }
+            localStorage.setItem(COPIAS_RECUPERADAS_KEY, JSON.stringify([...new Set([
+              ...existentes, ...copiasRecuperacao.map(c => c.texto),
+            ])]))
+            guardouOriginaisWeb = true
+          }
+        } catch (e) { falhou = true; avisar(true, e) }
+      }
+    }
+    if (envelope && !falhou && texto !== noLocal) {
+      try {
+        // no programa, sem armazenamento do navegador o arquivo é a única fonte (BL-RC6-D01)
+        if (tauri && typeof localStorage === 'undefined') noLocal = texto
+        else localStorage.setItem(AUTOSAVE_KEY, envelope)
+        noLocal = texto
+      } catch (e) { falhou = true; avisar(true, e) }
+    }
+    if (envelope && tauri && texto !== noArquivo && (!precisaMigrar || migrouNoNativo)) {
+      emAndamento = tauri.core.invoke('salvar_circuito', { texto: envelope })
+        .then(() => void (noArquivo = texto))
+        .catch((e: unknown) => { falhou = true; avisar(true, e) })
+        .finally(() => (emAndamento = null))
+      await emAndamento
+    }
+    if (falhou) {
+      if (novaTentativa === undefined) {
+        novaTentativa = window.setTimeout(() => {
+          novaTentativa = undefined
+          void gravar()
+        }, NOVA_TENTATIVA_MS)
+      }
+      return false
+    }
+    if (envelope) {
+      precisaMigrar = false
+      if (reiniciarRevisao) {
+        reiniciarRevisao = false
+        useCircuit.setState({ avisoRecuperacao: AVISO_CONTAGEM_REINICIADA })
+      }
+    }
+    avisar(false)
+    return true
   }
   useCircuit.subscribe((s) => {
     if (s.components === prev.components && s.wires === prev.wires) return
@@ -863,6 +1130,7 @@ if (typeof window !== 'undefined') {
     if (timer !== undefined) return
     timer = window.setTimeout(() => void gravar(), ESPERA_AUTOSAVE_MS)
   })
+  if ((precisaMigrar || corrigirLocalReiniciado) && !useCircuit.getState().recuperacao) timer = window.setTimeout(() => void gravar(), ESPERA_AUTOSAVE_MS)
   const descarregar = () => {
     if (timer !== undefined) void gravar()
   }
@@ -870,8 +1138,9 @@ if (typeof window !== 'undefined') {
   window.addEventListener?.('visibilitychange', () => {
     if (typeof document !== 'undefined' && document.visibilityState === 'hidden') descarregar()
   })
-  // o programa do Windows chama isto ao fechar a janela e só fecha depois que o arquivo foi gravado
-  ;(window as unknown as { __bancadaAoFechar?: () => Promise<void> }).__bancadaAoFechar = () => gravar()
+  // o programa do Windows chama isto ao fechar a janela: espera a gravação em andamento, grava o que faltar e diz se
+  // conseguiu (se não, o programa pergunta antes de fechar)
+  ;(window as unknown as { __bancadaAoFechar?: () => Promise<boolean> }).__bancadaAoFechar = () => gravar()
 }
 
 // Acesso de depuração no dev server (não existe no build de produção nem em testes node).

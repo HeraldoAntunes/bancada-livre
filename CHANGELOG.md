@@ -9,7 +9,55 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
-## [2.1.0] - 2026-10-28
+## [2.1.1] - 2026-10-30
+
+### Corrigido
+- Fechar a janela enquanto o circuito ainda estava sendo gravado podia perder a última mudança. Agora o programa
+  espera a gravação terminar antes de fechar; se ela demorar demais, pergunta se fecha assim mesmo.
+- Quando o salvamento automático falhava, ele não tentava de novo, e ao reabrir o programa voltava ao circuito antigo.
+  Agora tenta de novo sozinho e ao fechar, o aviso só sai quando grava de verdade, e, ao abrir, o programa
+  fica com a cópia íntegra de gravação mais recente. Se não conseguir gravar ao fechar, pergunta antes.
+- Abrir o Bancada Livre duas vezes criava duas janelas, e a última a gravar apagava o trabalho da outra. Agora a
+  segunda abertura traz para a frente a janela que já está aberta.
+- A desinstalação (e a atualização por cima) podia ficar pela metade quando o antivírus segurava o programa por um
+  instante. Agora ela espera e, se não conseguir, não remove nada.
+- Depois de uma queda, reabrir o programa às vezes não mostrava janela nenhuma. Agora ele encerra o que ficou preso
+  da vez anterior, tenta abrir a janela de novo e, se mesmo assim não conseguir, avisa em português.
+- Com uma janela aberta por cima da bancada (edição de peça, Sobre, Guia), Delete, Backspace, Ctrl+Z, Ctrl+Y, E e R
+  agiam no circuito por trás dela.
+- Ainda podia sair número de peça repetido ao abrir certos arquivos, e o CSV com quebra de linha no nome de uma chave
+  não abria de volta como gabarito.
+- O zip para escola sem internet traz também o simulador em HTML, para abrir no navegador, e um LEIA-ME.
+- Se o programa não conseguisse pedir à página que gravasse antes de fechar, a janela fechava sem perguntar. Agora
+  pergunta, e com Não a janela continua aberta.
+- Uma cópia salva estragada (com uma peça vazia na lista) podia tomar o lugar da cópia de reserva boa, e uma cópia boa
+  que não conseguia ser posta no lugar era apagada na abertura seguinte. Agora o programa não apaga nem troca nenhuma
+  cópia ao abrir: confere todas e abre a de número de revisão mais alto, gravado dentro do próprio circuito. Antes, a
+  data do arquivo podia fazer abrir uma cópia mais velha.
+- Na imagem exportada (PNG e SVG), os botões do CLOCK saíam como dois quadrados pretos.
+- No CSV da tabela-verdade, o nome de uma chave começado por `=`, `+`, `-` ou `@` podia virar fórmula na planilha. Agora
+  sai com um apóstrofo na frente, e o Bancada lê de volta sem ele. Nomes com espaço no começo ou no fim também voltam
+  iguais.
+- Abrir um circuito e, antes de ele terminar de carregar, escolher outro ou mexer no circuito podia trocar o que estava
+  na bancada pelo arquivo antigo.
+- Arquivos com o mesmo nome interno numa peça e num fio, com `:` no nome interno ou com uma peça a milhões de pontos de
+  distância passam a ser recusados ao abrir, sem mexer no circuito aberto. O salvamento automático tem o mesmo limite de
+  tamanho do Abrir, e os comandos para agentes de IA recusam parâmetro que não é deles.
+
+### Alterado
+- O programa para Windows vem num zip, `Instalar-BancadaLivre-x.y.z.zip`, com a licença e um LEIA-ME: extraia e abra o
+  `BancadaLivre.exe`, que se instala do mesmo jeito. Igual aos outros programas livres do professor; alguns antivírus
+  acusavam de vez em quando o exe solto.
+- O THIRD-PARTY-NOTICES lista cada biblioteca Rust do programa do Windows, com versão e licença, e o
+  THIRD-PARTY-RUST.md traz o texto completo de cada licença.
+- Na primeira abertura depois de atualizar, o circuito salvo pela 2.1.0 continua de onde parou, sem perguntar nada, e
+  todas as cópias antigas ficam guardadas na pasta `copias-preservadas`. O programa só pergunta qual versão continuar
+  quando o arquivo principal falta ou está estragado, ou quando há uma gravação interrompida mais nova que ele. Fechar
+  sem escolher não grava nada, e a pergunta volta na abertura seguinte.
+- A janela Sobre e o README dizem que o WebView2 da Microsoft pode abrir conexões próprias com a Microsoft, e citam o
+  Codex, da OpenAI, junto com o Claude, como ferramentas de inteligência artificial usadas.
+
+## [2.1.0] - 2026-10-29
 
 ### Adicionado
 - No Windows, o Bancada Livre tem janela própria: o programa instalado não usa mais o navegador do dia a dia. Ele

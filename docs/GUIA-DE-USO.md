@@ -60,7 +60,7 @@ posição do banco de chaves e cada bit do contador. As saídas são os LEDs, ca
   achadas pelo nome; um X numa saída do gabarito aceita qualquer valor). A tabela marca em vermelho cada saída que
   não bate, com o valor esperado, e diz quantas linhas estão certas. **Tirar gabarito** volta ao normal.
 - Em circuito com flip-flops, a tabela usa o valor guardado neste momento: para ver o comportamento no tempo, use a
-  linha do tempo (seção 7).
+  linha do tempo (seção 8).
 
 ## 6. Memória: flip-flops e trava D
 
@@ -107,7 +107,9 @@ reduz e `Ctrl+0` faz o mesmo que **Ajustar**.
 
 ## 11. Salvar, abrir e exportar
 
-- O circuito aberto fica guardado sozinho no navegador: fechar a janela não perde o trabalho.
+- O circuito aberto fica guardado sozinho, e fechar a janela espera a gravação terminar. Queda de energia ou programa
+  encerrado à força ainda podem perder a última mudança. Se o salvamento automático não
+  conseguir gravar (disco cheio, modo privado do navegador), a barra de baixo avisa; aí, use **Salvar**.
 - **Salvar** baixa o circuito como `circuito.json`, para guardar ou entregar trabalhos; **Abrir** carrega de volta.
 - **PNG** baixa uma imagem do circuito inteiro; **SVG** baixa o desenho vetorial, nítido em qualquer tamanho, bom
   para prova e slides.

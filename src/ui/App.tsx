@@ -8,6 +8,7 @@ import { executarNaTela as cmd } from '../comandos'
 import { Palette } from './Palette'
 import { BarraPasso } from './BarraPasso'
 import { JanelaEdicao } from './JanelaEdicao'
+import { JanelaRecuperacao } from './JanelaRecuperacao'
 import { JanelaLinhaDoTempo } from './JanelaLinhaDoTempo'
 import { JanelaTabela } from './JanelaTabela'
 import { descreverNivel } from './passos'
@@ -15,6 +16,7 @@ import { SidePanel } from './SidePanel'
 import { TopBar } from './TopBar'
 import { Workbench } from './Workbench'
 import { Icon } from './icons'
+import { ignorarAtalho } from './atalhos'
 
 export default function App() {
   const components = useCircuit((s) => s.components)
@@ -24,6 +26,7 @@ export default function App() {
   const clockRunning = useCircuit((s) => s.clockRunning)
   const oscilando = useCircuit((s) => s.oscilando)
   const falhaSalvamento = useCircuit((s) => s.falhaSalvamento)
+  const avisoRecuperacao = useCircuit((s) => s.avisoRecuperacao)
   const avisoRelogio = useCircuit((s) => s.avisoRelogio)
   const tickClocks = useCircuit((s) => s.tickClocks)
   const hasClock = components.some((c) => c.type === 'CLOCK' || c.type === 'COUNTER')
@@ -66,8 +69,7 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const t = document.activeElement?.tagName
-      if (t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT') return
+      if (ignorarAtalho(document)) return
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault()
         cmd(e.shiftKey ? 'historico.refazer' : 'historico.desfazer')
@@ -111,6 +113,7 @@ export default function App() {
       {tabelaSolta && <JanelaTabela />}
       {linhaAtiva && <JanelaLinhaDoTempo />}
       <JanelaEdicao />
+      <JanelaRecuperacao />
       <footer className="status">
         <span>
           {components.length} componente{components.length === 1 ? '' : 's'} · {wires.length} fio
@@ -119,6 +122,11 @@ export default function App() {
         {falhaSalvamento && (
           <span className="warn" role="alert">
             <Icon name="alerta" size={14} /> {falhaSalvamento}
+          </span>
+        )}
+        {avisoRecuperacao && (
+          <span className="warn" role="status">
+            <Icon name="alerta" size={14} /> {avisoRecuperacao}
           </span>
         )}
         {avisoRelogio && (

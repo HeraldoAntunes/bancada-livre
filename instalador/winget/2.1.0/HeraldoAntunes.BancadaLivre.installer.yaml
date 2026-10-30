@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+# O BancadaLivre.exe se instala sozinho (sem Inno Setup, NSIS ou MSI): --instalar instala em silêncio, só para a conta,
+# sem administrador; a desinstalação vem do QuietUninstallString que ele registra (--desinstalar --silencioso).
+PackageIdentifier: HeraldoAntunes.BancadaLivre
+PackageVersion: 2.1.0
+InstallerType: exe
+Scope: user
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+InstallerSwitches:
+  Silent: --instalar
+  SilentWithProgress: --instalar
+UpgradeBehavior: install
+ElevationRequirement: elevationProhibited
+Dependencies:
+  PackageDependencies:
+  - PackageIdentifier: Microsoft.EdgeWebView2Runtime
+ReleaseDate: 2026-10-29
+AppsAndFeaturesEntries:
+- DisplayName: Bancada Livre
+  Publisher: Heraldo Antunes (projeto livre)
+  DisplayVersion: 2.1.0
+  ProductCode: '{B3D1A6E0-5C2F-4A87-9E14-7F0C2B8D4E61}_is1'
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.0/BancadaLivre-2.1.0.exe
+  InstallerSha256: 6A8E776EF4C77C46D30B6A1799CE5E3D5A618F297CDBF5F354B37BB87D0AE621
+  ProductCode: '{B3D1A6E0-5C2F-4A87-9E14-7F0C2B8D4E61}_is1'
+ManifestType: installer
+ManifestVersion: 1.10.0

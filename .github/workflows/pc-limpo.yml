@@ -36,9 +36,18 @@ jobs:
         shell: pwsh
         run: ./instalador/build.ps1 -SemDefender
 
+      - name: Extrair o programa do zip, como a pessoa faz
+        shell: pwsh
+        run: Expand-Archive (Get-ChildItem pacote/Instalar-BancadaLivre-*.zip).FullName -DestinationPath extraido
+
       - name: Testar o programa instalado
         shell: pwsh
-        run: ./instalador/testar-instalado.ps1 -Programa (Get-ChildItem pacote/BancadaLivre-*.exe).FullName -Saida teste-instalado
+        run: ./instalador/testar-instalado.ps1 -Programa extraido/BancadaLivre.exe -Saida teste-instalado
+
+      - name: Testar o salvamento (fechar rápido, falha ao gravar, segunda janela)
+        if: always()
+        shell: pwsh
+        run: ./instalador/testar-salvamento.ps1 -Exe extraido/BancadaLivre.exe -Saida teste-instalado/salvamento
 
       - name: Guardar o retrato e o resultado
         if: always()

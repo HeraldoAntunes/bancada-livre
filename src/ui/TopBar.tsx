@@ -5,7 +5,7 @@
 import { useRef, useState } from 'react'
 import { version } from '../../package.json'
 import { EXAMPLE_LEVELS, EXAMPLES } from '../examples'
-import { useCircuit } from '../state/store'
+import { MAX_JSON_CHARS, revisaoDeEdicao, useCircuit } from '../state/store'
 import { executarNaTela as cmd } from '../comandos'
 import { AboutDialog } from './AboutDialog'
 import { GuideDialog } from './GuideDialog'
@@ -37,11 +37,21 @@ export function TopBar({ tab, stepMode, onToggleStep }: TopBarProps) {
   const tabelaSolta = useCircuit((s) => s.tabelaSolta)
   const linhaAtiva = useCircuit((s) => s.linhaAtiva)
   const fileRef = useRef<HTMLInputElement>(null)
+  const escolhaArquivo = useRef(0)
   const [showAbout, setShowAbout] = useState(false)
 
   const open = async (file: File | undefined) => {
+    const escolha = ++escolhaArquivo.current
     if (!file) return
-    cmd('circuito.abrir', { json: await file.text() })
+    const revisao = revisaoDeEdicao()
+    try {
+      const json = await file.slice(0, MAX_JSON_CHARS * 4 + 1).text()
+      // Uma escolha, edição ou ação de desfazer mais recente torna esta leitura obsoleta.
+      if (escolha !== escolhaArquivo.current || revisao !== revisaoDeEdicao()) return
+      cmd('circuito.abrir', { json })
+    } catch {
+      if (escolha === escolhaArquivo.current) window.alert('Não foi possível ler o arquivo de circuito.')
+    }
   }
 
   return (
@@ -60,7 +70,7 @@ export function TopBar({ tab, stepMode, onToggleStep }: TopBarProps) {
       <div className="grupo" role="group" aria-label="Arquivo">
         <span className="grupo-titulo">Arquivo</span>
         <div className="grupo-botoes">
-          <button className="action" title="Abrir um circuito salvo (.json)" onClick={() => fileRef.current?.click()}>
+          <button className="action" title="Abrir um circuito salvo (.json)" onClick={() => { escolhaArquivo.current++; fileRef.current?.click() }}>
             <Icon name="abrir" size={15} /> Abrir
           </button>
           <button className="action" title="Salvar o circuito num arquivo (.json)" onClick={() => cmd('arquivo.salvar')}>

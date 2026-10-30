@@ -36,13 +36,13 @@ tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e se
 
 ## Qual arquivo baixar?
 
-Versão 2.1.0:
+Versão 2.1.1:
 
 | Para quê | Baixar |
 |---|---|
-| **Windows: instalar ou usar sem instalar** | [**BancadaLivre-2.1.0.exe**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.0/BancadaLivre-2.1.0.exe) |
-| Windows de escola sem internet (traz o WebView2 da Microsoft) | [BancadaLivre-2.1.0-sem-internet.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.0/BancadaLivre-2.1.0-sem-internet.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.1.0.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.0/BancadaLivre-2.1.0.html) |
+| **Windows: instalar ou usar sem instalar** (extraia o zip e abra o `BancadaLivre.exe`) | [**Instalar-BancadaLivre-2.1.1.zip**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.1/Instalar-BancadaLivre-2.1.1.zip) |
+| Windows de escola sem internet (traz o WebView2 da Microsoft) | [BancadaLivre-2.1.1-sem-internet.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.1/BancadaLivre-2.1.1-sem-internet.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.1.1.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.1/BancadaLivre-2.1.1.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na
@@ -63,7 +63,7 @@ programa é gratuito e não tem assinatura paga). Versões anteriores e a confer
 
    | Arquivo | Para quem |
    |---|---|
-   | **`BancadaLivre-x.y.z.exe`** ⭐ | **quase todo mundo no Windows.** Abra com dois cliques e responda **Sim** para instalar: ele cria os atalhos no menu Iniciar e na Área de Trabalho, abre numa janela própria e não pede senha de administrador. Responda **Não** para só usar agora, sem instalar (serve para pendrive). Para atualizar, baixe o novo e abra do mesmo jeito; os circuitos salvos ficam |
+   | **`Instalar-BancadaLivre-x.y.z.zip`** ⭐ | **quase todo mundo no Windows.** Extraia o zip (botão direito, **Extrair tudo**), abra o `BancadaLivre.exe` com dois cliques e responda **Sim** para instalar: ele cria os atalhos no menu Iniciar e na Área de Trabalho, abre numa janela própria e não pede senha de administrador. Responda **Não** para só usar agora, sem instalar (serve para pendrive). Para atualizar, baixe o novo e abra do mesmo jeito; os circuitos salvos ficam |
    | `BancadaLivre-x.y.z-sem-internet.zip` | escola sem internet num Windows sem o WebView2 da Microsoft (que desenha a janela): descompacte e abra `BancadaLivre.exe`; ele oferece instalar o WebView2 que vem junto |
    | `BancadaLivre-x.y.z.html` | qualquer sistema: abra com dois cliques no navegador. É um arquivo só, que dá para pôr no Moodle ou mandar por e-mail |
    | Código-fonte | só para quem vai estudar ou modificar o programa |
@@ -73,7 +73,7 @@ programa é gratuito e não tem assinatura paga). Versões anteriores e a confer
 Para conferir se o arquivo é legítimo, compare o SHA-256 com o `SHA256SUMS.txt` da mesma página (troque `x.y.z` pela
 versão que baixou):
 ```bash
-certutil -hashfile BancadaLivre-x.y.z.exe SHA256
+certutil -hashfile Instalar-BancadaLivre-x.y.z.zip SHA256
 ```
 
 ## Como é
@@ -138,11 +138,14 @@ Duplo clique num componente abre a janela de edição dele.
 **É de graça mesmo?** Sim. É software livre (licença MIT): pode usar, copiar, instalar em quantos computadores quiser e
 distribuir.
 
-**Precisa de internet?** Não. Tudo funciona offline, e o programa não acessa a internet em momento nenhum.
+**Precisa de internet?** Não para montar, simular ou salvar circuitos. A janela do Windows usa o WebView2, que
+pode abrir conexões próprias com a Microsoft. Veja [Privacidade](#privacidade).
 
-**Onde ficam os meus circuitos?** O circuito aberto fica guardado no próprio navegador (salvamento automático: fechar
-a janela não perde o trabalho). Para guardar ou entregar, use **Salvar**, que baixa um arquivo `.json`; **Abrir**
-carrega de volta.
+**Onde ficam os meus circuitos?** O salvamento automático guarda o circuito no armazenamento local do navegador;
+no programa do Windows, também em arquivos na pasta `%LOCALAPPDATA%\Bancada Livre`. Se não conseguir gravar (por
+exemplo, disco cheio ou armazenamento bloqueado), a barra de baixo avisa: use **Salvar** antes de fechar. Queda de
+energia ou encerramento forçado podem perder mudanças ainda não gravadas. Para guardar uma cópia ou entregar,
+use **Salvar**, que baixa um arquivo `.json`; **Abrir** carrega de volta.
 
 **Posso pôr no Moodle ou mandar para os alunos?** Pode. O `BancadaLivre-x.y.z.html` é o simulador inteiro num arquivo
 só: o aluno abre com dois cliques, sem instalar nada.
@@ -189,14 +192,12 @@ fica em `src/comandos.ts`.
 
 ## Privacidade
 
-O simulador nunca se conecta à internet. O arquivo HTML traz uma política de segurança que bloqueia qualquer
-acesso à rede, e o programa do Windows não tem nenhum recurso de rede. O botão **Ver se há versão nova**, na janela
-Sobre, só abre a página do programa no seu navegador.
+O simulador funciona sem internet e não envia nada a servidores. O arquivo HTML bloqueia qualquer acesso da página
+à rede. O botão **Ver se há versão nova**, na janela Sobre, só abre a página do programa no seu navegador.
 
-No programa do Windows, a janela é desenhada pelo WebView2, um componente da Microsoft que vem no Windows. O
-programa desliga os serviços de rede dele, mas o WebView2 ainda abre por conta própria uma conexão com servidores
-da Microsoft. O simulador não tem acesso a essa conexão e não envia nada por ela. O arquivo HTML aberto no
-navegador não usa o WebView2.
+No programa do Windows, a janela é desenhada pelo WebView2, um componente da Microsoft. O programa desliga os
+serviços de rede dele, mas o WebView2 pode abrir conexões próprias com a Microsoft. O simulador não usa essas
+conexões.
 
 O circuito em uso fica guardado neste computador (salvamento automático): no navegador e, no programa do Windows,
 também num arquivo na pasta `%LOCALAPPDATA%\Bancada Livre`. Lá também ficam os
@@ -217,9 +218,9 @@ Cada versão fica arquivada no Zenodo com DOI. O DOI geral, que leva sempre à v
 ## Como foi feito
 
 O Bancada Livre foi criado e dirigido por **Heraldo Antunes**, para as suas aulas. Foi feito com apoio de
-**inteligência artificial** (Claude, da Anthropic, pelo Claude Code), usada como ferramenta: a ideia, os requisitos,
-as decisões de didática, a revisão e a aprovação de cada versão são do autor. A mesma declaração aparece na janela
-**Sobre** do programa, aberta pelo número da versão.
+**inteligência artificial** (Claude, da Anthropic, pelo Claude Code, e Codex, da OpenAI), usada como ferramenta:
+a ideia, os requisitos, as decisões de didática, a revisão e a aprovação de cada versão são do autor. Os commits
+registram a assistência por IA; a janela **Sobre**, aberta pelo número da versão, também informa esse uso.
 
 ## Licença
 

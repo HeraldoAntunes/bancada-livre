@@ -35,11 +35,14 @@ const MAX_LINHAS = 512
 const MAX_COLUNAS = 40
 
 /** Valor de célula como texto comparável: "1", "0", "X", ou o dígito do display em maiúscula. */
-const normal = (v: string) => v.trim().toUpperCase()
+const semProtecao = (v: string) => /^'(?:'|\s*[=+@-])/.test(v) ? v.slice(1) : v
+const normal = (v: string) => semProtecao(v).trim().toUpperCase()
 
 /** Célula de CSV: entre aspas quando tem separador, aspas ou quebra de linha (aspas internas dobradas). */
 const celula = (v: string | number) => {
-  const t = String(v)
+  const original = String(v)
+  // Uma planilha pode interpretar estes prefixos como fórmula; aspas de CSV não impedem isso.
+  const t = /^\s*[=+@-]/.test(original) || original.startsWith("'") ? "'" + original : original
   return /[;,\t"\r\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t
 }
 
@@ -69,12 +72,33 @@ function dividirLinha(linha: string, sep: string): string[] {
       aspas = true
       atual = ''
     } else if (ch === sep) {
-      celulas.push(atual.trim())
+      celulas.push(atual)
       atual = ''
     } else atual += ch
   }
-  celulas.push(atual.trim())
+  celulas.push(atual)
   return celulas
+}
+
+/**
+ * Linhas do arquivo, respeitando as aspas: uma quebra de linha dentro de `"..."` é parte da célula (um rótulo com
+ * quebra de linha), não o fim da linha. Linhas vazias saem.
+ */
+function linhasDoArquivo(texto: string): string[] {
+  const linhas: string[] = []
+  let atual = ''
+  let aspas = false
+  for (let i = 0; i < texto.length; i++) {
+    const ch = texto[i]
+    if (ch === '"') aspas = !aspas
+    if (!aspas && (ch === '\n' || ch === '\r')) {
+      if (ch === '\r' && texto[i + 1] === '\n') i++
+      if (atual.trim() !== '') linhas.push(atual)
+      atual = ''
+    } else atual += ch
+  }
+  if (atual.trim() !== '') linhas.push(atual)
+  return linhas
 }
 
 /** Separador da linha de nomes: o primeiro que aparece fora das aspas. */
@@ -90,17 +114,13 @@ function separador(linha: string): string {
  */
 export function lerGabarito(texto: string): Gabarito | string {
   if (texto.length > MAX_CSV_CHARS) return 'Arquivo grande demais para ser uma tabela-verdade.'
-  const linhas = texto
-    .replace(/^\uFEFF/, '')
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => l !== '')
+  const linhas = linhasDoArquivo(texto.replace(/^\uFEFF/, ''))
   if (linhas.length < 2) return 'O arquivo precisa da linha de nomes e de pelo menos uma linha da tabela.'
   const sep = separador(linhas[0])
   const dividir = (l: string) => dividirLinha(l, sep)
-  const colunas = dividir(linhas[0])
+  const colunas = dividir(linhas[0]).map(semProtecao)
   if (colunas.length < 2 || colunas.length > MAX_COLUNAS) return 'A tabela precisa de 2 a 40 colunas.'
-  if (colunas.some((c) => c === '') || new Set(colunas).size !== colunas.length) {
+  if (colunas.some((c) => c.trim() === '') || new Set(colunas).size !== colunas.length) {
     return 'Cada coluna precisa de um nome, sem repetir.'
   }
   if (linhas.length - 1 > MAX_LINHAS) return 'A tabela tem linhas demais (no máximo 512).'

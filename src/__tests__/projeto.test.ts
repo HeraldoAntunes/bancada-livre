@@ -261,6 +261,29 @@ describe('executável e instalador (Windows)', () => {
     expect(tauriConf.bundle.icon).toEqual(['../instalador/bancada-livre.ico'])
   })
 
+  it('o zip sem internet leva o HTML de alternativa e um LEIA-ME com os nomes certos (auditoria rodada 2)', () => {
+    const build = arq('build.ps1')
+    expect(build).toContain('Copy-Item dist\\index.html "$semInternet\\bancada-livre.html"')
+    expect(build).toContain('LEIA-ME.txt')
+    const nome = /pub const WEBVIEW2_COMPLETO: &str = "([^"]+)";/.exec(sistemaRs)?.[1] ?? '(sem nome)'
+    for (const citado of ['BancadaLivre.exe', 'bancada-livre.html', nome]) expect(build).toContain(citado)
+    expect(sistemaRs).toContain('bancada-livre.html')
+  })
+
+  it('nenhum exe solto no pacote: o programa vai num zip Instalar-, com licença, avisos e LEIA-ME (como na família)', () => {
+    const build = arq('build.ps1')
+    expect(build).toContain('$programa = "pacote\\Instalar-BancadaLivre-$versao.zip"')
+    expect(build).toContain('Copy-Item LICENSE, THIRD-PARTY-NOTICES.md $instalar')
+    expect(build).toContain('"$instalar\\LEIA-ME.txt"')
+    expect(build).not.toMatch(/Copy-Item \$exe (?:\$programa|"pacote\\)/)
+  })
+
+  it('o exe não leva os caminhos desta máquina (usuário e pasta do projeto, achado na 2.1.1-rc.1)', () => {
+    const build = arq('build.ps1')
+    expect(build).toContain('CARGO_ENCODED_RUSTFLAGS')
+    for (const de of ['$env:USERPROFILE\\.cargo', '$raiz']) expect(build).toContain(`--remap-path-prefix=${de}=`)
+  })
+
   it('escola sem internet: o zip leva o instalador do WebView2 que o programa procura ao lado dele', () => {
     const nome = /pub const WEBVIEW2_COMPLETO: &str = "([^"]+)";/.exec(sistemaRs)?.[1] ?? '(sem nome)'
     expect(arq('build.ps1')).toContain(nome)

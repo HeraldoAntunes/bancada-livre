@@ -9,10 +9,11 @@ export const SOBRE = {
     'MIT. É software livre: pode usar, copiar, modificar e distribuir, inclusive em outras ' +
     'instituições de ensino, desde que mantenha o aviso de autoria e a licença.',
   privacidade:
-    'O simulador nunca se conecta à internet: nada é enviado a servidores. O circuito em uso e os ajustes ' +
+    'O simulador funciona sem internet: nada é enviado a servidores. No programa do Windows, o WebView2 da ' +
+    'Microsoft, que desenha a janela, pode abrir conexões próprias com a Microsoft. O circuito em uso e os ajustes ' +
     'ficam guardados só neste computador. Os arquivos que você salvar vão para a pasta de downloads.',
   ia:
-    'Feito com apoio de inteligência artificial (Claude, da Anthropic), usada como ferramenta. ' +
+    'Feito com apoio de inteligência artificial (Claude, da Anthropic, e Codex, da OpenAI), usada como ferramenta. ' +
     'A ideia, os requisitos, as decisões e a revisão de cada versão são do autor.',
   terceiros:
     'Usa as bibliotecas React e zustand, ambas com licença MIT, e o desenho da bandeira do Brasil, de domínio ' +

@@ -89,7 +89,8 @@ describe('a tela usa os comandos (o critério não pode voltar atrás)', () => {
   })
 
   it('todo comando chamado pela tela existe no registro', () => {
-    const daTela = ['vista.ampliar', 'vista.ajustar', 'vista.tamanho_real', 'tabela.gerar'] // registrados pela tela montada
+    const daTela = ['vista.ampliar', 'vista.ajustar', 'vista.tamanho_real', 'tabela.gerar',
+      'recuperacao.listar', 'recuperacao.escolher', 'recuperacao.adiar'] // registrados pela tela montada
     const nomes = new Set([...listar().map((c) => c.nome), ...daTela])
     for (const [arquivo, fonte] of Object.entries(fontes)) {
       for (const m of fonte.matchAll(/cmd\(\s*'([\w.]+)'/g)) expect(nomes.has(m[1]), `${arquivo}: ${m[1]}`).toBe(true)

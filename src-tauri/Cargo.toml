@@ -2,7 +2,7 @@
 # Programa do Windows: janela própria (Tauri 2 com o WebView2) com o simulador embutido. Sem rede.
 [package]
 name = "bancada-livre"
-version = "2.1.0"
+version = "2.1.1"
 description = "Bancada Livre: simulador didático de lógica digital"
 authors = ["Heraldo Antunes"]
 edition = "2021"

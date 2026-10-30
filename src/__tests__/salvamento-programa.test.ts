@@ -1,10 +1,9 @@
 // Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
-// Salvamento automático no programa do Windows (Tauri): o circuito em arquivo vale mais que o do localStorage, e cada
-// mudança vai para os dois. No navegador nada muda.
-import { afterEach, describe, expect, it, vi } from 'vitest'
+// Salvamento automático no Windows: entre envelopes válidos vence a maior revisão; cada mudança vai às duas fontes.
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const CIRCUITO = { version: 1, components: [{ id: 'arquivo', type: 'SWITCH', x: 0, y: 0, state: 0 }], wires: [] }
-const OUTRO = { version: 1, components: [{ id: 'local', type: 'SWITCH', x: 0, y: 0, state: 0 }], wires: [] }
+const CIRCUITO = { version: 1, components: [{ id: 'arquivo', type: 'SWITCH', x: 0, y: 0, state: 0 }], wires: [], salvamento: { hora: 200, revisao: 1 } }
+const OUTRO = { version: 1, components: [{ id: 'local', type: 'SWITCH', x: 0, y: 0, state: 0 }], wires: [], salvamento: { hora: 100, revisao: 0 } }
 
 function ambiente(janela: Record<string, unknown>) {
   const guardado = new Map<string, string>([['simulador-portas:autosave', JSON.stringify(OUTRO)]])
@@ -24,14 +23,19 @@ function ambiente(janela: Record<string, unknown>) {
   return Object.assign(guardado, { ouvintes })
 }
 
+// relógio falso em todos: nenhuma gravação agendada dispara depois que a janela de teste foi desfeita
+beforeEach(() => {
+  vi.useFakeTimers()
+})
 afterEach(() => {
+  vi.clearAllTimers()
+  vi.useRealTimers()
   vi.unstubAllGlobals()
   vi.resetModules()
-  vi.useRealTimers()
 })
 
 describe('salvamento no programa do Windows', () => {
-  it('abre o circuito do arquivo, não o do localStorage', async () => {
+  it('abre o envelope do arquivo com maior revisão que o localStorage', async () => {
     ambiente({ __BANCADA_CIRCUITO__: JSON.stringify(CIRCUITO) })
     const { useCircuit } = await import('../state/store')
     expect(useCircuit.getState().components.map((c) => c.id)).toEqual(['arquivo'])
@@ -51,6 +55,9 @@ describe('salvamento no programa do Windows', () => {
     useCircuit.setState({ components: [], wires: [] })
     vi.advanceTimersByTime(500)
     expect(invoke).toHaveBeenCalledWith('salvar_circuito', { texto: guardado.get('simulador-portas:autosave') })
+    expect(JSON.parse(guardado.get('simulador-portas:autosave')!)).toEqual({
+      version: 1, components: [], wires: [], salvamento: { hora: Date.now() - 100, revisao: 1 },
+    })
   })
 
   it('com um clock rápido rodando, a mudança do aluno é gravada mesmo assim', async () => {
@@ -59,13 +66,14 @@ describe('salvamento no programa do Windows', () => {
     const guardado = ambiente({ __TAURI__: { core: { invoke } } })
     const { useCircuit } = await import('../state/store')
     useCircuit.setState({ components: [{ id: 'k', type: 'CLOCK', x: 0, y: 0, freq: 10, state: 0 }], wires: [] })
-    vi.advanceTimersByTime(500)
+    await vi.advanceTimersByTimeAsync(500)
     invoke.mockClear()
+    // (avanço assíncrono: desde a 2.1.1 a gravação em arquivo espera a anterior terminar, uma promessa)
     // o clock bate a cada 50 ms; no meio, o aluno põe um LED
     for (let t = 0; t < 20; t++) {
       useCircuit.getState().tickClocks(50)
       if (t === 2) useCircuit.setState((s) => ({ components: [...s.components, { id: 'led', type: 'LED', x: 9, y: 9 }] }))
-      vi.advanceTimersByTime(50)
+      await vi.advanceTimersByTimeAsync(50)
     }
     expect(invoke).toHaveBeenCalledTimes(1)
     expect(guardado.get('simulador-portas:autosave')).toContain('"led"')
@@ -97,7 +105,11 @@ describe('salvamento no programa do Windows', () => {
     vi.advanceTimersByTime(100)
     guardado.ouvintes.get('pagehide')?.()
     expect(guardado.get('simulador-portas:autosave')).toContain('"ultimo"')
+    const circuito = { version: 1, components: [{ id: 'ultimo', type: 'LED', x: 0, y: 0 }], wires: [] }
     expect(invoke).toHaveBeenCalledWith('salvar_circuito', { texto: guardado.get('simulador-portas:autosave') })
+    expect(JSON.parse(guardado.get('simulador-portas:autosave')!)).toEqual({
+      ...circuito, salvamento: { hora: Date.now(), revisao: 1 },
+    })
   })
 
   it('o programa, ao fechar a janela, espera o arquivo ser gravado', async () => {
