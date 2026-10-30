@@ -1,0 +1,13 @@
+{
+  "name": "bancada-livre-teste-migracao",
+  "private": true,
+  "description": "Teste da migração 2.1.0 para 2.1.1 no Linux: HTML no Chromium sem janela e salvamento.rs real por uma ponte",
+  "type": "module",
+  "scripts": {
+    "preparar": "./preparar.sh",
+    "testar": "node migracao.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "25.14.0"
+  }
+}
