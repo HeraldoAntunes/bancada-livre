@@ -1,0 +1,18 @@
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
+# Avisos de vulnerabilidade que não atingem o programa publicado, com o motivo (lidos pelo OSV-Scanner e pelo Scorecard).
+# As duas bibliotecas abaixo só entram na versão Linux do Tauri (janela com GTK). O Bancada Livre publica o programa só
+# para Windows e o HTML, e nenhum dos dois as leva: `cargo tree --target x86_64-pc-windows-msvc -i glib` (e
+# `-i proc-macro-error`) não mostra nada. Não dá para atualizar: o Tauri 2 depende do gtk 0.18, que usa as duas.
+# Rever a cada atualização do Tauri: quando ele trocar o gtk 0.18, apagar estas entradas.
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0429"
+reason = "glib 0.18 (VariantStrIter): só na versão Linux do Tauri; fora do programa do Windows e do HTML publicados."
+
+[[IgnoredVulns]]
+id = "GHSA-wrw7-89jp-8q8g"
+reason = "O mesmo aviso do glib (RUSTSEC-2024-0429), com o identificador do GitHub."
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0370"
+reason = "proc-macro-error sem manutenção, usado só pelos macros do gtk 0.18 na versão Linux do Tauri; fora do programa do Windows e do HTML publicados."

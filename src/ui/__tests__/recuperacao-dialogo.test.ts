@@ -56,11 +56,13 @@ it('escolha por comando abre a versão indicada e recusa índices e parâmetros 
   expect(useCircuit.getState().components.map(c => c.id)).toEqual(['novo'])
   retirar()
 })
-it('adiar usa fechar_sem_gravar e não escolhe nem grava circuitos', async () => {
+// validação da 2.1.1 publicada (30/10/2026): fechar_sem_gravar faz o programa perguntar "O circuito não pôde ser
+// gravado... Fechar assim mesmo?", embora nada se perca ao adiar a escolha. Adiar fecha direto.
+it('adiar fecha direto, sem a pergunta de gravação falha, e não escolhe nem grava circuitos', async () => {
   const { executar, useCircuit, invoke, setItem, retirar } = await ambiente()
   expect(executar('recuperacao.adiar').ok).toBe(true)
   await vi.advanceTimersByTimeAsync(6000)
-  expect(invoke).toHaveBeenCalledExactlyOnceWith('fechar_sem_gravar')
+  expect(invoke).toHaveBeenCalledExactlyOnceWith('fechar')
   expect(setItem).not.toHaveBeenCalled()
   expect(useCircuit.getState().recuperacao).toHaveLength(2)
   retirar()

@@ -239,7 +239,9 @@ describe('executável e instalador (Windows)', () => {
     expect(arq('build.ps1')).toMatch(/Get-Content package\.json -Raw \| ConvertFrom-Json\)\.version/)
     expect(instalacaoRs).toContain('pub const VERSAO: &str = env!("CARGO_PKG_VERSION");')
     expect(tauriConf.version).toBe('../package.json')
-    expect(cargoToml).toMatch(new RegExp(`^version = "${pkg.version.replace(/\./g, '\\.')}"$`, 'm'))
+    // escapa todo caractere especial de expressão regular, inclusive a barra invertida (CodeQL, incomplete escaping)
+    const literal = pkg.version.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&')
+    expect(cargoToml).toMatch(new RegExp(`^version = "${literal}"$`, 'm'))
   })
 
   it('o programa se instala sozinho, sem empacotador (Inno Setup, NSIS, MSI ou PyInstaller)', () => {

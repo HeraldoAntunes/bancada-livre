@@ -220,6 +220,16 @@ const HISTORY_MAX = 50
 export const MAX_JSON_CHARS = 2_000_000
 const AUTOSAVE_KEY = 'simulador-portas:autosave'
 export const COPIAS_RECUPERADAS_KEY = 'simulador-portas:copias-recuperadas'
+/** O armazenamento do navegador, ou null quando ele falta ou a política do site o bloqueia (aí até ler lança). */
+function armazenamentoAcessivel(): Storage | null {
+  try {
+    if (typeof localStorage === 'undefined') return null
+    localStorage.getItem(AUTOSAVE_KEY)
+    return localStorage
+  } catch {
+    return null
+  }
+}
 let revisaoAutosave = 0
 /** Onde fica guardado um salvamento que não pôde ser aberto, para não ser sobrescrito na primeira edição. */
 export const AUTOSAVE_RECUSADO_KEY = 'simulador-portas:autosave-recusado'
@@ -1015,7 +1025,7 @@ if (typeof window !== 'undefined') {
             // ilegível conta como fonte ausente: as cópias já validadas seguem para a migração (BL-RC6-D01).
             let local: string | null = null
             try {
-              if (typeof localStorage !== 'undefined') local = localStorage.getItem(AUTOSAVE_KEY)
+              local = armazenamentoAcessivel()?.getItem(AUTOSAVE_KEY) ?? null
             } catch (e) {
               console.warn('Bancada Livre: armazenamento do navegador ilegível; reinício segue com as outras cópias.', e)
             }
@@ -1092,9 +1102,11 @@ if (typeof window !== 'undefined') {
     }
     if (envelope && !falhou && texto !== noLocal) {
       try {
-        // no programa, sem armazenamento do navegador o arquivo é a única fonte (BL-RC6-D01)
-        if (tauri && typeof localStorage === 'undefined') noLocal = texto
-        else localStorage.setItem(AUTOSAVE_KEY, envelope)
+        // no programa, sem armazenamento do navegador o arquivo é a única fonte (BL-RC6-D01); quando a política do PC
+        // bloqueia os dados do site, até ler `localStorage` lança, e isso também é "sem armazenamento" (validação da
+        // 2.1.1). Quota na escrita, com o armazenamento acessível, continua sendo falha avisada.
+        const local = tauri ? armazenamentoAcessivel() : localStorage
+        if (local) local.setItem(AUTOSAVE_KEY, envelope)
         noLocal = texto
       } catch (e) { falhou = true; avisar(true, e) }
     }

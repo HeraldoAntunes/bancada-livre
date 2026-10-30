@@ -58,5 +58,8 @@ export default defineConfig({
     // processa o CSS nos testes: sem isso, styles.css?raw chega vazio ao teste de cabeçalho
     css: true,
     include: ['src/**/__tests__/**/*.test.ts'],
+    // a 1ª importação da interface inteira passa dos 5 s padrão com o PC ocupado (testes de escolha de arquivo e da
+    // janela de recuperação estouravam só sob carga); um teste travado de verdade ainda para em 30 s
+    testTimeout: 30_000,
   },
 })

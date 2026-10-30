@@ -2,9 +2,12 @@
 // Só para testes: avalia uma expressão na janela do programa instalado pelo protocolo de depuração do WebView2.
 // O programa só abre essa porta quando o teste liga WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=N.
 // Uso:  node instalador/cdp.mjs <porta> "<expressão JavaScript>"
+import { URL } from 'node:url'
 const [porta, expressao] = process.argv.slice(2)
 const alvos = await (await fetch(`http://127.0.0.1:${porta}/json`)).json()
-const pagina = alvos.find((a) => a.type === 'page' && a.url.startsWith('http://tauri.localhost'))
+// confere o endereço inteiro (protocolo e host), não só o começo do texto (CodeQL, URL substring sanitization)
+const ehDoPrograma = (url) => { try { const u = new URL(url); return u.protocol === 'http:' && u.host === 'tauri.localhost' } catch { return false } }
+const pagina = alvos.find((a) => a.type === 'page' && ehDoPrograma(a.url))
 if (!pagina) throw new Error('a janela do simulador não apareceu no protocolo de depuração')
 const ws = new WebSocket(pagina.webSocketDebuggerUrl)
 await new Promise((r) => ws.addEventListener('open', r))

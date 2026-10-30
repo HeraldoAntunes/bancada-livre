@@ -358,7 +358,9 @@ mod testes {
     const C2: &str = r#"{"version":1,"components":[{"id":"a","type":"LED","x":10,"y":20},{"id":"b","type":"SWITCH","x":0,"y":0}],"wires":[{"id":"w","from":{"comp":"b","pin":"out"},"to":{"comp":"a","pin":"in"}}]}"#;
     /// Um circuito que passa no filtro daqui mas que o simulador recusa (tipo de peça que não existe).
     const TIPO_DESCONHECIDO: &str = r#"{"version":1,"components":[{"id":"z","type":"NAO_EXISTE","x":1,"y":1}],"wires":[]}"#;
-    /// O atual que não deixa ser trocado (aberto sem permitir apagar), como um antivírus segurando o arquivo.
+    /// O atual que não deixa ser trocado (aberto sem permitir apagar), como um antivírus segurando o arquivo. Só no
+    /// Windows: no Linux o arquivo aberto pode ser trocado, e a função do sistema não existe (validação da 2.1.1).
+    #[cfg(windows)]
     fn prender(caminho: &Path) -> fs::File {
         use std::os::windows::fs::OpenOptionsExt;
         fs::OpenOptions::new().read(true).share_mode(1).open(caminho).unwrap()   // só FILE_SHARE_READ
@@ -514,6 +516,7 @@ mod testes {
     }
 
     // a troca final falha (atual preso): o atual e a reserva ficam como estavam, e o novo fica entre as cópias
+    #[cfg(windows)]
     #[test]
     fn atual_preso_nao_perde_nenhuma_copia() {
         let p = pasta("troca-presa");

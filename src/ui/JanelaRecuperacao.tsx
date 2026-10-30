@@ -16,7 +16,8 @@ export function registrarComandosRecuperacao() {
       } }),
     registrar('recuperacao.adiar', { descricao: 'Fecha sem escolher nem substituir circuitos guardados',
       params: {}, executar: () => {
-        if (programa().__TAURI__) return programa().__TAURI__!.core.invoke('fechar_sem_gravar')
+        // nada se perde ao adiar: fecha direto (fechar_sem_gravar faria o programa perguntar se fecha mesmo sem gravar)
+        if (programa().__TAURI__) return programa().__TAURI__!.core.invoke('fechar')
         window.close()
       } }),
   ]

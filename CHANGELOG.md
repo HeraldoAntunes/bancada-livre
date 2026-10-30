@@ -9,6 +9,13 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+### Corrigido
+- No programa do Windows, num PC em que a política bloqueia os dados de site, o circuito era gravado no arquivo, mas
+  a barra avisava que o salvamento automático tinha falhado, tentava gravar de novo a cada 5 segundos e, ao fechar,
+  perguntava se fechava mesmo assim. Agora o arquivo basta, e o aviso de contagem reiniciada aparece quando deve.
+- "Fechar sem escolher", na pergunta sobre qual versão do circuito continuar, fazia o programa perguntar se fechava
+  sem gravar, embora nada se perca. Agora fecha direto, e a pergunta volta na abertura seguinte.
+
 ## [2.1.1] - 2026-10-30
 
 ### Corrigido
