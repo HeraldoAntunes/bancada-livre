@@ -27,6 +27,7 @@ function arvore($raiz) {
   $tipos
 }
 
+try {
 # 1) primeira abertura: cria o perfil
 $p = abrir
 Start-Sleep 15
@@ -60,10 +61,12 @@ if ($vivo) { $p.CloseMainWindow() | Out-Null; if (-not $p.WaitForExit(10000)) { 
 "Local State do perfil depois de abrir: $(Test-Path (Join-Path $perfil 'Bancada Livre\WebView2\EBWebView\Local State'))"
 if ($vistos.Count -eq 0) { "nenhuma conexão TCP nem porta UDP em $Segundos s" }
 else { $vistos.GetEnumerator() | ForEach-Object { "$($_.Value)  $($_.Key)" } }
-# fecha o que abriu (pelo PID) e o que sobrar do WebView2 do perfil de rascunho
+} finally {
+# fecha o que abriu, também se a medição parou no meio (pelo PID) e o que sobrar do WebView2 do perfil de rascunho
 Get-Process -Id $abertos -ErrorAction SilentlyContinue | ForEach-Object { $_.CloseMainWindow() | Out-Null; if (-not $_.WaitForExit(10000)) { Stop-Process -Id $_.Id -Force } }
 Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($perfil) } |
   ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 
 # o perfil de rascunho não serve mais: sai (o relatório fica)
 Start-Sleep 1; Remove-Item -Recurse -Force $perfil -ErrorAction SilentlyContinue
+}

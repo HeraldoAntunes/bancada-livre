@@ -473,16 +473,44 @@ mod testes {
         assert!(mais_nova("2.1.0", "versão estranha"));
     }
 
-    fn destino_de_teste(nome: &str) -> Destino {
+    /// Destino de teste na pasta temporária, com chave própria no registro. As duas saem no fim do teste, também quando
+    /// ele falha (o disco do professor encheu com sobras de teste, 30/10/2026).
+    struct DestinoDeTeste(Destino, PathBuf);
+    impl std::ops::Deref for DestinoDeTeste {
+        type Target = Destino;
+        fn deref(&self) -> &Destino { &self.0 }
+    }
+    impl Drop for DestinoDeTeste {
+        fn drop(&mut self) {
+            apagar_chave(HKCU, &self.0.chave);       // só a deste teste: os outros rodam ao mesmo tempo
+            let _ = fs::remove_dir_all(&self.1);
+        }
+    }
+    fn destino_de_teste(nome: &str) -> DestinoDeTeste {
         let base = std::env::temp_dir().join(format!("bancada-teste-instalacao-{nome}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&base);
-        Destino {
+        DestinoDeTeste(Destino {
             programa: base.join("Programs").join("Bancada Livre"),
             menu: base.join("Menu"),
             area: base.join("Area"),
             chave: format!(r"Software\BancadaLivreTeste\{nome}-{}", std::process::id()),
             sobras: base.join("sobras"),
-        }
+        }, base)
+    }
+    /// Pasta de teste na pasta temporária, apagada no fim do teste, também quando ele falha.
+    struct PastaDeTeste(PathBuf);
+    impl std::ops::Deref for PastaDeTeste {
+        type Target = PathBuf;
+        fn deref(&self) -> &PathBuf { &self.0 }
+    }
+    impl Drop for PastaDeTeste {
+        fn drop(&mut self) { let _ = fs::remove_dir_all(&self.0); }
+    }
+    fn pasta_de_teste(nome: &str) -> PastaDeTeste {
+        let p = std::env::temp_dir().join(format!("bancada-teste-{nome}-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&p);
+        fs::create_dir_all(&p).unwrap();
+        PastaDeTeste(p)
     }
 
     // instala por cima de uma instalação do Inno Setup, atualiza e desinstala, em pastas e chave próprias do teste
@@ -524,12 +552,10 @@ mod testes {
         assert!(!d.menu.join(ATALHO).exists());
         let sobrou: Vec<_> = fs::read_dir(&d.programa).unwrap().flatten().map(|e| e.file_name()).collect();
         assert_eq!(sobrou, vec![std::ffi::OsString::from("meu-circuito.json")]);
-        apagar_chave(HKCU, &d.chave);      // só a deste teste: os outros rodam ao mesmo tempo
-        let _ = fs::remove_dir_all(base);
     }
 
     // achado do Tarja Livre (29/10/2026): o exe preso por um instante (antivírus) deixava a desinstalação pela metade
-    fn instalado_para_desinstalar(nome: &str) -> (Destino, PathBuf) {
+    fn instalado_para_desinstalar(nome: &str) -> (DestinoDeTeste, PathBuf) {
         let d = destino_de_teste(nome);
         let origem = d.programa.parent().unwrap().parent().unwrap().join("baixado").join(EXE);
         fs::create_dir_all(origem.parent().unwrap()).unwrap();
@@ -552,7 +578,6 @@ mod testes {
         solta.join().unwrap();
         assert!(!d.exe().exists() && !d.menu.join(ATALHO).exists());
         assert!(ler_texto(HKCU, &d.chave, "DisplayVersion").is_none());
-        let _ = fs::remove_dir_all(d.programa.parent().unwrap().parent().unwrap());
     }
 
     #[test]
@@ -563,8 +588,6 @@ mod testes {
         drop(trava);
         assert!(d.exe().exists() && d.menu.join(ATALHO).exists() && d.programa.join("LICENSE").exists());
         assert_eq!(ler_texto(HKCU, &d.chave, "DisplayVersion").as_deref(), Some(VERSAO));
-        apagar_chave(HKCU, &d.chave);
-        let _ = fs::remove_dir_all(d.programa.parent().unwrap().parent().unwrap());
     }
 
     #[test]
@@ -576,15 +599,12 @@ mod testes {
         instalar(&d, &origem).unwrap();
         solta.join().unwrap();
         assert_eq!(fs::read(d.exe()).unwrap(), b"programa novo");
-        apagar_chave(HKCU, &d.chave);
-        let _ = fs::remove_dir_all(d.programa.parent().unwrap().parent().unwrap());
     }
 
     // N-C2: se o exe novo não entrar no lugar, o antigo volta; dando certo, o antigo sai
     #[test]
     fn troca_do_exe_volta_atras_se_o_novo_nao_entrar() {
-        let pasta = std::env::temp_dir().join(format!("bancada-teste-troca-{}", std::process::id()));
-        fs::create_dir_all(&pasta).unwrap();
+        let pasta = pasta_de_teste("troca");
         let (novo, exe, antigo) = (pasta.join("x.novo"), pasta.join("x.exe"), pasta.join("x.antigo"));
         fs::write(&novo, b"novo").unwrap();
         fs::write(&exe, b"antigo").unwrap();
@@ -595,14 +615,12 @@ mod testes {
         trocar_exe(&novo, &exe, &antigo, Duration::from_millis(300), |a, b| fs::rename(a, b)).unwrap();
         assert_eq!(fs::read(&exe).unwrap(), b"novo");
         assert_eq!(fs::read(&antigo).unwrap(), b"antigo");
-        let _ = fs::remove_dir_all(pasta);
     }
 
     // N-R1: com uma troca anterior pela metade (só a reserva no disco), falhas repetidas não podem apagar a última cópia
     #[test]
     fn falhas_repetidas_deixam_sempre_uma_copia_do_programa() {
-        let pasta = std::env::temp_dir().join(format!("bancada-teste-troca-interrompida-{}", std::process::id()));
-        fs::create_dir_all(&pasta).unwrap();
+        let pasta = pasta_de_teste("troca-interrompida");
         let (novo, exe, antigo) = (pasta.join("x.novo"), pasta.join("x.exe"), pasta.join("x.antigo"));
         fs::write(&novo, b"novo").unwrap();
         fs::write(&antigo, b"antigo").unwrap();       // o exe sumiu numa troca interrompida
@@ -620,7 +638,6 @@ mod testes {
             assert!(trocar_exe(&novo, &exe, &antigo, Duration::from_millis(300), falha).is_err());
             assert!(e_copia(&exe) || e_copia(&antigo), "sem nenhuma cópia do programa depois da falha");
         }
-        let _ = fs::remove_dir_all(pasta);
     }
 
     // auditoria rodada 2: com a pasta temporária em outro disco, mover o exe para lá sempre falha; a desinstalação
@@ -635,6 +652,5 @@ mod testes {
         assert_eq!(movidos.len(), 1);
         limpar_sobras(&d);
         assert!(!d.sobras.exists());
-        let _ = fs::remove_dir_all(d.programa.parent().unwrap().parent().unwrap());
     }
 }

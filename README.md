@@ -36,13 +36,13 @@ tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e se
 
 ## Qual arquivo baixar?
 
-Versão 2.1.1:
+Versão 2.1.2:
 
 | Para quê | Baixar |
 |---|---|
-| **Windows: instalar ou usar sem instalar** (extraia o zip e abra o `BancadaLivre.exe`) | [**Instalar-BancadaLivre-2.1.1.zip**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.1/Instalar-BancadaLivre-2.1.1.zip) |
-| Windows de escola sem internet (traz o WebView2 da Microsoft) | [BancadaLivre-2.1.1-sem-internet.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.1/BancadaLivre-2.1.1-sem-internet.zip) |
-| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.1.1.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.1/BancadaLivre-2.1.1.html) |
+| **Windows: instalar ou usar sem instalar** (extraia o zip e abra o `BancadaLivre.exe`) | [**Instalar-BancadaLivre-2.1.2.zip**](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.2/Instalar-BancadaLivre-2.1.2.zip) |
+| Windows de escola sem internet (traz o WebView2 da Microsoft) | [BancadaLivre-2.1.2-sem-internet.zip](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.2/BancadaLivre-2.1.2-sem-internet.zip) |
+| Qualquer sistema, sem instalar nada: abre no navegador | [BancadaLivre-2.1.2.html](https://github.com/HeraldoAntunes/bancada-livre/releases/download/v2.1.2/BancadaLivre-2.1.2.html) |
 
 Se o Windows avisar "o Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo** (o
 programa é gratuito e não tem assinatura paga). Versões anteriores e a conferência dos arquivos ficam na

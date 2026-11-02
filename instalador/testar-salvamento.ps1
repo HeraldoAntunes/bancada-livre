@@ -201,9 +201,9 @@ if ($Desinstalar) {
     $_.CloseMainWindow() | Out-Null; if (-not $_.WaitForExit(10000)) { Stop-Process -Id $_.Id -Force } }
   Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($perfil) } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  # o perfil de rascunho não serve mais: sai, também se o teste parou no meio (o relatório fica)
+  Start-Sleep 1; Remove-Item -Recurse -Force $perfil -ErrorAction SilentlyContinue
 }
-# o perfil de rascunho não serve mais: sai (o relatório fica)
-Start-Sleep 1; Remove-Item -Recurse -Force $perfil -ErrorAction SilentlyContinue
 
 $texto = @("## Salvamento no programa real: $(Split-Path $Exe -Leaf) ($((Get-Item $Exe).VersionInfo.ProductVersion))", '',
   '| Teste | Resultado | Detalhe |', '|---|---|---|') + $linhas

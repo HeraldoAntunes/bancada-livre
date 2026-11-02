@@ -132,9 +132,9 @@ try {
   anotar 'Nenhum aviso de erro do programa' ($avisos.Count -eq 0) "$($avisos.Count) aviso(s)$(if ($avisos) { ': ' + $avisos[0] })"
 } finally {
   limparRascunho
+  # o perfil de rascunho não serve mais: sai, também se o teste parou no meio (o relatório fica)
+  Start-Sleep 1; Remove-Item -Recurse -Force $perfil -ErrorAction SilentlyContinue
 }
-# o perfil de rascunho não serve mais: sai (o relatório fica)
-Start-Sleep 1; Remove-Item -Recurse -Force $perfil -ErrorAction SilentlyContinue
 
 $titulo = "## Bancada Livre instalado: $([Environment]::OSVersion.VersionString)"
 $texto = @($titulo, '', '| Teste | Resultado | Detalhe |', '|---|---|---|') + $linhas

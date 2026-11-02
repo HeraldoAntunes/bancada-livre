@@ -16,6 +16,7 @@ $caixasArq = Join-Path (Resolve-Path $Saida).Path 'caixas.txt'
 Remove-Item $caixasArq -ErrorAction SilentlyContinue
 $env:BANCADA_SEM_CAIXAS = $caixasArq
 $env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = $null
+try {
 Add-Type -Namespace AF -Name U -MemberDefinition @'
 public delegate bool Cb(System.IntPtr h, System.IntPtr l);
 [DllImport("user32.dll")] public static extern bool EnumWindows(Cb f, System.IntPtr l);
@@ -85,9 +86,11 @@ if ($avisos) { $caixas += $avisos | ForEach-Object { "aviso do programa: $_" } }
 ''
 "rodadas: $Rodadas; caixas ou saídas com erro: $($caixas.Count); presos: $presos; janela não apareceu: $semJanela; abertura normal depois: $normal"
 $caixas
-# o que sobrar do WebView2 do perfil de rascunho (só ele, conferido pela linha de comando)
+} finally {
+# o que sobrar do WebView2 do perfil de rascunho (só ele, conferido pela linha de comando), também se o teste parou no meio
 Get-CimInstance Win32_Process -Filter "Name='msedgewebview2.exe'" | Where-Object { $_.CommandLine -and $_.CommandLine.Contains($perfil) } |
   ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 # o perfil de rascunho não serve mais: sai (o relatório fica)
 Start-Sleep 1; Remove-Item -Recurse -Force $perfil -ErrorAction SilentlyContinue
+}
 if ($caixas.Count -or $presos -or $semJanela -or -not $normal) { exit 1 }

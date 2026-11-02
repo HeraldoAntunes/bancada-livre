@@ -258,7 +258,13 @@ mod testes {
 
     #[test]
     fn apaga_so_o_local_state_do_perfil() {
+        // a pasta sai no fim do teste, também quando ele falha
+        struct Faxina(std::path::PathBuf);
+        impl Drop for Faxina {
+            fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.0); }
+        }
         let webview = std::env::temp_dir().join(format!("bancada-teste-perfil-{}", std::process::id()));
+        let _faxina = Faxina(webview.clone());
         let perfil = webview.join("EBWebView");
         std::fs::create_dir_all(perfil.join("Default").join("Local Storage")).unwrap();
         std::fs::write(perfil.join("Local State"), b"{\"profile\":{\"info_cache\":{\"Default\":{}}}}").unwrap();
@@ -267,7 +273,6 @@ mod testes {
         assert!(!perfil.join("Local State").exists());
         assert!(perfil.join("Default").join("Local Storage").join("000003.log").exists());
         sem_conexao_do_perfil(&webview);       // sem o arquivo: nada a fazer, sem erro
-        let _ = std::fs::remove_dir_all(webview);
     }
 
     // BL-NR-02 (caso N06 do auditor): sem a página confirmar a gravação, só fecha com o Sim da pessoa; com Não, a janela

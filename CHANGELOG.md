@@ -9,12 +9,32 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+## [2.1.2] - 2026-11-02
+
 ### Corrigido
-- No programa do Windows, num PC em que a política bloqueia os dados de site, o circuito era gravado no arquivo, mas
-  a barra avisava que o salvamento automático tinha falhado, tentava gravar de novo a cada 5 segundos e, ao fechar,
-  perguntava se fechava mesmo assim. Agora o arquivo basta, e o aviso de contagem reiniciada aparece quando deve.
-- "Fechar sem escolher", na pergunta sobre qual versão do circuito continuar, fazia o programa perguntar se fechava
-  sem gravar, embora nada se perca. Agora fecha direto, e a pergunta volta na abertura seguinte.
+- No programa do Windows, quando a política do PC bloqueia os dados de site do navegador, um circuito gravado no
+  arquivo deixa de gerar o aviso falso de falha do salvamento automático e a confirmação extra ao fechar.
+  Falhas reais de gravação continuam sendo avisadas, e o aviso de contagem reiniciada aparece quando necessário.
+- "Fechar sem escolher", na pergunta sobre qual versão do circuito continuar, fecha sem pedir uma segunda
+  confirmação. As cópias guardadas continuam disponíveis para a escolha na próxima abertura.
+
+### Manutenção e testes
+- Os testes de instalação e os roteiros de conferência passam a limpar os próprios rascunhos ao terminar,
+  inclusive nos caminhos de falha previstos.
+- A procura de erros nas ferramentas de teste confere o endereço completo da janela e trata como texto literal
+  os trechos usados para conferir a versão.
+- Os testes da interface têm prazo de até 30 segundos para carregar em um computador ocupado. Isso não altera
+  o tempo de resposta do simulador.
+- Um teste de arquivo preso, específico do Windows, deixa de impedir a execução da suíte no Linux.
+- Novos testes geram entradas variadas para conferir a abertura de circuitos e a leitura e escrita de CSV.
+  A biblioteca usada por esses testes não entra no HTML distribuído.
+- O analisador TypeScript das ferramentas de verificação foi atualizado. Isso não elimina todos os avisos
+  remanescentes nas dependências de desenvolvimento.
+- A configuração do OSV-Scanner registra os motivos dos avisos de componentes do alvo Linux que não fazem
+  parte do programa Windows e do HTML publicados.
+
+### Documentação
+- O README passa a indicar a situação estável do projeto.
 
 ## [2.1.1] - 2026-10-30
 
