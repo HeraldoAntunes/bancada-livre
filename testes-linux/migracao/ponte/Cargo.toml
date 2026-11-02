@@ -1,0 +1,15 @@
+# Bancada Livre · © 2026 Heraldo Antunes · SPDX-License-Identifier: MIT
+# Ponte de teste: no lugar do Tauri, atende a página com o src-tauri/src/salvamento.rs real, sem janela e no Linux.
+[package]
+name = "ponte-salvamento"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde_json = "=1.0.154"
+
+[features]
+v210 = []
+
+[workspace]
