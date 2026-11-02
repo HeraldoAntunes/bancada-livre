@@ -8,7 +8,7 @@ O aluno liga chaves, portas, CIs 74xx, flip-flops, LEDs e displays e vê o sinal
 tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e sem internet.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/feito%20em-TypeScript-555" alt="Feito em TypeScript">
+  <img src="https://img.shields.io/badge/feito%20em-TypeScript-3178C6?logo=typescript&logoColor=white" alt="Feito em TypeScript">
   <a href="#sistemas"><img src="https://img.shields.io/badge/testado%20no-Edge%20%C2%B7%20Windows%2011-0078D6" alt="Testado no Edge · Windows 11"></a>
   <img src="https://img.shields.io/badge/internet-n%C3%A3o%20precisa-2b8a3e" alt="Não precisa de internet">
   <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue" alt="Licença MIT"></a>
