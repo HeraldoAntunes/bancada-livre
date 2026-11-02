@@ -9,6 +9,11 @@ desenvolvimento, antes da primeira publicação.
 
 ## [Não publicado]
 
+### Segurança
+- Ferramentas de verificação: o minimatch usado pelo ESLint e pelo typescript-eslint passa para a 11.0.4 (aviso
+  GHSA-g3hv-75wg-m249, negação de serviço com padrões de glob). Nenhuma versão do ESLint traz a correção ainda,
+  então ela é forçada pelo `overrides` do package.json. Não entra no HTML nem no programa.
+
 ## [2.1.2] - 2026-11-02
 
 ### Corrigido
