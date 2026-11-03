@@ -1,0 +1,13 @@
+{
+  "name": "bancada-livre-defeitos",
+  "private": true,
+  "description": "Testes que mostram os defeitos achados na validação no Linux da 2.1.2 (falham de propósito até a correção)",
+  "type": "module",
+  "scripts": {
+    "png-largo": "node png-largo.mjs",
+    "cargo-test-linux": "./cargo-test-linux.sh"
+  },
+  "devDependencies": {
+    "puppeteer-core": "25.14.0"
+  }
+}

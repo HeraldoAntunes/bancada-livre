@@ -1,0 +1,13 @@
+{
+  "name": "bancada-livre-ponta-a-ponta",
+  "private": true,
+  "description": "Testes de ponta a ponta do HTML único da 2.1.2 no Chromium e no Firefox do Linux, sem janela",
+  "type": "module",
+  "scripts": {
+    "preparar": "./preparar.sh",
+    "testar": "node ponta-a-ponta.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "25.14.0"
+  }
+}
