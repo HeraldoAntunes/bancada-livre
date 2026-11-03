@@ -12,7 +12,10 @@ export default tseslint.config(
     files: ['src/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
     rules: {
-      ...reactHooks.configs.recommended.rules,
+      // as duas regras do "recommended" até a versão 5 do plugin; as do React Compiler, que a versão 7 junta ao
+      // "recommended", ficam para uma decisão à parte (hoje acusam 2 trechos do programa)
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },

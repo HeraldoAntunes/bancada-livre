@@ -14,6 +14,11 @@ desenvolvimento, antes da primeira publicação.
   GHSA-g3hv-75wg-m249, negação de serviço com padrões de glob). Nenhuma versão do ESLint traz a correção ainda,
   então ela é forçada pelo `overrides` do package.json. Não entra no HTML nem no programa.
 
+### Manutenção e testes
+- Ferramentas de verificação: ESLint 10.13.0, com o `@eslint/js` 10.0.1 e o `eslint-plugin-react-hooks` 7.1.1
+  (a versão 5 do plugin não aceita o ESLint 10). Seguem ligadas as mesmas duas regras dos hooks de antes; as regras
+  do React Compiler que a versão 7 junta ao "recommended" ficam para depois. Não entra no HTML nem no programa.
+
 ## [2.1.2] - 2026-11-02
 
 ### Corrigido
