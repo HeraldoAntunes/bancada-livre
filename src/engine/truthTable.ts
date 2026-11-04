@@ -54,7 +54,7 @@ function nomeDaPosicao(c: CircuitComponent, i: number): string {
  * Colunas de entrada: cada chave ou botão, cada posição de cada banco de chaves e cada bit de cada contador
  * (do mais alto para o mais baixo, então as linhas seguem a contagem 0, 1, 2…).
  */
-export function inputColumns(components: CircuitComponent[]): TableColumn[] {
+function colunasDeEntrada(components: CircuitComponent[]): TableColumn[] {
   return components.flatMap((c): TableColumn[] => {
     if (c.type === 'SWITCH' || c.type === 'PUSH_BUTTON') {
       return [{ comp: c, pin: 'out', name: c.label ?? '?', key: c.id }]
@@ -70,7 +70,7 @@ export function inputColumns(components: CircuitComponent[]): TableColumn[] {
 }
 
 /** Colunas de saída: cada LED, display e sonda, e cada LED de cada barra. */
-export function outputColumns(components: CircuitComponent[]): TableColumn[] {
+function colunasDeSaida(components: CircuitComponent[]): TableColumn[] {
   return components.flatMap((c): TableColumn[] => {
     if (c.type === 'LED' || c.type === 'DISPLAY' || c.type === 'PROBE') {
       return [{ comp: c, pin: 'in', name: c.label ?? '?', key: c.id }]
@@ -81,6 +81,37 @@ export function outputColumns(components: CircuitComponent[]): TableColumn[] {
     return []
   })
 }
+
+/**
+ * Cada coluna com um nome só (revisão da 2.1.2, Ordem 23): com dois rótulos iguais, a repetição ganha `_2`, `_3`…, sem
+ * colidir com outro rótulo. Assim o CSV exportado volta como gabarito, e a expressão não mistura duas peças.
+ */
+function semRepetir(entradas: TableColumn[], saidas: TableColumn[]): { inputs: TableColumn[]; outputs: TableColumn[] } {
+  const todas = [...entradas, ...saidas]
+  const usados = new Set(todas.map((c) => c.name))
+  const vistos = new Set<string>()
+  const renomear = (c: TableColumn): TableColumn => {
+    if (!vistos.has(c.name)) {
+      vistos.add(c.name)
+      return c
+    }
+    let k = 2
+    while (usados.has(`${c.name}_${k}`)) k++
+    const name = `${c.name}_${k}`
+    usados.add(name)
+    vistos.add(name)
+    return { ...c, name }
+  }
+  return { inputs: entradas.map(renomear), outputs: saidas.map(renomear) }
+}
+
+/** Colunas de entrada, com nomes que não se repetem entre si nem com os das saídas. */
+export const inputColumns = (components: CircuitComponent[]): TableColumn[] =>
+  semRepetir(colunasDeEntrada(components), colunasDeSaida(components)).inputs
+
+/** Colunas de saída, com nomes que não se repetem entre si nem com os das entradas. */
+export const outputColumns = (components: CircuitComponent[]): TableColumn[] =>
+  semRepetir(colunasDeEntrada(components), colunasDeSaida(components)).outputs
 
 /** Estado atual de uma coluna de entrada (para marcar a linha da tabela que está na bancada). */
 export function estadoDaColuna(col: TableColumn): 0 | 1 {

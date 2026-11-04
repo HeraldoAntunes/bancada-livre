@@ -60,6 +60,21 @@ export function exportBenchSvg() {
   baixarArquivo(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n', xml], { type: 'image/svg+xml;charset=utf-8' }), 'circuito.svg')
 }
 
+/**
+ * Maior lado e maior área que a imagem pode ter: o Firefox não desenha um canvas com lado acima de 32767 px, e os
+ * navegadores têm limite de área. Validação no Linux da 2.1.2: num circuito muito largo o PNG não saía, sem aviso.
+ */
+export const PNG_LADO_MAX = 16384
+export const PNG_AREA_MAX = 100_000_000
+const AVISO_PNG = 'Não foi possível gerar o PNG deste circuito. Use SVG, que sai em qualquer tamanho.'
+
+/** Escala do PNG: o dobro do tamanho real para ficar nítido no projetor, menos quando passaria dos limites. */
+export function escalaDoPng(largura: number, altura: number): number {
+  const w = Math.max(1, largura)
+  const h = Math.max(1, altura)
+  return Math.min(2, PNG_LADO_MAX / w, PNG_LADO_MAX / h, Math.sqrt(PNG_AREA_MAX / (w * h)))
+}
+
 export function exportBenchPng() {
   const pronto = svgDaBancada()
   if (!pronto) return
@@ -67,19 +82,32 @@ export function exportBenchPng() {
   const url = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }))
   const img = new Image()
   img.onload = () => {
-    const scale = 2 // nitidez para projeção/impressão
+    const scale = escalaDoPng(rect.width, rect.height)
     const canvas = document.createElement('canvas')
-    canvas.width = Math.round(rect.width * scale)
-    canvas.height = Math.round(rect.height * scale)
-    const ctx = canvas.getContext('2d')!
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.scale(scale, scale)
-    ctx.drawImage(img, 0, 0)
+    canvas.width = Math.max(1, Math.floor(rect.width * scale))
+    canvas.height = Math.max(1, Math.floor(rect.height * scale))
+    try {
+      const ctx = canvas.getContext('2d')
+      if (!ctx) throw new Error('sem contexto 2d')
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.scale(scale, scale)
+      ctx.drawImage(img, 0, 0)
+    } catch (e) {
+      console.warn('Bancada Livre: o PNG não pôde ser desenhado.', e)
+      URL.revokeObjectURL(url)
+      window.alert(AVISO_PNG)
+      return
+    }
     URL.revokeObjectURL(url)
     canvas.toBlob((blob) => {
       if (blob) baixarArquivo(blob, 'circuito.png')
+      else window.alert(AVISO_PNG)
     })
+  }
+  img.onerror = () => {
+    URL.revokeObjectURL(url)
+    window.alert(AVISO_PNG)
   }
   img.src = url
 }

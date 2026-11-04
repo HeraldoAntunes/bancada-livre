@@ -27,7 +27,7 @@ import {
   type CorLed,
   type DisplayMode,
 } from './engine/types'
-import { programa, useCircuit, type AbaPaleta } from './state/store'
+import { LIMITE_POSICAO, programa, useCircuit, type AbaPaleta } from './state/store'
 import { chipDemo } from './ui/demoDoChip'
 import { exportBenchPng, exportBenchSvg } from './ui/exportPng'
 import { sinaisObservados } from './engine/linhaDoTempo'
@@ -120,6 +120,13 @@ export function executarNaTela(nome: string, params: Record<string, unknown> = {
 // ---------------------------------------------------------------- utilidades
 
 const st = () => useCircuit.getState()
+/** A mesma faixa que o importador aceita: fora dela, o circuito salvo não reabriria. */
+function posicao(v: unknown, eixo: string): number | undefined {
+  if (v !== undefined && Math.abs(v as number) > LIMITE_POSICAO) {
+    throw new Falha(`a posição ${eixo} vai de -${LIMITE_POSICAO} a ${LIMITE_POSICAO}`)
+  }
+  return v as number | undefined
+}
 
 function comp(id: unknown, tipos?: ComponentType[]): CircuitComponent {
   const c = st().components.find((x) => x.id === id)
@@ -253,11 +260,13 @@ registrar('componente.adicionar', {
   },
   executar: (p) => {
     if (p.chip !== undefined && p.tipo !== 'IC') throw new Falha('"chip" só vale no tipo IC')
+    const x = posicao(p.x, 'x')
+    const y = posicao(p.y, 'y')
     const n = st().components.length
     st().addComponent(
       p.tipo as ComponentType,
-      (p.x as number | undefined) ?? 120 + (n % 6) * 40,
-      (p.y as number | undefined) ?? 100 + (n % 6) * 32,
+      x ?? 120 + (n % 6) * 40,
+      y ?? 100 + (n % 6) * 32,
       p.chip as (typeof CHIP_IDS)[number] | undefined,
     )
     const c = st().components[st().components.length - 1]
@@ -279,8 +288,10 @@ registrar('componente.mover', {
   params: { id, x: { tipo: 'numero', descricao: 'nova posição horizontal' }, y: { tipo: 'numero', descricao: 'nova posição vertical' } },
   executar: (p) => {
     const c = comp(p.id)
+    const x = posicao(p.x, 'x')!
+    const y = posicao(p.y, 'y')!
     st().checkpoint()
-    st().moveComponent(c.id, p.x as number, p.y as number)
+    st().moveComponent(c.id, x, y)
   },
 })
 

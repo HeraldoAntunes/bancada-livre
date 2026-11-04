@@ -53,6 +53,9 @@ const COALESCE_MS = 2500
 
 /** Acima disto o contador não acompanha o id do arquivo: perto de 2^53 o `counter++` para de mudar e repete ids. */
 const MAIOR_ID = 1_000_000_000
+/** Maior distância da origem que um componente pode ter: o importador recusa além dela, e a bancada não passa dela. */
+export const LIMITE_POSICAO = 1_000_000
+const limitarPosicao = (v: number) => Math.max(-LIMITE_POSICAO, Math.min(LIMITE_POSICAO, v))
 
 function bumpCounter(ids: string[]) {
   for (const id of ids) {
@@ -76,8 +79,8 @@ function validateCircuit(data: Circuit): string | null {
       typeof c !== 'object' ||
       typeof c.id !== 'string' || !c.id || c.id.includes(':') ||
       !VALID_TYPES.has(c.type) ||
-      !Number.isFinite(c.x) || Math.abs(c.x) > 1_000_000 ||
-      !Number.isFinite(c.y) || Math.abs(c.y) > 1_000_000
+      !Number.isFinite(c.x) || Math.abs(c.x) > LIMITE_POSICAO ||
+      !Number.isFinite(c.y) || Math.abs(c.y) > LIMITE_POSICAO
     ) {
       return 'Arquivo inválido: componente malformado.'
     }
@@ -231,6 +234,17 @@ function armazenamentoAcessivel(): Storage | null {
   }
 }
 let revisaoAutosave = 0
+/**
+ * Duas abas do mesmo circuito (revisão da 2.1.2, Ordem 23): a aba que acha a cópia automática mudada por outra não a
+ * sobrescreve; guarda a própria versão nesta chave + um id da aba, e a abertura seguinte pergunta qual continuar.
+ */
+export const AUTOSAVE_ABA_PREFIXO = 'simulador-portas:autosave-aba:'
+const AVISO_OUTRA_ABA = 'Este circuito também foi gravado em outra aba. Para não apagar o que ela guardou, esta aba ' +
+  'passa a guardar as mudanças à parte; ao reabrir, a Bancada pergunta qual versão continuar.'
+/** O texto da cópia automática que esta aba leu ao abrir ou gravou por último. */
+let conhecidoNoLocal: string | null = null
+/** Cópias de outras abas lidas ao abrir: saem depois que a cópia automática for gravada (já houve a escolha). */
+let abasLidas: string[] = []
 /** Onde fica guardado um salvamento que não pôde ser aberto, para não ser sobrescrito na primeira edição. */
 export const AUTOSAVE_RECUSADO_KEY = 'simulador-portas:autosave-recusado'
 const SHOW_NAMES_KEY = 'simulador-portas:nomes'
@@ -335,16 +349,23 @@ function loadAutosave(): Snapshot {
   let recusado: { texto: string; motivo: string } | null = null
   let local: string | null = null
   let horaLocal = 0
+  const deAbas: { chave: string; texto: string }[] = []
   try {
     if (typeof localStorage !== 'undefined') {
       local = localStorage.getItem(AUTOSAVE_KEY)
+      conhecidoNoLocal = local
       horaLocal = Number(localStorage.getItem(AUTOSAVE_KEY + '-hora'))
+      for (let i = 0; i < localStorage.length; i++) {
+        const chave = localStorage.key(i)
+        const texto = chave?.startsWith(AUTOSAVE_ABA_PREFIXO) ? localStorage.getItem(chave) : null
+        if (chave && texto) deAbas.push({ chave, texto })
+      }
     }
   } catch (e) {
     console.warn('Bancada Livre: não foi possível ler o armazenamento do navegador; tentando as cópias do programa.', e)
   }
   const p = programa()
-  const lista: { texto: string; origem: string; hora?: number; nativa: boolean }[] = []
+  const lista: { texto: string; origem: string; hora?: number; nativa: boolean; aba?: string }[] = []
   if (typeof p.__BANCADA_CIRCUITO__ === 'string' && p.__BANCADA_CIRCUITO__) {
     lista.push({ texto: p.__BANCADA_CIRCUITO__, origem: 'Arquivo principal do programa', hora: p.__BANCADA_CIRCUITO_HORA__, nativa: true })
   }
@@ -352,8 +373,12 @@ function loadAutosave(): Snapshot {
     lista.push({ texto: r.texto, origem: r.origem || `Cópia do programa ${i + 2}`, hora: r.hora, nativa: true })
   }
   if (local) lista.push({ texto: local, origem: 'Armazenamento do navegador', hora: horaLocal, nativa: false })
+  for (const { chave, texto } of deAbas) {
+    lista.push({ texto, origem: 'Salvamento de outra aba do navegador', nativa: false, aba: chave })
+  }
   const validos: CandidatoRecuperacao[] = []
-  for (const candidato of lista) {
+  let temAba = false
+  for (const { aba, ...candidato } of lista) {
     try {
       let data = lerDadosCircuito(candidato.texto)
       const err = validateCircuit(data)
@@ -375,6 +400,7 @@ function loadAutosave(): Snapshot {
       }
       revisaoAutosave = Math.max(revisaoAutosave, data.salvamento?.revisao ?? 0)
       validos.push({ ...candidato, data, hora: data.salvamento?.hora ?? horaInformativa(candidato.hora) })
+      if (aba) { abasLidas.push(aba); temAba = true }
     } catch (e) {
       recusado ??= { texto: candidato.texto, motivo: String(e) }
     }
@@ -384,12 +410,13 @@ function loadAutosave(): Snapshot {
   reiniciarRevisao = revisaoAutosave === Number.MAX_SAFE_INTEGER
   precisaMigrar = temLegado || reiniciarRevisao
   let principalSilencioso: CandidatoRecuperacao | undefined
-  if (temLegado && validos.length > 1) {
+  if ((temLegado || temAba) && validos.length > 1) {
     const conteudos = new Set(validos.map(c => JSON.stringify(conteudoCanonico({
       components: c.data.components, wires: c.data.wires,
     }))))
     if (conteudos.size > 1) {
-      if (p.__BANCADA_PERGUNTAR_MIGRACAO__ === false) {
+      // versão de outra aba diferente da automática: a pessoa escolhe, nunca em silêncio
+      if (p.__BANCADA_PERGUNTAR_MIGRACAO__ === false && !temAba) {
         principalSilencioso = validos.find(c => c.nativa && c.texto === p.__BANCADA_CIRCUITO__)
       }
       if (!principalSilencioso) {
@@ -623,6 +650,8 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   closeGuide: () => set({ guideChip: null }),
 
   addComponent: (type, x, y, chip) => {
+    x = limitarPosicao(x)
+    y = limitarPosicao(y)
     get().checkpoint()
     set((s) => ({
       components: [
@@ -649,7 +678,8 @@ export const useCircuit = create<CircuitStore>()((set, get) => ({
   },
 
   moveComponent: (id, x, y) =>
-    set((s) => ({ components: s.components.map((c) => (c.id === id ? { ...c, x, y } : c)) })),
+    set((s) => ({ components: s.components.map((c) =>
+      (c.id === id ? { ...c, x: limitarPosicao(x), y: limitarPosicao(y) } : c)) })),
 
   toggleSwitch: (id) =>
     set((s) => ({
@@ -1001,7 +1031,9 @@ if (typeof window !== 'undefined') {
   let migrouNoNativo = false
   let guardouOriginaisWeb = false
   let reinicioIniciado = false
-  const avisar = (falhou: boolean, e?: unknown) => {
+  /** Chave à parte desta aba, depois que outra aba gravou a mesma cópia automática. */
+  let chaveDaAba: string | null = null
+  const avisar =(falhou: boolean, e?: unknown) => {
     if (falhou) console.warn('Bancada Livre: o salvamento automático falhou.', e)
     const texto = falhou ? FALHA_SALVAMENTO : ''
     if (useCircuit.getState().falhaSalvamento !== texto) useCircuit.setState({ falhaSalvamento: texto })
@@ -1106,7 +1138,21 @@ if (typeof window !== 'undefined') {
         // bloqueia os dados do site, até ler `localStorage` lança, e isso também é "sem armazenamento" (validação da
         // 2.1.1). Quota na escrita, com o armazenamento acessível, continua sendo falha avisada.
         const local = tauri ? armazenamentoAcessivel() : localStorage
-        if (local) local.setItem(AUTOSAVE_KEY, envelope)
+        if (local) {
+          // outra aba gravou desde a última leitura ou gravação desta: não sobrescrever, guardar à parte e avisar
+          if (!chaveDaAba && local.getItem(AUTOSAVE_KEY) !== conhecidoNoLocal) {
+            chaveDaAba = AUTOSAVE_ABA_PREFIXO + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+            useCircuit.setState({ avisoRecuperacao: AVISO_OUTRA_ABA })
+          }
+          if (chaveDaAba) {
+            local.setItem(chaveDaAba, envelope)
+          } else {
+            local.setItem(AUTOSAVE_KEY, envelope)
+            conhecidoNoLocal = envelope
+            for (const chave of abasLidas) local.removeItem(chave)
+            abasLidas = []
+          }
+        }
         noLocal = texto
       } catch (e) { falhou = true; avisar(true, e) }
     }

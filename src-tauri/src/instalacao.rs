@@ -459,7 +459,8 @@ fn criar_atalho(lnk: &Path, exe: &Path, pasta: &Path) -> io::Result<()> {
     }
 }
 
-#[cfg(test)]
+// os testes de instalação usam o registro e o compartilhamento de arquivo do Windows (validação no Linux da 2.1.2)
+#[cfg(all(test, windows))]
 mod testes {
     use super::*;
 
