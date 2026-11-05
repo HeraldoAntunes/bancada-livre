@@ -8,17 +8,18 @@ O aluno liga chaves, portas, CIs 74xx, flip-flops, LEDs e displays e vê o sinal
 tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e sem internet.</p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/feito%20em-TypeScript-3178C6?logo=typescript&logoColor=white" alt="Feito em TypeScript">
+  <a href="https://github.com/HeraldoAntunes/bancada-livre/releases/latest"><img src="https://img.shields.io/github/v/release/HeraldoAntunes/bancada-livre?label=vers%C3%A3o" alt="Versão"></a>
+  <img src="https://img.shields.io/badge/situa%C3%A7%C3%A3o-est%C3%A1vel-2b8a3e" alt="Situação: estável">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue" alt="Licença MIT"></a>
+  <a href="https://doi.org/10.5281/zenodo.23696269"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23696269.svg" alt="DOI"></a>
+  <a href="https://github.com/HeraldoAntunes/bancada-livre/releases"><img src="https://img.shields.io/github/downloads/HeraldoAntunes/bancada-livre/total?label=downloads" alt="Downloads"></a>
+  <br>
   <a href="#sistemas"><img src="https://img.shields.io/badge/testado%20no-Edge%20%C2%B7%20Windows%2011-0078D6" alt="Testado no Edge · Windows 11"></a>
   <img src="https://img.shields.io/badge/internet-n%C3%A3o%20precisa-2b8a3e" alt="Não precisa de internet">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/licen%C3%A7a-MIT-blue" alt="Licença MIT"></a>
-  <img src="https://img.shields.io/badge/situa%C3%A7%C3%A3o-est%C3%A1vel-2b8a3e" alt="Situação: estável">
   <br>
+  <img src="https://img.shields.io/badge/feito%20em-TypeScript-3178C6?logo=typescript&logoColor=white" alt="Feito em TypeScript">
   <a href="https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml"><img src="https://github.com/HeraldoAntunes/bancada-livre/actions/workflows/testes.yml/badge.svg" alt="Testes"></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/HeraldoAntunes/bancada-livre"><img src="https://api.scorecard.dev/projects/github.com/HeraldoAntunes/bancada-livre/badge" alt="OpenSSF Scorecard"></a>
-  <a href="https://github.com/HeraldoAntunes/bancada-livre/releases/latest"><img src="https://img.shields.io/github/v/release/HeraldoAntunes/bancada-livre?label=vers%C3%A3o" alt="Versão"></a>
-  <a href="https://github.com/HeraldoAntunes/bancada-livre/releases"><img src="https://img.shields.io/github/downloads/HeraldoAntunes/bancada-livre/total?label=downloads" alt="Downloads"></a>
-  <a href="https://doi.org/10.5281/zenodo.23696269"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23696269.svg" alt="DOI"></a>
 </p>
 
 <p align="center">
@@ -36,7 +37,7 @@ tabela-verdade e a expressão booleana do circuito inteiro. Livre, gratuito e se
 
 ## Qual arquivo baixar?
 
-Versão 2.1.3:
+Versão atual: **2.1.3**
 
 | Para quê | Baixar |
 |---|---|
@@ -64,15 +65,15 @@ programa é gratuito e não tem assinatura paga). Versões anteriores e a confer
    | Arquivo | Para quem |
    |---|---|
    | **`Instalar-BancadaLivre-x.y.z.zip`** ⭐ | **quase todo mundo no Windows.** Extraia o zip (botão direito, **Extrair tudo**), abra o `BancadaLivre.exe` com dois cliques e responda **Sim** para instalar: ele cria os atalhos no menu Iniciar e na Área de Trabalho, abre numa janela própria e não pede senha de administrador. Responda **Não** para só usar agora, sem instalar (serve para pendrive). Para atualizar, baixe o novo e abra do mesmo jeito; os circuitos salvos ficam |
-   | `BancadaLivre-x.y.z-sem-internet.zip` | escola sem internet num Windows sem o WebView2 da Microsoft (que desenha a janela): descompacte e abra `BancadaLivre.exe`; ele oferece instalar o WebView2 que vem junto |
+   | `BancadaLivre-x.y.z-sem-internet.zip` | escola sem internet num Windows sem o WebView2 da Microsoft (que desenha a janela): extraia o zip e abra `BancadaLivre.exe`; ele oferece instalar o WebView2 que vem junto |
    | `BancadaLivre-x.y.z.html` | qualquer sistema: abra com dois cliques no navegador. É um arquivo só, que dá para pôr no Moodle ou mandar por e-mail |
    | Código-fonte | só para quem vai estudar ou modificar o programa |
 
 3. Abra pelo atalho **Bancada Livre** no Menu Iniciar (ou pelo arquivo HTML, no navegador).
 
-Para conferir se o arquivo é legítimo, compare o SHA-256 com o `SHA256SUMS.txt` da mesma página (troque `x.y.z` pela
-versão que baixou):
-```bash
+Para conferir se o arquivo é legítimo, compare o SHA-256 (uma "impressão digital" do arquivo: se um só byte mudar,
+ela muda) com o `SHA256SUMS.txt` da mesma página (troque `x.y.z` pela versão que baixou):
+```powershell
 certutil -hashfile Instalar-BancadaLivre-x.y.z.zip SHA256
 ```
 
@@ -84,7 +85,7 @@ certutil -hashfile Instalar-BancadaLivre-x.y.z.zip SHA256
 | ![Chaves BCD ligadas ao 7448 e ao display, mostrando o dígito 5](docs/img/display-7448.png) | ![Três chaves no 74138, com oito LEDs vermelhos e as expressões de cada saída](docs/img/decodificador-74138.png) |
 
 ## Recursos
-- **8 portas** no símbolo ANSI: AND, OR, NOT, NAND, NOR, XOR e XNOR, de 2 a 8 entradas, e o BUFFER.
+- **8 portas** no símbolo americano (ANSI): AND, OR, NAND, NOR, XOR e XNOR, de 2 a 8 entradas, e NOT e BUFFER, de uma entrada.
 - **Entradas:** chave (SWITCH), CLOCK de 0,5 a 10 Hz (com rodar, pausar e avançar meio período no próprio
   componente), NÍVEL ALTO (1), NÍVEL BAIXO (0), PUSH BUTTON, **banco de chaves** de 4 ou 8 posições e
   **contador automático** de 2 a 4 bits, que gera as combinações no ritmo escolhido.
@@ -141,8 +142,9 @@ distribuir.
 **Precisa de internet?** Não para montar, simular ou salvar circuitos. A janela do Windows usa o WebView2, que
 pode abrir conexões próprias com a Microsoft. Veja [Privacidade](#privacidade).
 
-**Onde ficam os meus circuitos?** O salvamento automático guarda o circuito no armazenamento local do navegador;
-no programa do Windows, também em arquivos na pasta `%LOCALAPPDATA%\Bancada Livre`. Se não conseguir gravar (por
+**Onde ficam os meus circuitos?** O salvamento automático guarda o circuito no próprio navegador, neste computador;
+no programa do Windows, também em arquivos na pasta `%LOCALAPPDATA%\Bancada Livre` (cole na barra do Explorador de
+Arquivos para abrir). Se não conseguir gravar (por
 exemplo, disco cheio ou armazenamento bloqueado), a barra de baixo avisa: use **Salvar** antes de fechar. Queda de
 energia ou encerramento forçado podem perder mudanças ainda não gravadas. Para guardar uma cópia ou entregar,
 use **Salvar**, que baixa um arquivo `.json`; **Abrir** carrega de volta.
@@ -151,7 +153,8 @@ use **Salvar**, que baixa um arquivo `.json`; **Abrir** carrega de volta.
 só: o aluno abre com dois cliques, sem instalar nada.
 
 **O antivírus reclamou. É seguro?** Os arquivos passam pelo Microsoft Defender antes de cada publicação, e você pode
-conferir o SHA-256 e a assinatura do Sigstore. Alertas de "editor desconhecido" acontecem porque não há assinatura
+conferir o SHA-256 e a assinatura digital gratuita do Sigstore (o `.sigstore.json`, que mostra que o arquivo saiu
+deste repositório pelo GitHub). Alertas de "editor desconhecido" acontecem porque não há assinatura
 digital paga. Veja [SECURITY.md](.github/SECURITY.md).
 
 **Tem flip-flop e memória?** Tem, desde a 2.0: flip-flops D, JK, T e SR, a trava D e os CIs 7474, 7476, 74161
@@ -245,3 +248,4 @@ sem internet e sem conta.
 | <img src="https://raw.githubusercontent.com/HeraldoAntunes/giz-na-tela/main/docs/img/icone.png" alt="" width="36"> | **Giz na Tela** | Escrever por cima de qualquer programa aberto no computador | [GitHub](https://github.com/HeraldoAntunes/giz-na-tela) | [Baixar](https://github.com/HeraldoAntunes/giz-na-tela/releases/latest) |
 | <img src="https://raw.githubusercontent.com/HeraldoAntunes/bancada-livre/main/src/assets/icone.svg" alt="" width="36"> | **Bancada Livre** | **Simulador de lógica digital: portas, CIs 74xx, flip-flops e tabela-verdade · você está aqui** | [GitHub](https://github.com/HeraldoAntunes/bancada-livre) | [Baixar](https://github.com/HeraldoAntunes/bancada-livre/releases/latest) |
 | <img src="https://raw.githubusercontent.com/HeraldoAntunes/tarja-livre/main/docs/img/icone.svg" alt="" width="36"> | **Tarja Livre** | Tarjar dados pessoais em PDF sem internet, de um jeito que a tarja não sai | [GitHub](https://github.com/HeraldoAntunes/tarja-livre) | [Baixar](https://github.com/HeraldoAntunes/tarja-livre/releases/latest) |
+| <img src="https://raw.githubusercontent.com/HeraldoAntunes/amplia/main/docs/img/icone.png" alt="" width="36"> | **Amplia** | Ampliar imagens em pôsteres para imprimir em folhas A4 | [GitHub](https://github.com/HeraldoAntunes/amplia) | [Testar](https://github.com/HeraldoAntunes/amplia/releases) |
